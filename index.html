@@ -15,6 +15,7 @@
     --accent-gold: #fbbf24;
     --accent-green: #22c55e;
     --accent-blue: #38bdf8;
+    --accent-purple: #c084fc;
     --accent-red: #ef4444;
     --text-white: #ffffff;
     --text-dim: #b6d4e3;
@@ -47,51 +48,53 @@
     overflow: hidden;
   }
 
-  /* TOP HEADER / STATS BAR (Classic Tycoon Style) */
+  /* TOP HEADER / STATS BAR */
   #top-bar {
-    height: 50px;
+    height: 52px;
     background: linear-gradient(180deg, #386780 0%, #204153 100%);
     border-bottom: 2px solid var(--panel-shadow);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 14px;
     z-index: 50;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.55);
   }
 
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     font-weight: 800;
-    font-size: 17px;
+    font-size: 16px;
     letter-spacing: 0.5px;
     color: var(--accent-gold);
     text-shadow: 1px 1px 2px #000;
+    white-space: nowrap;
   }
 
   .stats-group {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   .stat-pill {
     background: rgba(11, 23, 30, 0.85);
     border: 1px solid var(--panel-border);
     border-radius: 6px;
-    padding: 4px 12px;
+    padding: 3px 10px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 12px;
     box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6);
   }
 
   .stat-label {
     color: var(--text-dim);
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     font-weight: 600;
   }
@@ -103,6 +106,7 @@
   }
   .stat-val.gold { color: var(--accent-gold); }
   .stat-val.blue { color: var(--accent-blue); }
+  .stat-val.purple { color: var(--accent-purple); }
 
   /* TOOLBAR */
   #toolbar {
@@ -113,18 +117,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 12px;
+    padding: 0 10px;
     z-index: 45;
+    overflow-x: auto;
   }
 
   .tool-cluster {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: rgba(10, 20, 26, 0.4);
-    padding: 4px 8px;
+    padding: 3px 6px;
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
   }
 
   .t-btn {
@@ -133,16 +139,17 @@
     border-bottom-color: var(--panel-shadow);
     border-right-color: var(--panel-shadow);
     color: #ffffff;
-    padding: 7px 14px;
-    font-size: 13px;
+    padding: 6px 11px;
+    font-size: 12px;
     font-weight: 600;
     border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     transition: all 0.1s ease;
     box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    white-space: nowrap;
   }
 
   .t-btn:hover {
@@ -168,9 +175,9 @@
 
   .badge-cost {
     font-size: 10px;
-    padding: 1px 5px;
+    padding: 1px 4px;
     border-radius: 3px;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0,0,0,0.45);
     color: var(--accent-gold);
     font-weight: 700;
   }
@@ -180,19 +187,13 @@
     flex: 1;
     position: relative;
     overflow: hidden;
-    background-color: #0b151b;
+    background-color: #081116;
     cursor: grab;
   }
 
-  #viewport-area.panning {
-    cursor: grabbing;
-  }
-  #viewport-area.building-road {
-    cursor: crosshair;
-  }
-  #viewport-area.demolishing {
-    cursor: cell;
-  }
+  #viewport-area.panning { cursor: grabbing; }
+  #viewport-area.building-road { cursor: crosshair; }
+  #viewport-area.demolishing { cursor: cell; }
 
   #canvas-world {
     position: absolute;
@@ -202,7 +203,7 @@
     height: 100%;
   }
 
-  /* FLOATING PANELS */
+  /* FLOATING HUD CARDS */
   .hud-card {
     position: absolute;
     background: rgba(18, 38, 49, 0.94);
@@ -215,11 +216,11 @@
 
   /* MINIMAP */
   #minimap-widget {
-    bottom: 20px;
-    right: 20px;
-    width: 210px;
-    height: 210px;
-    padding: 10px;
+    bottom: 16px;
+    right: 16px;
+    width: 200px;
+    height: 200px;
+    padding: 8px;
     display: flex;
     flex-direction: column;
   }
@@ -232,7 +233,7 @@
     font-weight: 700;
     text-transform: uppercase;
     color: var(--text-dim);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   #canvas-minimap {
@@ -246,22 +247,22 @@
 
   /* ZOOM & HELPER CONTROLS */
   #quick-controls {
-    bottom: 20px;
-    left: 20px;
+    bottom: 16px;
+    left: 16px;
     padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   .round-btn {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--panel-main);
     border: 1px solid var(--panel-border);
     color: #fff;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     display: flex;
@@ -279,32 +280,32 @@
 
   /* TILE INSPECTOR CARD */
   #inspector-card {
-    top: 20px;
-    left: 20px;
-    padding: 12px 16px;
+    top: 16px;
+    left: 16px;
+    padding: 12px 14px;
     min-width: 250px;
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.45;
     pointer-events: none;
   }
 
   #inspector-card h4 {
     color: var(--accent-gold);
-    font-size: 15px;
-    margin-bottom: 4px;
+    font-size: 14px;
+    margin-bottom: 3px;
   }
 
   .inspector-sub {
     color: var(--text-dim);
     font-size: 11px;
     font-family: monospace;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
   /* TOAST NOTIFICATIONS */
   #toast-rack {
     position: absolute;
-    top: 24px;
+    top: 16px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -318,22 +319,23 @@
     background: rgba(15, 33, 42, 0.96);
     border: 1px solid var(--accent-gold);
     color: #ffffff;
-    padding: 9px 20px;
-    border-radius: 25px;
-    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
     box-shadow: 0 4px 16px rgba(0,0,0,0.6);
     animation: toastPop 3s forwards ease-in-out;
+    white-space: nowrap;
   }
 
   @keyframes toastPop {
-    0% { opacity: 0; transform: translateY(-12px); }
+    0% { opacity: 0; transform: translateY(-10px); }
     12% { opacity: 1; transform: translateY(0); }
     85% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-12px); }
+    100% { opacity: 0; transform: translateY(-10px); }
   }
 
-  /* MODAL: MAP SELECTION */
+  /* MODALS */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -352,38 +354,43 @@
     background: linear-gradient(180deg, #274b5e 0%, #152c38 100%);
     border: 2px solid var(--panel-border);
     border-radius: 12px;
-    width: 620px;
-    max-width: 92vw;
-    padding: 26px;
+    width: 640px;
+    max-width: 94vw;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 24px;
     box-shadow: 0 16px 40px rgba(0,0,0,0.85);
   }
 
   .dialog-title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--accent-gold);
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     text-shadow: 1px 1px 2px #000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .dialog-subtitle {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-dim);
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
 
   .grid-presets {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 18px;
   }
 
   .preset-tile {
     background: rgba(12, 24, 32, 0.7);
     border: 2px solid var(--panel-main);
     border-radius: 8px;
-    padding: 14px 10px;
+    padding: 12px 8px;
     text-align: center;
     cursor: pointer;
     transition: all 0.15s ease;
@@ -401,31 +408,16 @@
     box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
   }
 
-  .p-title {
-    font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 4px;
-  }
+  .p-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .p-dim { font-family: monospace; color: var(--accent-gold); font-size: 12px; }
+  .p-desc { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
 
-  .p-dim {
-    font-family: monospace;
-    color: var(--accent-gold);
-    font-size: 13px;
-  }
-
-  .p-desc {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 6px;
-  }
-
-  /* CUSTOM CONFIG SLIDERS */
   #custom-box {
     background: rgba(8, 18, 24, 0.6);
     border: 1px solid var(--panel-main);
     border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
+    padding: 14px;
+    margin-bottom: 18px;
     display: none;
   }
 
@@ -433,8 +425,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    font-size: 13px;
+    margin-bottom: 10px;
+    font-size: 12px;
   }
   .slider-row:last-child { margin-bottom: 0; }
   .slider-row label { color: var(--text-dim); }
@@ -442,7 +434,7 @@
   .slider-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
   input[type="range"] {
@@ -452,8 +444,8 @@
 
   .slider-val {
     font-family: monospace;
-    font-size: 13px;
-    min-width: 48px;
+    font-size: 12px;
+    min-width: 44px;
     text-align: right;
     color: var(--accent-gold);
   }
@@ -461,7 +453,7 @@
   .dialog-foot {
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
+    gap: 10px;
   }
 
   .btn-start {
@@ -469,9 +461,9 @@
     border: 1px solid #fde68a;
     color: #0f1c24;
     font-weight: 800;
-    font-size: 15px;
-    padding: 11px 28px;
-    border-radius: 7px;
+    font-size: 14px;
+    padding: 9px 24px;
+    border-radius: 6px;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     transition: 0.1s ease;
@@ -480,8 +472,8 @@
     background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
   }
 
-  /* TOWN INFO MODAL */
-  #town-card {
+  /* TOWN & ENTITY CARDS */
+  #entity-modal-card {
     display: none;
     position: absolute;
     bottom: 24px;
@@ -490,35 +482,68 @@
     background: rgba(15, 33, 43, 0.96);
     border: 2px solid var(--accent-gold);
     border-radius: 10px;
-    padding: 16px 22px;
-    min-width: 340px;
+    padding: 14px 20px;
+    min-width: 330px;
     z-index: 45;
     box-shadow: 0 8px 24px rgba(0,0,0,0.7);
   }
 
-  .town-header {
+  .entity-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--accent-gold);
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
-  .town-row {
-    font-size: 13px;
+  .entity-row {
+    font-size: 12px;
     color: var(--text-dim);
     margin-bottom: 4px;
   }
-  .town-row b { color: #fff; }
+  .entity-row b { color: #fff; }
 
   .close-x {
     cursor: pointer;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--text-dim);
   }
   .close-x:hover { color: #fff; }
+
+  /* FLEET TABLE & STYLING */
+  .fleet-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px 0;
+    font-size: 12px;
+  }
+  .fleet-table th {
+    background: rgba(10, 24, 32, 0.8);
+    color: var(--text-dim);
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--panel-border);
+    font-weight: 600;
+  }
+  .fleet-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .fleet-table tr:hover {
+    background: rgba(255,255,255,0.05);
+  }
+  .badge-tag {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .badge-van { background: #1e3a8a; color: #93c5fd; }
+  .badge-truck { background: #78350f; color: #fde68a; }
+  .badge-train { background: #064e3b; color: #6ee7b7; }
 </style>
 </head>
 <body>
@@ -545,12 +570,20 @@
         <span id="txt-towns" class="stat-val blue">0</span>
       </div>
       <div class="stat-pill">
+        <span class="stat-label">Industries</span>
+        <span id="txt-industries" class="stat-val gold">0</span>
+      </div>
+      <div class="stat-pill">
         <span class="stat-label">Population</span>
         <span id="txt-pop" class="stat-val">0</span>
       </div>
       <div class="stat-pill">
-        <span class="stat-label">Trade Routes</span>
+        <span class="stat-label">Routes</span>
         <span id="txt-routes" class="stat-val blue">0 Active</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Fleet</span>
+        <span id="txt-fleet" class="stat-val purple">0</span>
       </div>
       <div class="stat-pill">
         <span class="stat-label">Net Income</span>
@@ -559,6 +592,11 @@
     </div>
 
     <div class="stats-group">
+      <button class="t-btn" id="btn-fleet" style="background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-color: #93c5fd;">🚛 Fleet</button>
+      <button class="t-btn" id="btn-save-game" title="Quick Save to Browser Storage">💾 Save</button>
+      <button class="t-btn" id="btn-load-game" title="Load Game from Browser Storage">📂 Load</button>
+      <button class="t-btn" id="btn-export-game" title="Export Save File (.json)">⬇️ Export</button>
+      <button class="t-btn" id="btn-import-game" title="Import Save File (.json)">⬆️ Import</button>
       <button class="t-btn" id="btn-audio-toggle">🔊 Audio: ON</button>
       <button class="t-btn" id="btn-open-map-dialog" style="background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-color: #6ee7b7;">🗺️ New Map</button>
     </div>
@@ -567,31 +605,46 @@
   <!-- ACTION TOOLBAR -->
   <nav id="toolbar">
     <div class="tool-cluster">
-      <button class="t-btn active" data-tool="inspect" id="t-inspect">
+      <button class="t-btn active" data-tool="inspect" id="t-inspect" title="Inspect tiles, select objects, pan camera">
         <span>🔍</span>
         <span>Inspect & Pan</span>
       </button>
-      <button class="t-btn" data-tool="road" id="t-road">
+      <button class="t-btn" data-tool="road" id="t-road" title="Build roads on land ($20) or road bridges over water ($80)">
         <span>🛣️</span>
         <span>Lay Street</span>
         <span class="badge-cost">$20</span>
       </button>
-      <button class="t-btn" data-tool="town" id="t-town">
+      <button class="t-btn" data-tool="rail" id="t-rail" title="Build railroad tracks ($35) or rail trestle bridges over water ($120)">
+        <span>🛤️</span>
+        <span>Lay Rail</span>
+        <span class="badge-cost">$35</span>
+      </button>
+      <button class="t-btn" data-tool="station" id="t-station" title="Build a train station near towns or industries ($600)">
+        <span>🚉</span>
+        <span>Station</span>
+        <span class="badge-cost">$600</span>
+      </button>
+      <button class="t-btn" data-tool="industry" id="t-industry" title="Found an industry: Coal Mine, Farm, Sawmill, or Factory ($1,500)">
+        <span>🏭</span>
+        <span>Industry</span>
+        <span class="badge-cost">$1,500</span>
+      </button>
+      <button class="t-btn" data-tool="town" id="t-town" title="Found a new town with town hall ($2,000)">
         <span>🏛️</span>
         <span>Found Town</span>
         <span class="badge-cost">$2,000</span>
       </button>
-      <button class="t-btn" data-tool="building" id="t-building">
+      <button class="t-btn" data-tool="building" id="t-building" title="Add a residential or commercial building near a town ($150)">
         <span>🏠</span>
         <span>Add House</span>
         <span class="badge-cost">$150</span>
       </button>
-      <button class="t-btn" data-tool="trees" id="t-trees">
+      <button class="t-btn" data-tool="trees" id="t-trees" title="Plant trees ($10)">
         <span>🌲</span>
         <span>Plant Trees</span>
         <span class="badge-cost">$10</span>
       </button>
-      <button class="t-btn danger" data-tool="demolish" id="t-demolish">
+      <button class="t-btn danger" data-tool="demolish" id="t-demolish" title="Bulldoze roads, rails, bridges, trees, and buildings ($15)">
         <span>🚜</span>
         <span>Bulldozer</span>
         <span class="badge-cost">$15</span>
@@ -624,7 +677,7 @@
         <span>World Radar</span>
         <span id="lbl-radar-dim">40x40</span>
       </div>
-      <canvas id="canvas-minimap" width="190" height="190"></canvas>
+      <canvas id="canvas-minimap" width="180" height="180"></canvas>
     </div>
 
     <!-- QUICK ZOOM CONTROLS -->
@@ -637,26 +690,84 @@
     <!-- TOAST POPUPS -->
     <div id="toast-rack"></div>
 
-    <!-- TOWN DETAILS DIALOG -->
-    <div id="town-card">
-      <div class="town-header">
-        <span id="town-title">Westbrook</span>
-        <span class="close-x" id="btn-close-town">&times;</span>
+    <!-- ENTITY DETAILS CARD (Town / Industry / Station) -->
+    <div id="entity-modal-card">
+      <div class="entity-header">
+        <span id="entity-title">Westbrook</span>
+        <span class="close-x" id="btn-close-entity">&times;</span>
       </div>
-      <div class="town-row">Population: <b id="town-pop">420</b></div>
-      <div class="town-row">Structures: <b id="town-bldgs">6</b></div>
-      <div class="town-row">Network Status: <b id="town-net" style="color:#4ade80;">Active Trade Route</b></div>
-      <div class="town-row" style="margin-top:8px; font-style:italic; font-size:11px;">
+      <div class="entity-row" id="entity-line-1">Population: <b>420</b></div>
+      <div class="entity-row" id="entity-line-2">Structures: <b>6</b></div>
+      <div class="entity-row" id="entity-line-3">Network Status: <b style="color:#4ade80;">Active Trade Route</b></div>
+      <div class="entity-row" id="entity-tip" style="margin-top:8px; font-style:italic; font-size:11px; color:#cbd5e1;">
         💡 Tip: Connect streets to other towns to automatically run cargo vans and earn monthly income!
       </div>
     </div>
   </main>
 </div>
 
-<!-- MAP CONFIGURATION MODAL (CHOOSING TINY, MEDIUM, LARGE, EXTRA LARGE, WORLD, CUSTOM) -->
+<!-- FLEET MANAGER MODAL -->
+<div class="modal-overlay" id="modal-fleet" style="display:none;">
+  <div class="dialog-box" style="width:720px;">
+    <div class="dialog-title">
+      <span>🚛 Transport Fleet & Logistics</span>
+      <span class="close-x" id="btn-close-fleet">&times;</span>
+    </div>
+    <p class="dialog-subtitle">Manage operating cargo vans, freight trucks, and express trains running across your transport empire.</p>
+
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
+      <div class="stat-pill" style="flex:1;">
+        <span class="stat-label">Active Vehicles:</span>
+        <span id="flt-total-veh" class="stat-val gold">0</span>
+      </div>
+      <div class="stat-pill" style="flex:1;">
+        <span class="stat-label">Trade & Cargo Routes:</span>
+        <span id="flt-total-routes" class="stat-val blue">0</span>
+      </div>
+      <div class="stat-pill" style="flex:1;">
+        <span class="stat-label">Fleet Lifetime Earnings:</span>
+        <span id="flt-total-earnings" class="stat-val">$0</span>
+      </div>
+    </div>
+
+    <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--panel-border); border-radius:6px; background: rgba(8,18,24,0.6);">
+      <table class="fleet-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Route / Connection</th>
+            <th>Cargo</th>
+            <th>Speed</th>
+            <th>Lifetime Profit</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="fleet-table-body">
+          <tr>
+            <td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No active vehicles. Connect towns or industries with roads/rails to launch vehicles!</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+      <div style="font-size:12px; color:var(--text-dim);">
+        Trains unlock higher speed, larger cargo batches, and massive revenue bonuses.
+      </div>
+      <div class="dialog-foot">
+        <button class="t-btn" id="btn-fleet-upgrade-all" style="background: linear-gradient(180deg, #10b981 0%, #059669 100%);">⚡ Upgrade All Engines ($500)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAP CONFIGURATION MODAL -->
 <div class="modal-overlay" id="modal-map-gen">
   <div class="dialog-box">
-    <h2 class="dialog-title">Select Map Size & World</h2>
+    <div class="dialog-title">
+      <span>Select Map Size & World</span>
+      <span class="close-x" id="btn-close-map-dialog">&times;</span>
+    </div>
     <p class="dialog-subtitle">Choose your simulation territory size or configure custom dimensions.</p>
 
     <div class="grid-presets">
@@ -668,22 +779,22 @@
       <div class="preset-tile selected" data-size="medium">
         <div class="p-title">Medium</div>
         <div class="p-dim">40 x 40</div>
-        <div class="p-desc">Standard balanced region, 5-6 towns.</div>
+        <div class="p-desc">Standard balanced region, 5-6 towns & industries.</div>
       </div>
       <div class="preset-tile" data-size="large">
         <div class="p-title">Large</div>
         <div class="p-dim">70 x 70</div>
-        <div class="p-desc">Broad territory with 10-12 towns.</div>
+        <div class="p-desc">Broad territory with 10-12 towns & supply chains.</div>
       </div>
       <div class="preset-tile" data-size="xlarge">
         <div class="p-title">Extra Large</div>
         <div class="p-dim">110 x 110</div>
-        <div class="p-desc">Massive empire, 18+ towns & lakes.</div>
+        <div class="p-desc">Massive empire, 18+ towns, lakes, and industries.</div>
       </div>
       <div class="preset-tile" data-size="world">
         <div class="p-title">World</div>
         <div class="p-dim">160 x 160</div>
-        <div class="p-desc">Continental scale, 28+ towns.</div>
+        <div class="p-desc">Continental scale, 28+ towns & rail corridors.</div>
       </div>
       <div class="preset-tile" data-size="custom">
         <div class="p-title">Custom</div>
@@ -736,6 +847,9 @@
   </div>
 </div>
 
+<!-- HIDDEN FILE INPUT FOR IMPORT -->
+<input type="file" id="file-import-save" accept=".json" style="display:none;">
+
 <script>
 /* =========================================================================
    SIMULATION ENGINE & GAME LOGIC
@@ -761,7 +875,7 @@ class GameAudio {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(600, this.ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
@@ -783,6 +897,57 @@ class GameAudio {
       gain.connect(this.ctx.destination);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.07);
+    } catch(e) {}
+  }
+  buildRail() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(350, this.ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.08);
+    } catch(e) {}
+  }
+  trainWhistle() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      [440, 554].forEach(f => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.35);
+      });
+    } catch(e) {}
+  }
+  cash() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const freqs = [784, 1046];
+      freqs.forEach((f, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.06);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime + i * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.06 + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(this.ctx.currentTime + i * 0.06);
+        osc.stop(this.ctx.currentTime + i * 0.06 + 0.15);
+      });
     } catch(e) {}
   }
   demolish() {
@@ -830,7 +995,7 @@ class GameAudio {
 // Master Game State
 const GAME = {
   audio: new GameAudio(),
-  activeTool: 'inspect', // 'inspect'|'road'|'town'|'building'|'trees'|'demolish'
+  activeTool: 'inspect', // 'inspect'|'road'|'rail'|'station'|'industry'|'town'|'building'|'trees'|'demolish'
   viewMode: 'iso',       // 'iso' | 'ortho'
   money: 50000,
   simSpeed: 1,           // 0=pause, 1=1x, 2=2x, 5=5x
@@ -839,8 +1004,11 @@ const GAME = {
   mapH: 40,
   tiles: [],
   towns: [],
+  industries: [],
+  stations: [],
   routes: [],
   vehicles: [],
+  floatingTexts: [],
   cam: { x: 0, y: 0, zoom: 1.0 },
   mouse: {
     x: 0, y: 0,
@@ -852,10 +1020,19 @@ const GAME = {
   },
   costs: {
     road: 20,
-    demolish: 15,
+    roadBridge: 80,
+    rail: 35,
+    railBridge: 120,
+    station: 600,
+    industry: 1500,
     town: 2000,
     building: 150,
-    trees: 10
+    trees: 10,
+    demolish: 15
+  },
+  stats: {
+    totalLifetimeRevenue: 0,
+    deliveriesCount: 0
   }
 };
 
@@ -867,13 +1044,23 @@ const TOWN_NAMES = [
   "Ashford", "Sunnydale", "Foxborough", "Kittery", "Camden"
 ];
 
+const INDUSTRY_TYPES = [
+  { type: 'coal', name: 'Coal Mine', icon: '⛏️', produces: 'Coal', consumes: null, color: '#18181b', payout: 240 },
+  { type: 'farm', name: 'Grain & Dairy Farm', icon: '🌾', produces: 'Grain', consumes: null, color: '#eab308', payout: 210 },
+  { type: 'forest', name: 'Forest & Sawmill', icon: '🌲', produces: 'Timber', consumes: null, color: '#854d0e', payout: 220 },
+  { type: 'factory', name: 'Manufacturing Plant', icon: '🏭', produces: 'Goods', consumes: ['Coal', 'Timber'], color: '#ef4444', payout: 350 }
+];
+
 function generateMap(w, h, townCount, waterPct, treePct) {
   GAME.mapW = w;
   GAME.mapH = h;
   GAME.tiles = [];
   GAME.towns = [];
+  GAME.industries = [];
+  GAME.stations = [];
   GAME.routes = [];
   GAME.vehicles = [];
+  GAME.floatingTexts = [];
 
   // 1. Initialize Grid
   for (let y = 0; y < h; y++) {
@@ -881,15 +1068,18 @@ function generateMap(w, h, townCount, waterPct, treePct) {
     for (let x = 0; x < w; x++) {
       row.push({
         type: 'grass',
-        road: 0, // bitmask: 1=N, 2=E, 4=S, 8=W
+        road: 0,        // bitmask: 1=N, 2=E, 4=S, 8=W
+        rail: 0,        // bitmask: 1=N, 2=E, 4=S, 8=W
+        bridge: null,   // null | 'road' | 'rail'
         building: null,
-        tree: false
+        tree: false,
+        elevation: 0
       });
     }
     GAME.tiles.push(row);
   }
 
-  // 2. Generate Water Bodies
+  // 2. Generate Lakes & Water
   const lakeCount = Math.max(1, Math.round((w * h / 450) * (waterPct / 20)));
   for (let l = 0; l < lakeCount; l++) {
     const cx = Math.floor(Math.random() * (w - 10)) + 5;
@@ -923,20 +1113,18 @@ function generateMap(w, h, townCount, waterPct, treePct) {
   let attempts = 0;
   const namePool = [...TOWN_NAMES].sort(() => Math.random() - 0.5);
 
-  while (placed < townCount && attempts < 250) {
+  while (placed < townCount && attempts < 350) {
     attempts++;
     const cx = Math.floor(Math.random() * (w - 10)) + 5;
     const cy = Math.floor(Math.random() * (h - 10)) + 5;
 
-    // Minimum distance between towns
     let ok = true;
-    const minD = Math.max(8, Math.min(w, h) / (townCount * 0.55));
+    const minD = Math.max(7, Math.min(w, h) / (townCount * 0.5));
     for (const t of GAME.towns) {
       if (Math.hypot(t.x - cx, t.y - cy) < minD) { ok = false; break; }
     }
     if (!ok) continue;
 
-    // Check water tiles
     let waterNear = 0;
     for (let dy = -2; dy <= 2; dy++) {
       for (let dx = -2; dx <= 2; dx++) {
@@ -956,13 +1144,12 @@ function generateMap(w, h, townCount, waterPct, treePct) {
       buildings: 1
     };
 
-    // Town Hall at center
     const center = GAME.tiles[cy][cx];
     center.type = 'grass';
     center.tree = false;
     center.building = { type: 'hall', townId: town.id, name: town.name };
 
-    // Cross roads around Town Hall
+    // Initial cross-streets around town hall
     const roads = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
     roads.forEach(([rx, ry]) => {
       if (rx >= 0 && rx < w && ry >= 0 && ry < h) {
@@ -973,7 +1160,7 @@ function generateMap(w, h, townCount, waterPct, treePct) {
       }
     });
 
-    // 2-3 starter houses
+    // 2-3 Starter houses
     const houses = [[cx - 1, cy - 1], [cx + 1, cy - 1], [cx - 1, cy + 1], [cx + 1, cy + 1]];
     houses.forEach(([hx, hy]) => {
       if (Math.random() > 0.3 && hx >= 0 && hx < w && hy >= 0 && hy < h) {
@@ -993,7 +1180,55 @@ function generateMap(w, h, townCount, waterPct, treePct) {
     placed++;
   }
 
+  // 5. Place Procedural Industries (Coal Mine, Farm, Sawmill, Factory)
+  const industryCount = Math.max(2, Math.floor(townCount * 0.85));
+  let indPlaced = 0;
+  let indAttempts = 0;
+
+  while (indPlaced < industryCount && indAttempts < 250) {
+    indAttempts++;
+    const ix = Math.floor(Math.random() * (w - 8)) + 4;
+    const iy = Math.floor(Math.random() * (h - 8)) + 4;
+    const tile = GAME.tiles[iy][ix];
+    if (tile.type === 'water' || tile.building || tile.road || tile.rail) continue;
+
+    // Check distance to towns & other industries
+    let tooClose = false;
+    for (const t of GAME.towns) {
+      if (Math.hypot(t.x - ix, t.y - iy) < 4) { tooClose = true; break; }
+    }
+    for (const ind of GAME.industries) {
+      if (Math.hypot(ind.x - ix, ind.y - iy) < 6) { tooClose = true; break; }
+    }
+    if (tooClose) continue;
+
+    const indDef = INDUSTRY_TYPES[indPlaced % INDUSTRY_TYPES.length];
+    const indObj = {
+      id: indPlaced + 1,
+      name: `${TOWN_NAMES[Math.floor(Math.random() * TOWN_NAMES.length)]} ${indDef.name}`,
+      indType: indDef.type,
+      produces: indDef.produces,
+      consumes: indDef.consumes,
+      payout: indDef.payout,
+      x: ix,
+      y: iy,
+      stockpile: 10
+    };
+
+    tile.type = 'grass';
+    tile.tree = false;
+    tile.building = {
+      type: 'industry',
+      indType: indDef.type,
+      indId: indObj.id,
+      name: indObj.name
+    };
+    GAME.industries.push(indObj);
+    indPlaced++;
+  }
+
   recalculateAllRoads();
+  recalculateAllRails();
 
   if (GAME.towns.length > 0) {
     centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
@@ -1005,23 +1240,70 @@ function generateMap(w, h, townCount, waterPct, treePct) {
   renderMinimap();
 }
 
+/* =========================================================================
+   AUTOTILING & BITMASK NETWORK CALCULATIONS
+   ========================================================================= */
+
 function updateRoadMask(x, y) {
   if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
   const tile = GAME.tiles[y][x];
   if (!tile.road) return;
 
   let mask = 0;
-  if (y > 0 && GAME.tiles[y - 1][x].road) mask |= 1;        // N
-  if (x < GAME.mapW - 1 && GAME.tiles[y][x + 1].road) mask |= 2; // E
-  if (y < GAME.mapH - 1 && GAME.tiles[y + 1][x].road) mask |= 4; // S
-  if (x > 0 && GAME.tiles[y][x - 1].road) mask |= 8;        // W
+  // Check North (y-1)
+  if (y > 0 && (GAME.tiles[y - 1][x].road || isRoadConnectable(x, y - 1))) mask |= 1;
+  // Check East (x+1)
+  if (x < GAME.mapW - 1 && (GAME.tiles[y][x + 1].road || isRoadConnectable(x + 1, y))) mask |= 2;
+  // Check South (y+1)
+  if (y < GAME.mapH - 1 && (GAME.tiles[y + 1][x].road || isRoadConnectable(x, y + 1))) mask |= 4;
+  // Check West (x-1)
+  if (x > 0 && (GAME.tiles[y][x - 1].road || isRoadConnectable(x - 1, y))) mask |= 8;
+
   tile.road = mask || 15;
+}
+
+function isRoadConnectable(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return false;
+  const t = GAME.tiles[y][x];
+  if (t.road) return true;
+  if (t.building && (t.building.type === 'hall' || t.building.type === 'industry')) return true;
+  return false;
+}
+
+function updateRailMask(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+  if (!tile.rail) return;
+
+  let mask = 0;
+  if (y > 0 && (GAME.tiles[y - 1][x].rail || isRailConnectable(x, y - 1))) mask |= 1;
+  if (x < GAME.mapW - 1 && (GAME.tiles[y][x + 1].rail || isRailConnectable(x + 1, y))) mask |= 2;
+  if (y < GAME.mapH - 1 && (GAME.tiles[y + 1][x].rail || isRailConnectable(x, y + 1))) mask |= 4;
+  if (x > 0 && (GAME.tiles[y][x - 1].rail || isRailConnectable(x - 1, y))) mask |= 8;
+
+  tile.rail = mask || 15;
+}
+
+function isRailConnectable(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return false;
+  const t = GAME.tiles[y][x];
+  if (t.rail) return true;
+  if (t.building && (t.building.type === 'station' || t.building.type === 'industry')) return true;
+  return false;
 }
 
 function recalculateAllRoads() {
   for (let y = 0; y < GAME.mapH; y++) {
     for (let x = 0; x < GAME.mapW; x++) {
       if (GAME.tiles[y][x].road) updateRoadMask(x, y);
+    }
+  }
+}
+
+function recalculateAllRails() {
+  for (let y = 0; y < GAME.mapH; y++) {
+    for (let x = 0; x < GAME.mapW; x++) {
+      if (GAME.tiles[y][x].rail) updateRailMask(x, y);
     }
   }
 }
@@ -1034,7 +1316,18 @@ function updateRoadNeighbors(x, y) {
   if (x > 0) updateRoadMask(x - 1, y);
 }
 
-// Projections
+function updateRailNeighbors(x, y) {
+  updateRailMask(x, y);
+  if (y > 0) updateRailMask(x, y - 1);
+  if (x < GAME.mapW - 1) updateRailMask(x + 1, y);
+  if (y < GAME.mapH - 1) updateRailMask(x, y + 1);
+  if (x > 0) updateRailMask(x - 1, y);
+}
+
+/* =========================================================================
+   PROJECTIONS & COORDINATE CONVERSION
+   ========================================================================= */
+
 const TILE_W = 64;
 const TILE_H = 32;
 
@@ -1080,7 +1373,7 @@ function centerCameraOn(tx, ty) {
 }
 
 /* =========================================================================
-   CANVAS RENDERING
+   CANVAS RENDERING ENGINE
    ========================================================================= */
 
 const canvas = document.getElementById('canvas-world');
@@ -1107,6 +1400,7 @@ function gameLoop(now) {
 
   renderWorld(now);
   renderVehicles(now);
+  renderFloatingTexts(dt);
   renderHighlights();
 
   requestAnimationFrame(gameLoop);
@@ -1146,11 +1440,19 @@ function drawTileIso(ctx, x, y, tile, px, py, tw, th, now) {
   ctx.closePath();
 
   if (tile.type === 'water') {
-    const wave = Math.sin((x + y * 0.5) + now * 0.003) * 6;
-    ctx.fillStyle = `hsl(204, 82%, ${34 + wave * 0.4}%)`;
+    const wave = Math.sin((x * 0.8 + y * 0.6) + now * 0.003) * 5;
+    ctx.fillStyle = `hsl(202, 80%, ${32 + wave * 0.5}%)`;
     ctx.fill();
     ctx.strokeStyle = '#1e5a7d';
     ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Subtle water shimmer lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(px - tw * 0.15, py + th * 0.45);
+    ctx.lineTo(px + tw * 0.15, py + th * 0.55);
     ctx.stroke();
   } else {
     ctx.fillStyle = (x + y) % 2 === 0 ? '#499336' : '#41862f';
@@ -1160,11 +1462,18 @@ function drawTileIso(ctx, x, y, tile, px, py, tw, th, now) {
     ctx.stroke();
   }
 
+  // Draw Bridges / Roads / Rails
+  const isBridge = tile.type === 'water' && (tile.road || tile.rail);
+
   if (tile.road) {
-    drawRoadIso(ctx, px, py, tw, th, tile.road);
+    drawRoadIso(ctx, px, py, tw, th, tile.road, isBridge);
   }
 
-  if (tile.tree && !tile.road && !tile.building) {
+  if (tile.rail) {
+    drawRailIso(ctx, px, py, tw, th, tile.rail, isBridge);
+  }
+
+  if (tile.tree && !tile.road && !tile.rail && !tile.building) {
     drawTreeIso(ctx, px, py, tw, th, x, y);
   }
 
@@ -1173,75 +1482,285 @@ function drawTileIso(ctx, x, y, tile, px, py, tw, th, now) {
   }
 }
 
-function drawRoadIso(ctx, px, py, tw, th, mask) {
+/* =========================================================================
+   FIXED ISOMETRIC ROAD RENDERING: CONNECTS DIRECTLY TO DIAMOND EDGES
+   ========================================================================= */
+
+function drawRoadIso(ctx, px, py, tw, th, mask, isBridge) {
   const cx = px;
   const cy = py + th / 2;
-  const rw = tw * 0.28;
-  const rh = th * 0.28;
+  const rw = 0.28; // Road half-width factor
 
-  ctx.save();
+  // Center junction polygon vertices
+  const cJ_N = { x: cx + rw * tw * 0.5, y: cy - rw * th * 0.5 };
+  const cJ_E = { x: cx + rw * tw * 0.5, y: cy + rw * th * 0.5 };
+  const cJ_S = { x: cx - rw * tw * 0.5, y: cy + rw * th * 0.5 };
+  const cJ_W = { x: cx - rw * tw * 0.5, y: cy - rw * th * 0.5 };
+
+  // Bridge Support Piers (when spanning water)
+  if (isBridge) {
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(cx - tw * 0.22, cy + th * 0.15, tw * 0.08, th * 0.5);
+    ctx.fillRect(cx + tw * 0.14, cy + th * 0.15, tw * 0.08, th * 0.5);
+
+    // Bridge shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + th * 0.35, tw * 0.35, th * 0.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Draw asphalt road surface
+  ctx.fillStyle = isBridge ? '#4b5563' : '#374151';
+  ctx.strokeStyle = '#1f2937';
+  ctx.lineWidth = Math.max(1, tw * 0.015);
+
+  // Fill center junction
   ctx.beginPath();
-  ctx.moveTo(px, py);
-  ctx.lineTo(px + tw / 2, py + th / 2);
-  ctx.lineTo(px, py + th);
-  ctx.lineTo(px - tw / 2, py + th / 2);
+  ctx.moveTo(cJ_N.x, cJ_N.y);
+  ctx.lineTo(cJ_E.x, cJ_E.y);
+  ctx.lineTo(cJ_S.x, cJ_S.y);
+  ctx.lineTo(cJ_W.x, cJ_W.y);
   ctx.closePath();
-  ctx.clip();
-
-  ctx.fillStyle = '#424649';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  if (mask & 1) { // North
+  // North Arm (dy = -1: towards screen +tw/4, -th/4)
+  if (mask & 1) {
+    const eL = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
+    const eR = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
     ctx.beginPath();
-    ctx.moveTo(cx - rw * 0.7, cy);
-    ctx.lineTo(px - tw * 0.2, py + th * 0.2);
-    ctx.lineTo(px, py);
-    ctx.lineTo(px + tw * 0.2, py + th * 0.2);
-    ctx.lineTo(cx + rw * 0.7, cy);
-    ctx.fill();
-  }
-  if (mask & 4) { // South
-    ctx.beginPath();
-    ctx.moveTo(cx - rw * 0.7, cy);
-    ctx.lineTo(px - tw * 0.2, py + th * 0.8);
-    ctx.lineTo(px, py + th);
-    ctx.lineTo(px + tw * 0.2, py + th * 0.8);
-    ctx.lineTo(cx + rw * 0.7, cy);
-    ctx.fill();
-  }
-  if (mask & 8) { // West
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - rh * 0.7);
-    ctx.lineTo(px - tw * 0.35, py + th * 0.3);
-    ctx.lineTo(px - tw / 2, py + th / 2);
-    ctx.lineTo(px - tw * 0.35, py + th * 0.7);
-    ctx.lineTo(cx, cy + rh * 0.7);
-    ctx.fill();
-  }
-  if (mask & 2) { // East
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - rh * 0.7);
-    ctx.lineTo(px + tw * 0.35, py + th * 0.3);
-    ctx.lineTo(px + tw / 2, py + th / 2);
-    ctx.lineTo(px + tw * 0.35, py + th * 0.7);
-    ctx.lineTo(cx, cy + rh * 0.7);
+    ctx.moveTo(cJ_W.x, cJ_W.y);
+    ctx.lineTo(eL.x, eL.y);
+    ctx.lineTo(eR.x, eR.y);
+    ctx.lineTo(cJ_E.x, cJ_E.y);
+    ctx.closePath();
     ctx.fill();
   }
 
-  // Yellow road dash line
+  // South Arm (dy = +1: towards screen -tw/4, +th/4)
+  if (mask & 4) {
+    const eL = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
+    const eR = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath();
+    ctx.moveTo(cJ_W.x, cJ_W.y);
+    ctx.lineTo(eL.x, eL.y);
+    ctx.lineTo(eR.x, eR.y);
+    ctx.lineTo(cJ_E.x, cJ_E.y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // East Arm (dx = +1: towards screen +tw/4, +th/4)
+  if (mask & 2) {
+    const eT = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
+    const eB = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath();
+    ctx.moveTo(cJ_N.x, cJ_N.y);
+    ctx.lineTo(eT.x, eT.y);
+    ctx.lineTo(eB.x, eB.y);
+    ctx.lineTo(cJ_S.x, cJ_S.y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // West Arm (dx = -1: towards screen -tw/4, -th/4)
+  if (mask & 8) {
+    const eT = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
+    const eB = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath();
+    ctx.moveTo(cJ_N.x, cJ_N.y);
+    ctx.lineTo(eT.x, eT.y);
+    ctx.lineTo(eB.x, eB.y);
+    ctx.lineTo(cJ_S.x, cJ_S.y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Curbed side borders
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = Math.max(1, tw * 0.018);
+  ctx.beginPath();
+  if (mask & 1) {
+    ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(cx + tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 - rw * th * 0.5);
+    ctx.moveTo(cJ_E.x, cJ_E.y); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5);
+  }
+  if (mask & 4) {
+    ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(cx - tw * 0.25 - rw * tw * 0.5, cy + th * 0.25 - rw * th * 0.5);
+    ctx.moveTo(cJ_E.x, cJ_E.y); ctx.lineTo(cx - tw * 0.25 + rw * tw * 0.5, cy + th * 0.25 + rw * th * 0.5);
+  }
+  if (mask & 2) {
+    ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy + th * 0.25 - rw * th * 0.5);
+    ctx.moveTo(cJ_S.x, cJ_S.y); ctx.lineTo(cx + tw * 0.25 - rw * tw * 0.5, cy + th * 0.25 + rw * th * 0.5);
+  }
+  if (mask & 8) {
+    ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(cx - tw * 0.25 + rw * tw * 0.5, cy - th * 0.25 - rw * th * 0.5);
+    ctx.moveTo(cJ_S.x, cJ_S.y); ctx.lineTo(cx - tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5);
+  }
+  ctx.stroke();
+
+  // Bridge railings
+  if (isBridge) {
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = Math.max(1.5, tw * 0.024);
+    ctx.beginPath();
+    if ((mask & 5) === 5) {
+      ctx.moveTo(cJ_W.x, cJ_W.y - 2); ctx.lineTo(cx + tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 - rw * th * 0.5 - 2);
+      ctx.moveTo(cJ_E.x, cJ_E.y - 2); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5 - 2);
+    } else {
+      ctx.moveTo(cJ_N.x, cJ_N.y - 2); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy + th * 0.25 - rw * th * 0.5 - 2);
+      ctx.moveTo(cJ_S.x, cJ_S.y - 2); ctx.lineTo(cx - tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5 - 2);
+    }
+    ctx.stroke();
+  }
+
+  // Yellow dashed centerline connecting cleanly across edge midpoints
   ctx.strokeStyle = '#facc15';
-  ctx.lineWidth = Math.max(1, tw * 0.025);
+  ctx.lineWidth = Math.max(1, tw * 0.022);
   ctx.setLineDash([3 * GAME.cam.zoom, 3 * GAME.cam.zoom]);
   ctx.beginPath();
-  if (mask & 1) { ctx.moveTo(cx, cy); ctx.lineTo(px, py); }
-  if (mask & 4) { ctx.moveTo(cx, cy); ctx.lineTo(px, py + th); }
-  if (mask & 8) { ctx.moveTo(cx, cy); ctx.lineTo(px - tw / 2, py + th / 2); }
-  if (mask & 2) { ctx.moveTo(cx, cy); ctx.lineTo(px + tw / 2, py + th / 2); }
+  if (mask & 1) { ctx.moveTo(cx, cy); ctx.lineTo(cx + tw * 0.25, cy - th * 0.25); }
+  if (mask & 4) { ctx.moveTo(cx, cy); ctx.lineTo(cx - tw * 0.25, cy + th * 0.25); }
+  if (mask & 2) { ctx.moveTo(cx, cy); ctx.lineTo(cx + tw * 0.25, cy + th * 0.25); }
+  if (mask & 8) { ctx.moveTo(cx, cy); ctx.lineTo(cx - tw * 0.25, cy - th * 0.25); }
   ctx.stroke();
   ctx.setLineDash([]);
-  ctx.restore();
+}
+
+/* =========================================================================
+   RAILROAD TRACK RENDERING IN ISOMETRIC VIEW
+   ========================================================================= */
+
+function drawRailIso(ctx, px, py, tw, th, mask, isBridge) {
+  const cx = px;
+  const cy = py + th / 2;
+  const rw = 0.20; // Rail ballast half-width
+
+  // Bridge piers for rail trestle
+  if (isBridge) {
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(cx - tw * 0.2, cy + th * 0.15, tw * 0.06, th * 0.5);
+    ctx.fillRect(cx + tw * 0.14, cy + th * 0.15, tw * 0.06, th * 0.5);
+    // Cross brace
+    ctx.strokeStyle = '#92400e';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - tw * 0.2, cy + th * 0.2);
+    ctx.lineTo(cx + tw * 0.2, cy + th * 0.5);
+    ctx.moveTo(cx + tw * 0.2, cy + th * 0.2);
+    ctx.lineTo(cx - tw * 0.2, cy + th * 0.5);
+    ctx.stroke();
+  }
+
+  // Ballast Gravel Base (Dark charcoal)
+  ctx.fillStyle = '#3f3f46';
+  ctx.beginPath();
+  const cJ_N = { x: cx + rw * tw * 0.5, y: cy - rw * th * 0.5 };
+  const cJ_E = { x: cx + rw * tw * 0.5, y: cy + rw * th * 0.5 };
+  const cJ_S = { x: cx - rw * tw * 0.5, y: cy + rw * th * 0.5 };
+  const cJ_W = { x: cx - rw * tw * 0.5, y: cy - rw * th * 0.5 };
+
+  ctx.moveTo(cJ_N.x, cJ_N.y);
+  ctx.lineTo(cJ_E.x, cJ_E.y);
+  ctx.lineTo(cJ_S.x, cJ_S.y);
+  ctx.lineTo(cJ_W.x, cJ_W.y);
+  ctx.closePath();
+  ctx.fill();
+
+  if (mask & 1) {
+    const eL = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
+    const eR = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath(); ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(eL.x, eL.y); ctx.lineTo(eR.x, eR.y); ctx.lineTo(cJ_E.x, cJ_E.y); ctx.fill();
+  }
+  if (mask & 4) {
+    const eL = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
+    const eR = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath(); ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(eL.x, eL.y); ctx.lineTo(eR.x, eR.y); ctx.lineTo(cJ_E.x, cJ_E.y); ctx.fill();
+  }
+  if (mask & 2) {
+    const eT = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
+    const eB = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath(); ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(eT.x, eT.y); ctx.lineTo(eB.x, eB.y); ctx.lineTo(cJ_S.x, cJ_S.y); ctx.fill();
+  }
+  if (mask & 8) {
+    const eT = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
+    const eB = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
+    ctx.beginPath(); ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(eT.x, eT.y); ctx.lineTo(eB.x, eB.y); ctx.lineTo(cJ_S.x, cJ_S.y); ctx.fill();
+  }
+
+  // Wooden Railroad Ties / Sleepers
+  ctx.strokeStyle = '#5c2d16';
+  ctx.lineWidth = Math.max(1.5, tw * 0.035);
+  ctx.beginPath();
+  const tieW = rw * 0.9;
+  const drawSleeper = (sx, sy, isDiag1) => {
+    if (isDiag1) {
+      ctx.moveTo(sx - tieW * tw * 0.5, sy - tieW * th * 0.5);
+      ctx.lineTo(sx + tieW * tw * 0.5, sy + tieW * th * 0.5);
+    } else {
+      ctx.moveTo(sx + tieW * tw * 0.5, sy - tieW * th * 0.5);
+      ctx.lineTo(sx - tieW * tw * 0.5, sy + tieW * th * 0.5);
+    }
+  };
+
+  // Center tie
+  drawSleeper(cx, cy, (mask & 5) !== 0);
+
+  // Arm ties
+  if (mask & 1) {
+    drawSleeper(cx + tw * 0.125, cy - th * 0.125, true);
+    drawSleeper(cx + tw * 0.22, cy - th * 0.22, true);
+  }
+  if (mask & 4) {
+    drawSleeper(cx - tw * 0.125, cy + th * 0.125, true);
+    drawSleeper(cx - tw * 0.22, cy + th * 0.22, true);
+  }
+  if (mask & 2) {
+    drawSleeper(cx + tw * 0.125, cy + th * 0.125, false);
+    drawSleeper(cx + tw * 0.22, cy + th * 0.22, false);
+  }
+  if (mask & 8) {
+    drawSleeper(cx - tw * 0.125, cy - th * 0.125, false);
+    drawSleeper(cx - tw * 0.22, cy - th * 0.22, false);
+  }
+  ctx.stroke();
+
+  // Dual Parallel Steel Rails (Shiny silver with dark shadow)
+  const railDist = rw * 0.45;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = Math.max(1, tw * 0.022);
+
+  ctx.beginPath();
+  // North Rails
+  if (mask & 1) {
+    // Rail 1
+    ctx.moveTo(cx - railDist * tw * 0.5, cy - railDist * th * 0.5);
+    ctx.lineTo(cx + tw * 0.25 - railDist * tw * 0.5, cy - th * 0.25 - railDist * th * 0.5);
+    // Rail 2
+    ctx.moveTo(cx + railDist * tw * 0.5, cy + railDist * th * 0.5);
+    ctx.lineTo(cx + tw * 0.25 + railDist * tw * 0.5, cy - th * 0.25 + railDist * th * 0.5);
+  }
+  // South Rails
+  if (mask & 4) {
+    ctx.moveTo(cx - railDist * tw * 0.5, cy - railDist * th * 0.5);
+    ctx.lineTo(cx - tw * 0.25 - railDist * tw * 0.5, cy + th * 0.25 - railDist * th * 0.5);
+    ctx.moveTo(cx + railDist * tw * 0.5, cy + railDist * th * 0.5);
+    ctx.lineTo(cx - tw * 0.25 + railDist * tw * 0.5, cy + th * 0.25 + railDist * th * 0.5);
+  }
+  // East Rails
+  if (mask & 2) {
+    ctx.moveTo(cx + railDist * tw * 0.5, cy - railDist * th * 0.5);
+    ctx.lineTo(cx + tw * 0.25 + railDist * tw * 0.5, cy + th * 0.25 - railDist * th * 0.5);
+    ctx.moveTo(cx - railDist * tw * 0.5, cy + railDist * th * 0.5);
+    ctx.lineTo(cx + tw * 0.25 - railDist * tw * 0.5, cy + th * 0.25 + railDist * th * 0.5);
+  }
+  // West Rails
+  if (mask & 8) {
+    ctx.moveTo(cx + railDist * tw * 0.5, cy - railDist * th * 0.5);
+    ctx.lineTo(cx - tw * 0.25 + railDist * tw * 0.5, cy - th * 0.25 - railDist * th * 0.5);
+    ctx.moveTo(cx - railDist * tw * 0.5, cy + railDist * th * 0.5);
+    ctx.lineTo(cx - tw * 0.25 - railDist * tw * 0.5, cy - th * 0.25 + railDist * th * 0.5);
+  }
+  ctx.stroke();
 }
 
 function drawTreeIso(ctx, px, py, tw, th, x, y) {
@@ -1259,8 +1778,8 @@ function drawTreeIso(ctx, px, py, tw, th, x, y) {
     const layerW = w * (1 - i * 0.22);
     ctx.beginPath();
     ctx.moveTo(cx, layerY - h * 0.35);
-    ctx.lineTo(cx + layerW, layerY);
-    ctx.lineTo(cx - layerW, layerY);
+    ctx.lineTo(cx + layerW / 2, layerY);
+    ctx.lineTo(cx - layerW / 2, layerY);
     ctx.closePath();
     ctx.fill();
   }
@@ -1269,6 +1788,142 @@ function drawTreeIso(ctx, px, py, tw, th, x, y) {
 function drawBuildingIso(ctx, px, py, tw, th, bldg) {
   const cx = px;
   const cy = py + th / 2;
+
+  if (bldg.type === 'station') {
+    // Train Station Platform & Canopy
+    const sH = th * 1.3;
+    const sW = tw * 0.44;
+
+    // Platform Base
+    ctx.fillStyle = '#64748b';
+    ctx.beginPath();
+    ctx.moveTo(cx - sW, cy);
+    ctx.lineTo(cx, cy + th * 0.25);
+    ctx.lineTo(cx + sW, cy);
+    ctx.lineTo(cx, cy - th * 0.25);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#334155';
+    ctx.stroke();
+
+    // Station House
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(cx - sW * 0.4, cy - sH * 0.8, sW * 0.8, sH * 0.6);
+
+    // Gabled Roof
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath();
+    ctx.moveTo(cx - sW * 0.5, cy - sH * 0.8);
+    ctx.lineTo(cx, cy - sH * 1.15);
+    ctx.lineTo(cx + sW * 0.5, cy - sH * 0.8);
+    ctx.closePath();
+    ctx.fill();
+
+    // Clock
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(cx, cy - sH * 0.92, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Signboard
+    drawFloatingBadge(ctx, cx, cy - sH * 1.25, `🚉 ${bldg.name || 'Station'}`);
+    return;
+  }
+
+  if (bldg.type === 'industry') {
+    // Distinctive Industry Buildings
+    const indType = bldg.indType || 'factory';
+    const bH = th * 1.6;
+    const bW = tw * 0.45;
+
+    if (indType === 'coal') {
+      // Coal Mine: Headframe A-frame tower with pulley wheel & black coal pile
+      ctx.strokeStyle = '#27272a';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(cx - bW * 0.5, cy);
+      ctx.lineTo(cx, cy - bH * 1.2);
+      ctx.lineTo(cx + bW * 0.5, cy);
+      ctx.stroke();
+
+      // Pulley wheel
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(cx, cy - bH * 1.2, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Coal ore pile
+      ctx.fillStyle = '#18181b';
+      ctx.beginPath();
+      ctx.ellipse(cx + bW * 0.3, cy + th * 0.1, tw * 0.18, th * 0.15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawFloatingBadge(ctx, cx, cy - bH * 1.35, `⛏️ ${bldg.name}`);
+    } else if (indType === 'farm') {
+      // Farm: Red Barn & Silver Grain Silo
+      // Silo
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(cx - bW * 0.6, cy - bH * 0.9, bW * 0.3, bH * 0.7);
+      ctx.beginPath();
+      ctx.arc(cx - bW * 0.45, cy - bH * 0.9, bW * 0.15, Math.PI, 0);
+      ctx.fill();
+
+      // Big Red Barn
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(cx - bW * 0.2, cy - bH * 0.7, bW * 0.7, bH * 0.6);
+      // Barn roof
+      ctx.fillStyle = '#f87171';
+      ctx.beginPath();
+      ctx.moveTo(cx - bW * 0.25, cy - bH * 0.7);
+      ctx.lineTo(cx + bW * 0.15, cy - bH * 1.05);
+      ctx.lineTo(cx + bW * 0.55, cy - bH * 0.7);
+      ctx.closePath();
+      ctx.fill();
+
+      drawFloatingBadge(ctx, cx, cy - bH * 1.25, `🌾 ${bldg.name}`);
+    } else if (indType === 'forest') {
+      // Sawmill: Timber cabin & stack of logs
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(cx - bW * 0.5, cy - bH * 0.65, bW * 0.6, bH * 0.5);
+      // Green roof
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.moveTo(cx - bW * 0.55, cy - bH * 0.65);
+      ctx.lineTo(cx - bW * 0.2, cy - bH * 0.95);
+      ctx.lineTo(cx + bW * 0.15, cy - bH * 0.65);
+      ctx.closePath();
+      ctx.fill();
+
+      // Logs pile
+      ctx.fillStyle = '#b45309';
+      for (let k = 0; k < 3; k++) {
+        ctx.fillRect(cx + bW * 0.2, cy - k * 5, bW * 0.4, 4);
+      }
+
+      drawFloatingBadge(ctx, cx, cy - bH * 1.15, `🌲 ${bldg.name}`);
+    } else {
+      // Manufacturing Factory: Brick building with two tall smoking chimneys
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(cx - bW * 0.6, cy - bH * 0.7, bW * 1.2, bH * 0.6);
+
+      // Chimneys
+      ctx.fillStyle = '#7f1d1d';
+      ctx.fillRect(cx - bW * 0.3, cy - bH * 1.2, 5, bH * 0.6);
+      ctx.fillRect(cx + bW * 0.1, cy - bH * 1.35, 6, bH * 0.75);
+
+      // Smoke particles
+      ctx.fillStyle = 'rgba(203, 213, 225, 0.4)';
+      ctx.beginPath();
+      ctx.arc(cx - bW * 0.25, cy - bH * 1.3, 4, 0, Math.PI * 2);
+      ctx.arc(cx + bW * 0.15, cy - bH * 1.45, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawFloatingBadge(ctx, cx, cy - bH * 1.55, `🏭 ${bldg.name}`);
+    }
+    return;
+  }
+
+  // Standard Town Buildings & Town Hall
   const isHall = bldg.type === 'hall';
   const bH = isHall ? th * 1.8 : th * 1.25;
   const bW = tw * 0.42;
@@ -1322,27 +1977,28 @@ function drawBuildingIso(ctx, px, py, tw, th, bldg) {
     ctx.closePath();
     ctx.fill();
 
-    // Hover badge label
-    ctx.font = 'bold 11px sans-serif';
-    const text = bldg.name;
-    const m = ctx.measureText(text);
-    const badgeW = m.width + 12;
-    const badgeH = 18;
-    const by = cy - bH - th * 1.0;
-
-    ctx.fillStyle = 'rgba(12, 28, 38, 0.88)';
-    ctx.strokeStyle = '#facc15';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(cx - badgeW / 2, by - badgeH / 2, badgeW, badgeH, 4);
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, cx, by);
+    drawFloatingBadge(ctx, cx, cy - bH - th * 1.0, `🏛️ ${bldg.name}`);
   }
+}
+
+function drawFloatingBadge(ctx, bx, by, text) {
+  ctx.font = 'bold 11px sans-serif';
+  const m = ctx.measureText(text);
+  const badgeW = m.width + 12;
+  const badgeH = 18;
+
+  ctx.fillStyle = 'rgba(12, 28, 38, 0.88)';
+  ctx.strokeStyle = '#facc15';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(bx - badgeW / 2, by - badgeH / 2, badgeW, badgeH, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, bx, by);
 }
 
 function drawTileOrtho(ctx, x, y, tile, px, py, size) {
@@ -1356,7 +2012,7 @@ function drawTileOrtho(ctx, x, y, tile, px, py, size) {
   ctx.strokeRect(px, py, size, size);
 
   if (tile.road) {
-    ctx.fillStyle = '#475569';
+    ctx.fillStyle = tile.type === 'water' ? '#64748b' : '#475569';
     const rw = size * 0.35;
     const mid = size * 0.5;
     ctx.fillRect(px + mid - rw/2, py + mid - rw/2, rw, rw);
@@ -1366,7 +2022,18 @@ function drawTileOrtho(ctx, x, y, tile, px, py, size) {
     if (tile.road & 2) ctx.fillRect(px + mid, py + mid - rw/2, mid, rw);
   }
 
-  if (tile.tree && !tile.road && !tile.building) {
+  if (tile.rail) {
+    ctx.fillStyle = '#27272a';
+    const rw = size * 0.26;
+    const mid = size * 0.5;
+    ctx.fillRect(px + mid - rw/2, py + mid - rw/2, rw, rw);
+    if (tile.rail & 1) ctx.fillRect(px + mid - rw/2, py, rw, mid);
+    if (tile.rail & 4) ctx.fillRect(px + mid - rw/2, py + mid, rw, mid);
+    if (tile.rail & 8) ctx.fillRect(px, py + mid - rw/2, mid, rw);
+    if (tile.rail & 2) ctx.fillRect(px + mid, py + mid - rw/2, mid, rw);
+  }
+
+  if (tile.tree && !tile.road && !tile.rail && !tile.building) {
     ctx.fillStyle = '#15803d';
     ctx.beginPath();
     ctx.arc(px + size * 0.5, py + size * 0.5, size * 0.3, 0, Math.PI * 2);
@@ -1374,11 +2041,25 @@ function drawTileOrtho(ctx, x, y, tile, px, py, size) {
   }
 
   if (tile.building) {
-    ctx.fillStyle = tile.building.type === 'hall' ? '#e11d48' : '#f59e0b';
-    ctx.fillRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
-    ctx.strokeStyle = '#000';
-    ctx.strokeRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
+    if (bldgColor(tile.building)) {
+      ctx.fillStyle = bldgColor(tile.building);
+      ctx.fillRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
+    }
   }
+}
+
+function bldgColor(bldg) {
+  if (bldg.type === 'hall') return '#dc2626';
+  if (bldg.type === 'station') return '#2563eb';
+  if (bldg.type === 'industry') {
+    if (bldg.indType === 'coal') return '#18181b';
+    if (bldg.indType === 'farm') return '#eab308';
+    if (bldg.indType === 'forest') return '#854d0e';
+    return '#ef4444';
+  }
+  return bldg.type === 'comm' ? '#38bdf8' : '#fbbf24';
 }
 
 function renderHighlights() {
@@ -1388,25 +2069,32 @@ function renderHighlights() {
   const th = TILE_H * GAME.cam.zoom;
   const size = 48 * GAME.cam.zoom;
 
-  // Road Drag Line Preview
-  if (GAME.mouse.isDown && GAME.activeTool === 'road' && GAME.mouse.dragStartTileX !== -1) {
+  // Road or Rail Drag Line Preview
+  if (GAME.mouse.isDown && (GAME.activeTool === 'road' || GAME.activeTool === 'rail') && GAME.mouse.dragStartTileX !== -1) {
     const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, tileX, tileY);
     line.forEach(({ x, y }) => {
       if (x >= 0 && x < GAME.mapW && y >= 0 && y < GAME.mapH) {
         const p = tileToScreen(x, y);
-        ctx.fillStyle = 'rgba(250, 204, 21, 0.45)';
-        if (isIso) drawIsoDiamond(ctx, p.x, p.y, tw, th);
-        else ctx.fillRect(p.x, p.y, size, size);
+        ctx.fillStyle = GAME.activeTool === 'road' ? 'rgba(250, 204, 21, 0.45)' : 'rgba(168, 85, 247, 0.45)';
+        ctx.strokeStyle = GAME.activeTool === 'road' ? '#facc15' : '#c084fc';
+        ctx.lineWidth = 2;
+        if (isIso) {
+          drawIsoDiamond(ctx, p.x, p.y, tw, th, true);
+        } else {
+          ctx.fillRect(p.x, p.y, size, size);
+          ctx.strokeRect(p.x, p.y, size, size);
+        }
       }
     });
-  } else if (tileX >= 0 && tileX < GAME.mapW && tileY >= 0 && tileY < GAME.mapH) {
+    return;
+  }
+
+  // Single tile hover cursor
+  if (tileX >= 0 && tileX < GAME.mapW && tileY >= 0 && tileY < GAME.mapH) {
     const p = tileToScreen(tileX, tileY);
     if (GAME.activeTool === 'demolish') {
       ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
       ctx.strokeStyle = '#ef4444';
-    } else if (GAME.activeTool === 'inspect') {
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
-      ctx.strokeStyle = '#38bdf8';
     } else {
       ctx.fillStyle = 'rgba(34, 197, 94, 0.35)';
       ctx.strokeStyle = '#22c55e';
@@ -1456,7 +2144,7 @@ function getLine(x0, y0, x1, y1) {
 }
 
 /* =========================================================================
-   AUTOMATION: DELIVERY CARGO VEHICLES & TRADE ROUTES
+   AUTOMATION: VEHICLE MOVEMENT, ROUTES & SUPPLY CHAIN SIMULATION
    ========================================================================= */
 
 function tickSimulation(dt) {
@@ -1475,56 +2163,118 @@ function tickSimulation(dt) {
     updateHUD();
   }
 
-  // Vehicles movement along roads
+  // Vehicles movement along road & rail networks
   for (let i = 0; i < GAME.vehicles.length; i++) {
     const v = GAME.vehicles[i];
-    v.progress += dt * 1.5 * spd;
+    const speedMult = (v.speed || 1.0) * (v.mode === 'train' ? 2.2 : 1.5);
+    v.progress += dt * speedMult * spd;
+
     if (v.progress >= 1.0) {
       v.progress = 0;
       v.pathIdx++;
       if (v.pathIdx >= v.path.length - 1) {
-        // Cargo delivered!
-        const revenue = Math.round(v.path.length * 16);
-        GAME.money += revenue;
-        showToast(`🚚 Delivery +$${revenue} to ${v.t2.name}!`);
-
-        // Reverse route
-        const tmp = v.t1;
-        v.t1 = v.t2;
-        v.t2 = tmp;
-        v.path.reverse();
-        v.pathIdx = 0;
-        updateHUD();
+        // Arrived at destination!
+        handleVehicleDelivery(v);
       }
     }
   }
 }
 
+function handleVehicleDelivery(v) {
+  const dest = v.t2;
+  let revenue = Math.round(v.path.length * (v.mode === 'train' ? 32 : 18));
+  if (v.cargo && v.cargo.payout) revenue += v.cargo.payout;
+
+  GAME.money += revenue;
+  GAME.stats.totalLifetimeRevenue += revenue;
+  GAME.stats.deliveriesCount++;
+  v.lifetimeEarnings = (v.lifetimeEarnings || 0) + revenue;
+
+  // Floating text on screen
+  const screenPos = tileToScreen(v.path[v.path.length - 1].x, v.path[v.path.length - 1].y);
+  spawnFloatingText(screenPos.x, screenPos.y, `+$${revenue}`, '#22c55e');
+
+  if (v.mode === 'train') {
+    GAME.audio.trainWhistle();
+    showToast(`🚂 Express Train delivered ${v.cargo.name} to ${dest.name}! +$${revenue}`);
+  } else {
+    GAME.audio.cash();
+    showToast(`🚚 ${v.cargo.name} delivered to ${dest.name}! +$${revenue}`);
+  }
+
+  // Reverse route for return journey
+  const tmp = v.t1;
+  v.t1 = v.t2;
+  v.t2 = tmp;
+  v.path.reverse();
+  v.pathIdx = 0;
+  updateHUD();
+}
+
 function monthTick() {
   let routeIncome = 0;
-  GAME.routes.forEach(r => routeIncome += r.path.length * 10);
+  GAME.routes.forEach(r => routeIncome += r.path.length * 12);
   GAME.money += routeIncome;
 
   // Connected towns grow in population
   GAME.towns.forEach(t => {
-    const isConn = GAME.routes.some(r => r.t1.id === t.id || r.t2.id === t.id);
+    const isConn = GAME.routes.some(r => (r.t1 && r.t1.id === t.id) || (r.t2 && r.t2.id === t.id));
     if (isConn) {
-      t.population += Math.floor(Math.random() * 9) + 4;
+      t.population += Math.floor(Math.random() * 12) + 6;
     }
+  });
+
+  // Industries generate local stockpiles
+  GAME.industries.forEach(ind => {
+    ind.stockpile = Math.min(100, (ind.stockpile || 0) + 5);
   });
 
   updateHUD();
 }
 
-function findPath(t1, t2) {
-  const q = [{ x: t1.x, y: t1.y, path: [{ x: t1.x, y: t1.y }] }];
+function spawnFloatingText(x, y, text, color = '#22c55e') {
+  GAME.floatingTexts.push({
+    x: x,
+    y: y,
+    text: text,
+    color: color,
+    life: 1.5,
+    maxLife: 1.5
+  });
+}
+
+function renderFloatingTexts(dt) {
+  for (let i = GAME.floatingTexts.length - 1; i >= 0; i--) {
+    const ft = GAME.floatingTexts[i];
+    ft.life -= dt;
+    ft.y -= dt * 28;
+    if (ft.life <= 0) {
+      GAME.floatingTexts.splice(i, 1);
+      continue;
+    }
+    const alpha = Math.min(1.0, ft.life / ft.maxLife);
+    ctx.save();
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = ft.color;
+    ctx.globalAlpha = alpha;
+    ctx.fillText(ft.text, ft.x - 14, ft.y);
+    ctx.restore();
+  }
+}
+
+/* =========================================================================
+   PATHFINDING (BFS FOR ROADS AND RAILS)
+   ========================================================================= */
+
+function findPath(p1, p2, networkType = 'road') {
+  const q = [{ x: p1.x, y: p1.y, path: [{ x: p1.x, y: p1.y }] }];
   const visited = new Set();
-  visited.add(`${t1.x},${t1.y}`);
+  visited.add(`${p1.x},${p1.y}`);
 
   while (q.length > 0) {
     const cur = q.shift();
-    if (Math.abs(cur.x - t2.x) + Math.abs(cur.y - t2.y) <= 1) {
-      cur.path.push({ x: t2.x, y: t2.y });
+    if (Math.abs(cur.x - p2.x) + Math.abs(cur.y - p2.y) <= 1) {
+      cur.path.push({ x: p2.x, y: p2.y });
       return cur.path;
     }
 
@@ -1540,7 +2290,10 @@ function findPath(t1, t2) {
         const key = `${d.x},${d.y}`;
         if (!visited.has(key)) {
           const tile = GAME.tiles[d.y][d.x];
-          if (tile.road || (d.x === t2.x && d.y === t2.y)) {
+          const hasTrack = networkType === 'road' ? (tile.road > 0) : (tile.rail > 0);
+          const isDest = (d.x === p2.x && d.y === p2.y);
+
+          if (hasTrack || isDest) {
             visited.add(key);
             q.push({ x: d.x, y: d.y, path: [...cur.path, { x: d.x, y: d.y }] });
           }
@@ -1553,38 +2306,111 @@ function findPath(t1, t2) {
 
 function checkRoutes() {
   const newRoutes = [];
+
+  // 1. Town-to-Town Road Routes
   for (let i = 0; i < GAME.towns.length; i++) {
     for (let j = i + 1; j < GAME.towns.length; j++) {
       const t1 = GAME.towns[i];
       const t2 = GAME.towns[j];
-      const path = findPath(t1, t2);
+      const path = findPath(t1, t2, 'road');
       if (path && path.length > 2) {
-        newRoutes.push({ t1, t2, path: [...path] });
+        newRoutes.push({
+          id: `road_${t1.id}_${t2.id}`,
+          mode: 'road',
+          t1, t2,
+          cargo: { name: 'Passengers & Mail', type: 'passengers', payout: 60 },
+          path: [...path]
+        });
+      }
+    }
+  }
+
+  // 2. Industry Supply Chain Routes (Road & Rail)
+  for (const ind of GAME.industries) {
+    // Check connections to towns
+    for (const town of GAME.towns) {
+      // Road route
+      const roadPath = findPath(ind, town, 'road');
+      if (roadPath && roadPath.length > 2) {
+        newRoutes.push({
+          id: `ind_road_${ind.id}_${town.id}`,
+          mode: 'road',
+          t1: ind, t2: town,
+          cargo: { name: ind.produces, type: ind.indType, payout: ind.payout },
+          path: [...roadPath]
+        });
+      }
+      // Rail route (if both have nearby station or tracks)
+      const railPath = findPath(ind, town, 'rail');
+      if (railPath && railPath.length > 2) {
+        newRoutes.push({
+          id: `ind_rail_${ind.id}_${town.id}`,
+          mode: 'train',
+          t1: ind, t2: town,
+          cargo: { name: `Freight: ${ind.produces}`, type: ind.indType, payout: ind.payout * 1.6 },
+          path: [...railPath]
+        });
+      }
+    }
+  }
+
+  // 3. Station-to-Station Passenger / Express Rail Routes
+  for (let i = 0; i < GAME.stations.length; i++) {
+    for (let j = i + 1; j < GAME.stations.length; j++) {
+      const s1 = GAME.stations[i];
+      const s2 = GAME.stations[j];
+      const path = findPath(s1, s2, 'rail');
+      if (path && path.length > 2) {
+        newRoutes.push({
+          id: `train_${s1.id}_${s2.id}`,
+          mode: 'train',
+          t1: s1, t2: s2,
+          cargo: { name: 'Express Passengers', type: 'express', payout: 180 },
+          path: [...path]
+        });
       }
     }
   }
 
   if (newRoutes.length > GAME.routes.length) {
     GAME.audio.fanfare();
-    showToast(`🎉 New Trade Route Established! Monthly subsidies active.`);
+    showToast(`🎉 New Trade & Cargo Route Established! Monthly subsidies active.`);
   }
 
   GAME.routes = newRoutes;
 
-  // Auto-spawn delivery vehicles
-  GAME.vehicles = [];
+  // Keep existing vehicles or spawn new ones for routes without vehicles
+  const updatedVehicles = [];
   GAME.routes.forEach(r => {
-    GAME.vehicles.push({
-      t1: r.t1,
-      t2: r.t2,
-      path: [...r.path],
-      pathIdx: 0,
-      progress: 0
-    });
+    const existing = GAME.vehicles.find(v => v.routeId === r.id);
+    if (existing) {
+      existing.path = [...r.path];
+      updatedVehicles.push(existing);
+    } else {
+      updatedVehicles.push({
+        id: Math.random().toString(36).substring(2, 8),
+        routeId: r.id,
+        mode: r.mode,
+        t1: r.t1,
+        t2: r.t2,
+        cargo: r.cargo,
+        path: [...r.path],
+        pathIdx: 0,
+        progress: 0,
+        speed: 1.0,
+        lifetimeEarnings: 0
+      });
+    }
   });
+  GAME.vehicles = updatedVehicles;
 
   updateHUD();
+  updateFleetModal();
 }
+
+/* =========================================================================
+   VEHICLE SPRITE RENDERING (VANS, CARGO TRUCKS & TRAINS)
+   ========================================================================= */
 
 function renderVehicles(now) {
   const isIso = GAME.viewMode === 'iso';
@@ -1602,23 +2428,21 @@ function renderVehicles(now) {
     if (isIso) {
       const pos = tileToScreen(ix, iy);
       const sx = pos.x;
-      const sy = pos.y + th * 0.45;
+      const sy = pos.y + th * 0.5;
 
-      ctx.fillStyle = '#f59e0b';
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(sx - 8 * GAME.cam.zoom, sy - 6 * GAME.cam.zoom, 16 * GAME.cam.zoom, 12 * GAME.cam.zoom, 3);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(sx - 4 * GAME.cam.zoom, sy - 5 * GAME.cam.zoom, 8 * GAME.cam.zoom, 4 * GAME.cam.zoom);
+      if (v.mode === 'train') {
+        // Multi-Car Locomotive & Freight Train
+        drawTrainSpriteIso(ctx, sx, sy, p1, p2, v);
+      } else {
+        // Delivery Van or Cargo Truck
+        drawTruckSpriteIso(ctx, sx, sy, p1, p2, v);
+      }
     } else {
+      // Orthographic 2D top-down vehicle
       const pos = tileToScreen(ix, iy);
-      ctx.fillStyle = '#f59e0b';
+      ctx.fillStyle = v.mode === 'train' ? '#10b981' : '#f59e0b';
       ctx.beginPath();
-      ctx.arc(pos.x + size * 0.5, pos.y + size * 0.5, 6 * GAME.cam.zoom, 0, Math.PI * 2);
+      ctx.arc(pos.x + size * 0.5, pos.y + size * 0.5, v.mode === 'train' ? 8 * GAME.cam.zoom : 6 * GAME.cam.zoom, 0, Math.PI * 2);
       ctx.fill();
       ctx.strokeStyle = '#000';
       ctx.stroke();
@@ -1626,23 +2450,124 @@ function renderVehicles(now) {
   });
 }
 
+function drawTruckSpriteIso(ctx, sx, sy, p1, p2, v) {
+  const z = GAME.cam.zoom;
+  const isCargo = v.cargo && v.cargo.type !== 'passengers';
+
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 3 * z, 10 * z, 5 * z, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Truck Body
+  ctx.fillStyle = isCargo ? '#d97706' : '#f59e0b';
+  ctx.strokeStyle = '#1e293b';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(-8 * z, -8 * z, 16 * z, 11 * z, 2 * z);
+  ctx.fill();
+  ctx.stroke();
+
+  // Windshield & Cargo cab
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillRect(-5 * z, -7 * z, 10 * z, 3 * z);
+
+  // Cargo crate / load
+  if (isCargo) {
+    ctx.fillStyle = v.cargo.type === 'coal' ? '#18181b' : (v.cargo.type === 'forest' ? '#78350f' : '#22c55e');
+    ctx.fillRect(-6 * z, -3 * z, 12 * z, 5 * z);
+  }
+
+  ctx.restore();
+}
+
+function drawTrainSpriteIso(ctx, sx, sy, p1, p2, v) {
+  const z = GAME.cam.zoom;
+  ctx.save();
+  ctx.translate(sx, sy);
+
+  // Train Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(0, 4 * z, 18 * z, 6 * z, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Locomotive Engine (Black / Forest Green)
+  ctx.fillStyle = '#0f172a';
+  ctx.strokeStyle = '#f59e0b';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(-14 * z, -9 * z, 16 * z, 11 * z, 3 * z);
+  ctx.fill();
+  ctx.stroke();
+
+  // Red Cowcatcher grill
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(2 * z, -7 * z, 4 * z, 8 * z);
+
+  // Golden Smokestack
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillRect(-2 * z, -13 * z, 3 * z, 5 * z);
+
+  // Animated Steam Puffs
+  ctx.fillStyle = 'rgba(241, 245, 249, 0.7)';
+  const puff = Math.sin(performance.now() * 0.01) * 2;
+  ctx.beginPath();
+  ctx.arc(-5 * z + puff, -16 * z, 3.5 * z, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tender / Passenger Car behind locomotive
+  ctx.fillStyle = '#1e3a8a';
+  ctx.beginPath();
+  ctx.roundRect(-26 * z, -8 * z, 10 * z, 9 * z, 2 * z);
+  ctx.fill();
+  ctx.strokeStyle = '#93c5fd';
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 /* =========================================================================
-   BUILD & DELETE ACTIONS
+   BUILD & DEMOLISH ACTIONS
    ========================================================================= */
 
 function buildRoad(x, y) {
   if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
   const tile = GAME.tiles[y][x];
 
+  // Water Tile -> Road Bridge
   if (tile.type === 'water') {
-    showToast("Cannot place streets over deep water!");
+    if (tile.road) return;
+    if (tile.building) {
+      showToast("Tile is occupied!");
+      return;
+    }
+    if (GAME.money < GAME.costs.roadBridge) {
+      showToast("Building a road bridge requires $80!");
+      return;
+    }
+    GAME.money -= GAME.costs.roadBridge;
+    tile.road = 15;
+    tile.bridge = 'road';
+    updateRoadNeighbors(x, y);
+    GAME.audio.buildRoad();
+    showToast("🌉 Road Bridge constructed across water!");
+    checkRoutes();
+    updateHUD();
+    renderMinimap();
     return;
   }
+
   if (tile.building) {
     showToast("Tile is occupied by a building!");
     return;
   }
   if (tile.road) return;
+  const isCrossing = tile.rail > 0;
 
   if (GAME.money < GAME.costs.road) {
     showToast("Insufficient treasury funds!");
@@ -1654,6 +2579,155 @@ function buildRoad(x, y) {
   tile.tree = false;
   updateRoadNeighbors(x, y);
   GAME.audio.buildRoad();
+  if (isCrossing) showToast("🚦 Railroad level crossing created!");
+  checkRoutes();
+  updateHUD();
+  renderMinimap();
+}
+
+function buildRail(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+
+  // Water Tile -> Rail Trestle Bridge
+  if (tile.type === 'water') {
+    if (tile.rail) return;
+    if (tile.building) {
+      showToast("Tile is occupied!");
+      return;
+    }
+    if (GAME.money < GAME.costs.railBridge) {
+      showToast("Building a railway trestle bridge requires $120!");
+      return;
+    }
+    GAME.money -= GAME.costs.railBridge;
+    tile.rail = 15;
+    tile.bridge = 'rail';
+    updateRailNeighbors(x, y);
+    GAME.audio.buildRail();
+    showToast("🌉 Railway Trestle Bridge constructed!");
+    checkRoutes();
+    updateHUD();
+    renderMinimap();
+    return;
+  }
+
+  if (tile.building) {
+    showToast("Tile is occupied by a building!");
+    return;
+  }
+  if (tile.rail) return;
+  const isCrossing = tile.road > 0;
+
+  if (GAME.money < GAME.costs.rail) {
+    showToast("Insufficient treasury funds for railroad tracks ($35)!");
+    return;
+  }
+
+  GAME.money -= GAME.costs.rail;
+  tile.rail = 15;
+  tile.tree = false;
+  updateRailNeighbors(x, y);
+  GAME.audio.buildRail();
+  if (isCrossing) showToast("🚦 Railroad level crossing created!");
+  checkRoutes();
+  updateHUD();
+  renderMinimap();
+}
+
+function buildStation(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+
+  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
+    showToast("Station requires clear, open ground!");
+    return;
+  }
+
+  if (GAME.money < GAME.costs.station) {
+    showToast("Constructing a Train Station requires $600!");
+    return;
+  }
+
+  // Find nearest town
+  let nearestTown = null;
+  let minD = Infinity;
+  GAME.towns.forEach(t => {
+    const d = Math.hypot(t.x - x, t.y - y);
+    if (d < minD) { minD = d; nearestTown = t; }
+  });
+
+  const stationId = GAME.stations.length + 1;
+  const stationName = nearestTown ? `${nearestTown.name} Central Station` : `Station ${stationId}`;
+
+  GAME.money -= GAME.costs.station;
+  tile.tree = false;
+  tile.building = {
+    type: 'station',
+    stationId: stationId,
+    name: stationName
+  };
+
+  const stationObj = {
+    id: stationId,
+    name: stationName,
+    x: x,
+    y: y
+  };
+  GAME.stations.push(stationObj);
+
+  GAME.audio.trainWhistle();
+  showToast(`🚉 ${stationName} opened! Lay rails to link stations.`);
+  updateRailNeighbors(x, y);
+  checkRoutes();
+  updateHUD();
+  renderMinimap();
+}
+
+function buildIndustry(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+
+  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
+    showToast("Industry requires clear ground!");
+    return;
+  }
+
+  if (GAME.money < GAME.costs.industry) {
+    showToast("Founding an Industrial Center costs $1,500!");
+    return;
+  }
+
+  const indDef = INDUSTRY_TYPES[GAME.industries.length % INDUSTRY_TYPES.length];
+  const indId = GAME.industries.length + 1;
+  const indName = `${TOWN_NAMES[indId % TOWN_NAMES.length]} ${indDef.name}`;
+
+  GAME.money -= GAME.costs.industry;
+  tile.tree = false;
+  tile.building = {
+    type: 'industry',
+    indType: indDef.type,
+    indId: indId,
+    name: indName
+  };
+
+  const indObj = {
+    id: indId,
+    name: indName,
+    indType: indDef.type,
+    produces: indDef.produces,
+    consumes: indDef.consumes,
+    payout: indDef.payout,
+    x: x,
+    y: y,
+    stockpile: 15
+  };
+  GAME.industries.push(indObj);
+
+  GAME.audio.fanfare();
+  showToast(`🏭 ${indName} established! Connect to towns or factories for profit.`);
+  updateRoadNeighbors(x, y);
+  updateRailNeighbors(x, y);
   checkRoutes();
   updateHUD();
   renderMinimap();
@@ -1669,14 +2743,30 @@ function demolish(x, y) {
       showToast("Cannot demolish a Town Hall!");
       return;
     }
+    if (tile.building.type === 'station') {
+      GAME.stations = GAME.stations.filter(s => s.x !== x || s.y !== y);
+    }
+    if (tile.building.type === 'industry') {
+      GAME.industries = GAME.industries.filter(ind => ind.x !== x || ind.y !== y);
+    }
     tile.building = null;
     touched = true;
   }
+
   if (tile.road) {
     tile.road = 0;
+    tile.bridge = null;
     updateRoadNeighbors(x, y);
     touched = true;
   }
+
+  if (tile.rail) {
+    tile.rail = 0;
+    tile.bridge = null;
+    updateRailNeighbors(x, y);
+    touched = true;
+  }
+
   if (tile.tree) {
     tile.tree = false;
     touched = true;
@@ -1695,7 +2785,7 @@ function buildTown(x, y) {
   if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
   const tile = GAME.tiles[y][x];
 
-  if (tile.type === 'water' || tile.building || tile.road) {
+  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
     showToast("Town center requires clear land!");
     return;
   }
@@ -1731,7 +2821,7 @@ function buildHouse(x, y) {
   if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
   const tile = GAME.tiles[y][x];
 
-  if (tile.type === 'water' || tile.building || tile.road) {
+  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
     showToast("Select open meadow near a road!");
     return;
   }
@@ -1771,7 +2861,7 @@ function buildHouse(x, y) {
 function plantTrees(x, y) {
   if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
   const tile = GAME.tiles[y][x];
-  if (tile.type !== 'grass' || tile.road || tile.building || tile.tree) return;
+  if (tile.type !== 'grass' || tile.road || tile.rail || tile.building || tile.tree) return;
 
   if (GAME.money < GAME.costs.trees) return;
   GAME.money -= GAME.costs.trees;
@@ -1782,7 +2872,7 @@ function plantTrees(x, y) {
 }
 
 /* =========================================================================
-   USER INPUT CONTROLS
+   USER INPUT CONTROLS & EVENT LISTENERS
    ========================================================================= */
 
 const vp = document.getElementById('viewport-area');
@@ -1798,17 +2888,24 @@ vp.addEventListener('mousedown', (e) => {
   GAME.mouse.dragStartY = my;
 
   const t = screenToTile(mx, my);
+  GAME.mouse.tileX = t.x;
+  GAME.mouse.tileY = t.y;
   GAME.mouse.dragStartTileX = t.x;
   GAME.mouse.dragStartTileY = t.y;
 
   if (e.button === 2 || e.button === 1 || GAME.activeTool === 'inspect') {
     GAME.mouse.isPanning = true;
     vp.classList.add('panning');
+    if (e.button === 0 && GAME.activeTool === 'inspect') {
+      inspectTileObject(t.x, t.y);
+    }
     return;
   }
 
   if (e.button === 0) {
     if (GAME.activeTool === 'town') buildTown(t.x, t.y);
+    else if (GAME.activeTool === 'station') buildStation(t.x, t.y);
+    else if (GAME.activeTool === 'industry') buildIndustry(t.x, t.y);
     else if (GAME.activeTool === 'building') buildHouse(t.x, t.y);
     else if (GAME.activeTool === 'trees') plantTrees(t.x, t.y);
     else if (GAME.activeTool === 'demolish') demolish(t.x, t.y);
@@ -1847,6 +2944,9 @@ vp.addEventListener('mouseup', (e) => {
     if (GAME.activeTool === 'road' && GAME.mouse.dragStartTileX !== -1) {
       const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, GAME.mouse.tileX, GAME.mouse.tileY);
       line.forEach(({ x, y }) => buildRoad(x, y));
+    } else if (GAME.activeTool === 'rail' && GAME.mouse.dragStartTileX !== -1) {
+      const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, GAME.mouse.tileX, GAME.mouse.tileY);
+      line.forEach(({ x, y }) => buildRail(x, y));
     }
   }
 
@@ -1881,148 +2981,60 @@ window.addEventListener('keydown', (e) => {
   if (e.key === 'd' || e.key === 'ArrowRight') GAME.cam.x -= speed;
   if (e.key === '1') selectTool('inspect');
   if (e.key === '2') selectTool('road');
-  if (e.key === '3') selectTool('town');
-  if (e.key === '4') selectTool('building');
-  if (e.key === '5') selectTool('trees');
-  if (e.key === '6') selectTool('demolish');
+  if (e.key === '3') selectTool('rail');
+  if (e.key === '4') selectTool('station');
+  if (e.key === '5') selectTool('town');
   renderMinimap();
 });
 
-vp.addEventListener('click', () => {
-  if (GAME.activeTool === 'inspect' && GAME.mouse.tileX >= 0 && GAME.mouse.tileY >= 0) {
-    const tile = GAME.tiles[GAME.mouse.tileY]?.[GAME.mouse.tileX];
-    if (tile && tile.building) {
-      const town = GAME.towns.find(t => t.id === tile.building.townId);
-      if (town) openTownDialog(town);
-    }
-  }
-});
-
-/* =========================================================================
-   UI HELPERS & HUD
-   ========================================================================= */
-
-function updateHUD() {
-  document.getElementById('txt-money').textContent = `$${GAME.money.toLocaleString()}`;
-  document.getElementById('txt-date').textContent = `Year ${GAME.date.year}, ${getMonth(GAME.date.month)}`;
-  document.getElementById('txt-towns').textContent = GAME.towns.length;
-
-  let totalPop = 0;
-  GAME.towns.forEach(t => totalPop += t.population);
-  document.getElementById('txt-pop').textContent = totalPop.toLocaleString();
-
-  document.getElementById('txt-routes').textContent = `${GAME.routes.length} Active`;
-
-  let inc = 0;
-  GAME.routes.forEach(r => inc += r.path.length * 10);
-  document.getElementById('txt-income').textContent = `+$${inc.toLocaleString()} / mo`;
-}
-
-function getMonth(m) {
-  const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return names[(m - 1) % 12];
-}
-
-function showToast(msg) {
-  const rack = document.getElementById('toast-rack');
-  const t = document.createElement('div');
-  t.className = 'toast-item';
-  t.textContent = msg;
-  rack.appendChild(t);
-  setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 3000);
-}
-
-function updateInspector(tx, ty) {
-  const nameEl = document.getElementById('tile-name');
-  const posEl = document.getElementById('tile-pos');
-  const descEl = document.getElementById('tile-desc');
-
-  if (tx < 0 || tx >= GAME.mapW || ty < 0 || ty >= GAME.mapH) {
-    nameEl.textContent = 'Beyond Boundary';
-    posEl.textContent = `Grid (${tx}, ${ty})`;
-    descEl.textContent = 'Uncharted wilderness.';
-    return;
-  }
-
-  const tile = GAME.tiles[ty][tx];
-  posEl.textContent = `Grid (${tx}, ${ty})`;
-
-  if (tile.building) {
-    nameEl.textContent = tile.building.type === 'hall' ? `🏛️ ${tile.building.name} (Town Hall)` : `🏠 House (${tile.building.name})`;
-    const town = GAME.towns.find(t => t.id === tile.building.townId);
-    descEl.textContent = town ? `Town Pop: ${town.population.toLocaleString()} | Click to inspect.` : 'Urban building.';
-  } else if (tile.road) {
-    nameEl.textContent = '🛣️ Paved Street';
-    descEl.textContent = `Mask: ${tile.road} | Street transit route.`;
-  } else if (tile.tree) {
-    nameEl.textContent = '🌲 Forest Timber';
-    descEl.textContent = 'Can be cleared with bulldozer.';
-  } else if (tile.type === 'water') {
-    nameEl.textContent = '🌊 Basin Water';
-    descEl.textContent = 'Deep water body.';
-  } else {
-    nameEl.textContent = '🌱 Open Meadow';
-    descEl.textContent = 'Clear land ready for streets or expansion.';
-  }
-}
-
-function openTownDialog(town) {
-  const card = document.getElementById('town-card');
-  document.getElementById('town-title').textContent = town.name;
-  document.getElementById('town-pop').textContent = town.population.toLocaleString();
-  document.getElementById('town-bldgs').textContent = town.buildings;
-
-  const isConn = GAME.routes.some(r => r.t1.id === town.id || r.t2.id === town.id);
-  const netEl = document.getElementById('town-net');
-  if (isConn) {
-    netEl.textContent = 'Connected (Trading Goods & Passengers)';
-    netEl.style.color = '#4ade80';
-  } else {
-    netEl.textContent = 'Isolated (Lay streets to connect!)';
-    netEl.style.color = '#f87171';
-  }
-  card.style.display = 'block';
-}
-
-document.getElementById('btn-close-town').addEventListener('click', () => {
-  document.getElementById('town-card').style.display = 'none';
-});
-
-function selectTool(name) {
-  GAME.activeTool = name;
-  document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-tool') === name);
-  });
-
-  vp.className = '';
-  if (name === 'road') vp.classList.add('building-road');
-  if (name === 'demolish') vp.classList.add('demolishing');
-}
-
+// Toolbar tool selection
 document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(btn => {
-  btn.addEventListener('click', () => selectTool(btn.getAttribute('data-tool')));
-});
-
-document.getElementById('btn-projection-toggle').addEventListener('click', () => {
-  GAME.viewMode = GAME.viewMode === 'iso' ? 'ortho' : 'iso';
-  document.getElementById('btn-projection-toggle').textContent = GAME.viewMode === 'iso' ? '📐 View: Isometric' : '📐 View: Top-Down';
-  centerCameraOn(Math.floor(GAME.mapW / 2), Math.floor(GAME.mapH / 2));
-  renderMinimap();
-});
-
-const speeds = [
-  { id: 'spd-pause', s: 0 },
-  { id: 'spd-1x', s: 1 },
-  { id: 'spd-2x', s: 2 },
-  { id: 'spd-5x', s: 5 }
-];
-speeds.forEach(item => {
-  document.getElementById(item.id).addEventListener('click', () => {
-    GAME.simSpeed = item.s;
-    speeds.forEach(o => document.getElementById(o.id).classList.toggle('active', o.id === item.id));
+  btn.addEventListener('click', () => {
+    GAME.audio.ensure();
+    GAME.audio.click();
+    selectTool(btn.getAttribute('data-tool'));
   });
 });
 
+function selectTool(tool) {
+  GAME.activeTool = tool;
+  document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(b => b.classList.remove('active'));
+  const target = document.querySelector(`#toolbar .t-btn[data-tool="${tool}"]`);
+  if (target) target.classList.add('active');
+
+  vp.classList.remove('building-road', 'demolishing');
+  if (tool === 'road' || tool === 'rail') vp.classList.add('building-road');
+  if (tool === 'demolish') vp.classList.add('demolishing');
+}
+
+// Projection toggle
+document.getElementById('btn-projection-toggle').addEventListener('click', () => {
+  GAME.audio.ensure();
+  GAME.audio.click();
+  GAME.viewMode = GAME.viewMode === 'iso' ? 'ortho' : 'iso';
+  document.getElementById('btn-projection-toggle').textContent = GAME.viewMode === 'iso' ? '📐 View: Isometric' : '📐 View: Top-Down (2D)';
+  if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
+  renderMinimap();
+});
+
+// Speed buttons
+const spdButtons = [
+  { id: 'spd-pause', spd: 0 },
+  { id: 'spd-1x', spd: 1 },
+  { id: 'spd-2x', spd: 2 },
+  { id: 'spd-5x', spd: 5 }
+];
+spdButtons.forEach(({ id, spd }) => {
+  document.getElementById(id).addEventListener('click', () => {
+    GAME.audio.ensure();
+    GAME.audio.click();
+    GAME.simSpeed = spd;
+    spdButtons.forEach(b => document.getElementById(b.id).classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  });
+});
+
+// Zoom and center buttons
 document.getElementById('btn-zoom-add').addEventListener('click', () => {
   GAME.cam.zoom = Math.min(2.5, GAME.cam.zoom * 1.25);
   renderMinimap();
@@ -2033,25 +3045,372 @@ document.getElementById('btn-zoom-sub').addEventListener('click', () => {
 });
 document.getElementById('btn-center-capital').addEventListener('click', () => {
   if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
-  else centerCameraOn(Math.floor(GAME.mapW / 2), Math.floor(GAME.mapH / 2));
   renderMinimap();
 });
 
+// Audio toggle
 document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+  GAME.audio.ensure();
   GAME.audio.enabled = !GAME.audio.enabled;
   document.getElementById('btn-audio-toggle').textContent = GAME.audio.enabled ? '🔊 Audio: ON' : '🔇 Audio: OFF';
 });
 
 /* =========================================================================
-   MINIMAP
+   UI HELPERS, HUD & ENTITY INSPECTION
+   ========================================================================= */
+
+function updateHUD() {
+  document.getElementById('txt-money').textContent = `$${GAME.money.toLocaleString()}`;
+  document.getElementById('txt-date').textContent = `Year ${GAME.date.year}, ${getMonth(GAME.date.month)}`;
+  document.getElementById('txt-towns').textContent = GAME.towns.length;
+  document.getElementById('txt-industries').textContent = GAME.industries.length;
+
+  let totalPop = 0;
+  GAME.towns.forEach(t => totalPop += t.population);
+  document.getElementById('txt-pop').textContent = totalPop.toLocaleString();
+
+  document.getElementById('txt-routes').textContent = `${GAME.routes.length} Active`;
+  document.getElementById('txt-fleet').textContent = GAME.vehicles.length;
+
+  let netEst = 0;
+  GAME.routes.forEach(r => netEst += r.path.length * (r.mode === 'train' ? 18 : 10));
+  document.getElementById('txt-income').textContent = `+$${netEst.toLocaleString()} / mo`;
+}
+
+function getMonth(m) {
+  const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return names[m - 1] || 'Jan';
+}
+
+function updateInspector(tx, ty) {
+  const card = document.getElementById('inspector-card');
+  const tName = document.getElementById('tile-name');
+  const tPos = document.getElementById('tile-pos');
+  const tDesc = document.getElementById('tile-desc');
+
+  if (tx < 0 || tx >= GAME.mapW || ty < 0 || ty >= GAME.mapH) {
+    tName.textContent = "Outside Frontier";
+    tPos.textContent = "Uncharted";
+    tDesc.textContent = "Scroll or pan back onto the map grid.";
+    return;
+  }
+
+  const tile = GAME.tiles[ty][tx];
+  tPos.textContent = `Grid (${tx}, ${ty})`;
+
+  if (tile.building) {
+    if (tile.building.type === 'hall') {
+      tName.textContent = `🏛️ ${tile.building.name} (Town Hall)`;
+      tDesc.textContent = "Center of municipal commerce and growth.";
+    } else if (tile.building.type === 'station') {
+      tName.textContent = `🚉 ${tile.building.name}`;
+      tDesc.textContent = "Train station platform connecting passenger and freight rail.";
+    } else if (tile.building.type === 'industry') {
+      tName.textContent = `🏭 ${tile.building.name}`;
+      const ind = GAME.industries.find(i => i.id === tile.building.indId);
+      tDesc.textContent = ind ? `Produces ${ind.produces}. Stockpile: ${ind.stockpile || 0} crates.` : "Industrial production facility.";
+    } else {
+      tName.textContent = `🏠 Residential Structure`;
+      tDesc.textContent = `Attached to the municipality of ${tile.building.name}.`;
+    }
+  } else if (tile.road && tile.rail) {
+    tName.textContent = "🚦 Railroad Level Crossing";
+    tDesc.textContent = "Allows both road vehicles and trains to cross safely.";
+  } else if (tile.road) {
+    tName.textContent = tile.bridge === 'road' ? "🌉 Road Bridge" : "🛣️ Paved Street";
+    tDesc.textContent = "Allows automated delivery vans and cargo trucks to travel.";
+  } else if (tile.rail) {
+    tName.textContent = tile.bridge === 'rail' ? "🌉 Railway Trestle Bridge" : "🛤️ Railroad Track";
+    tDesc.textContent = "Heavy steel railway supporting high-speed express trains.";
+  } else if (tile.tree) {
+    tName.textContent = "🌲 Natural Forest";
+    tDesc.textContent = "Dense pine canopy. Clear with bulldozer to build.";
+  } else if (tile.type === 'water') {
+    tName.textContent = "🌊 Deep Water Lake";
+    tDesc.textContent = "Lay streets or rails across water to automatically construct bridges!";
+  } else {
+    tName.textContent = "🌱 Open Meadow";
+    tDesc.textContent = "Clear land ready for streets, rails, or town expansion.";
+  }
+}
+
+function inspectTileObject(tx, ty) {
+  if (tx < 0 || tx >= GAME.mapW || ty < 0 || ty >= GAME.mapH) return;
+  const tile = GAME.tiles[ty][tx];
+  if (!tile.building) return;
+
+  const card = document.getElementById('entity-modal-card');
+  const title = document.getElementById('entity-title');
+  const line1 = document.getElementById('entity-line-1');
+  const line2 = document.getElementById('entity-line-2');
+  const line3 = document.getElementById('entity-line-3');
+  const tip = document.getElementById('entity-tip');
+
+  if (tile.building.type === 'hall') {
+    const town = GAME.towns.find(t => t.id === tile.building.townId);
+    if (!town) return;
+    title.textContent = `🏛️ ${town.name}`;
+    line1.innerHTML = `Population: <b>${town.population.toLocaleString()}</b>`;
+    line2.innerHTML = `Municipal Structures: <b>${town.buildings}</b>`;
+    const isConn = GAME.routes.some(r => (r.t1 && r.t1.id === town.id) || (r.t2 && r.t2.id === town.id));
+    line3.innerHTML = `Network Status: <b style="color:${isConn ? '#4ade80' : '#f87171'};">${isConn ? 'Connected to Trade Network' : 'Isolated - Lay Roads or Rails'}</b>`;
+    tip.textContent = "💡 Connected towns grow faster and generate continuous monthly subsidies.";
+    card.style.display = 'block';
+  } else if (tile.building.type === 'industry') {
+    const ind = GAME.industries.find(i => i.id === tile.building.indId);
+    if (!ind) return;
+    title.textContent = `${tile.building.name}`;
+    line1.innerHTML = `Produces: <b>${ind.produces}</b> (Payout: <b>+$${ind.payout}</b>/delivery)`;
+    line2.innerHTML = `Warehouse Stockpile: <b>${ind.stockpile || 0} crates</b>`;
+    const isConn = GAME.routes.some(r => r.t1 && r.t1.id === ind.id);
+    line3.innerHTML = `Logistics Status: <b style="color:${isConn ? '#4ade80' : '#f87171'};">${isConn ? 'Active Freight Line' : 'Unconnected - Build Road or Rail to Towns/Factories'}</b>`;
+    tip.textContent = "💡 Run transport lines from primary producers (Mines, Farms, Forests) to Factories and Towns for top profits!";
+    card.style.display = 'block';
+  } else if (tile.building.type === 'station') {
+    const st = GAME.stations.find(s => s.id === tile.building.stationId);
+    if (!st) return;
+    title.textContent = `🚉 ${st.name}`;
+    line1.innerHTML = `Platform Type: <b>Dual-Track Passenger & Freight Station</b>`;
+    line2.innerHTML = `Coordinates: <b>(${st.x}, ${st.y})</b>`;
+    const isConn = GAME.routes.some(r => (r.t1 && r.t1.id === st.id) || (r.t2 && r.t2.id === st.id));
+    line3.innerHTML = `Rail Line: <b style="color:${isConn ? '#4ade80' : '#f87171'};">${isConn ? 'Active Express Train Service' : 'Waiting for track connection to another station'}</b>`;
+    tip.textContent = "💡 Trains carry heavier cargo at twice the speed of road vans!";
+    card.style.display = 'block';
+  }
+}
+
+document.getElementById('btn-close-entity').addEventListener('click', () => {
+  document.getElementById('entity-modal-card').style.display = 'none';
+});
+
+function showToast(msg) {
+  const rack = document.getElementById('toast-rack');
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.textContent = msg;
+  rack.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 3000);
+}
+
+/* =========================================================================
+   FLEET & LOGISTICS MANAGER MODAL
+   ========================================================================= */
+
+const fleetModal = document.getElementById('modal-fleet');
+document.getElementById('btn-fleet').addEventListener('click', () => {
+  GAME.audio.ensure();
+  GAME.audio.click();
+  updateFleetModal();
+  fleetModal.style.display = 'flex';
+});
+
+document.getElementById('btn-close-fleet').addEventListener('click', () => {
+  fleetModal.style.display = 'none';
+});
+
+function updateFleetModal() {
+  document.getElementById('flt-total-veh').textContent = GAME.vehicles.length;
+  document.getElementById('flt-total-routes').textContent = GAME.routes.length;
+  document.getElementById('flt-total-earnings').textContent = `$${(GAME.stats.totalLifetimeRevenue || 0).toLocaleString()}`;
+
+  const tbody = document.getElementById('fleet-table-body');
+  if (GAME.vehicles.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No active vehicles. Connect towns or industries with roads or rails to launch vehicles!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  GAME.vehicles.forEach(v => {
+    const tr = document.createElement('tr');
+    const badgeClass = v.mode === 'train' ? 'badge-train' : (v.cargo.type === 'passengers' ? 'badge-van' : 'badge-truck');
+    const typeLabel = v.mode === 'train' ? 'Express Train' : (v.cargo.type === 'passengers' ? 'Delivery Van' : 'Cargo Truck');
+
+    tr.innerHTML = `
+      <td><span class="badge-tag ${badgeClass}">${typeLabel}</span></td>
+      <td><b>${v.t1.name}</b> ↔ <b>${v.t2.name}</b></td>
+      <td>${v.cargo.name}</td>
+      <td>${Math.round(v.speed * 100)}%</td>
+      <td style="color:#22c55e; font-family:monospace; font-weight:700;">+$${(v.lifetimeEarnings || 0).toLocaleString()}</td>
+      <td><button class="t-btn" onclick="locateVehicle('${v.id}')" style="padding:3px 8px; font-size:11px;">🎯 Locate</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.locateVehicle = function(vehId) {
+  const v = GAME.vehicles.find(item => item.id === vehId);
+  if (!v || !v.path || v.path.length === 0) return;
+  const curPos = v.path[v.pathIdx] || v.path[0];
+  centerCameraOn(curPos.x, curPos.y);
+  fleetModal.style.display = 'none';
+  showToast(`Locating ${v.mode === 'train' ? 'Train' : 'Vehicle'} on route to ${v.t2.name}...`);
+  renderMinimap();
+};
+
+document.getElementById('btn-fleet-upgrade-all').addEventListener('click', () => {
+  if (GAME.money < 500) {
+    showToast("Fleet-wide engine upgrades cost $500!");
+    return;
+  }
+  GAME.money -= 500;
+  GAME.vehicles.forEach(v => v.speed = (v.speed || 1.0) * 1.25);
+  GAME.audio.fanfare();
+  showToast("⚡ All vehicle engines upgraded (+25% speed)!");
+  updateHUD();
+  updateFleetModal();
+});
+
+/* =========================================================================
+   PERSISTENCE: SAVE / LOAD / EXPORT / IMPORT
+   ========================================================================= */
+
+document.getElementById('btn-save-game').addEventListener('click', () => {
+  saveGame();
+});
+
+document.getElementById('btn-load-game').addEventListener('click', () => {
+  loadGame();
+});
+
+document.getElementById('btn-export-game').addEventListener('click', () => {
+  GAME.audio.ensure();
+  GAME.audio.click();
+  const saveData = {
+    version: 2,
+    date: GAME.date,
+    money: GAME.money,
+    mapW: GAME.mapW,
+    mapH: GAME.mapH,
+    tiles: GAME.tiles,
+    towns: GAME.towns,
+    industries: GAME.industries,
+    stations: GAME.stations,
+    costs: GAME.costs,
+    stats: GAME.stats
+  };
+  const blob = new Blob([JSON.stringify(saveData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `transport_tycoon_${GAME.date.year}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("⬇️ Game save exported to JSON file!");
+});
+
+const fileImport = document.getElementById('file-import-save');
+document.getElementById('btn-import-game').addEventListener('click', () => {
+  GAME.audio.ensure();
+  GAME.audio.click();
+  fileImport.click();
+});
+
+fileImport.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      GAME.date = data.date;
+      GAME.money = data.money;
+      GAME.mapW = data.mapW;
+      GAME.mapH = data.mapH;
+      GAME.tiles = data.tiles;
+      GAME.towns = data.towns || [];
+      GAME.industries = data.industries || [];
+      GAME.stations = data.stations || [];
+      GAME.stats = data.stats || { totalLifetimeRevenue: 0, deliveriesCount: 0 };
+      recalculateAllRoads();
+      recalculateAllRails();
+      checkRoutes();
+      if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
+      updateHUD();
+      renderMinimap();
+      GAME.audio.fanfare();
+      showToast("⬆️ Save file imported and loaded successfully!");
+    } catch (err) {
+      showToast("Failed to parse imported JSON file.");
+    }
+  };
+  reader.readAsText(file);
+});
+
+function saveGame(isSilent = false) {
+  try {
+    const saveData = {
+      version: 2,
+      date: GAME.date,
+      money: GAME.money,
+      mapW: GAME.mapW,
+      mapH: GAME.mapH,
+      tiles: GAME.tiles,
+      towns: GAME.towns,
+      industries: GAME.industries,
+      stations: GAME.stations,
+      costs: GAME.costs,
+      stats: GAME.stats
+    };
+    localStorage.setItem('tt_automation_save', JSON.stringify(saveData));
+    if (!isSilent) {
+      GAME.audio.click();
+      showToast("💾 Game saved successfully to browser storage!");
+    }
+  } catch (e) {
+    console.error("Save error:", e);
+    if (!isSilent) showToast("Save failed: storage quota exceeded or unavailable.");
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('tt_automation_save');
+    if (!raw) {
+      showToast("No saved game found in browser storage!");
+      return;
+    }
+    const data = JSON.parse(raw);
+    GAME.date = data.date;
+    GAME.money = data.money;
+    GAME.mapW = data.mapW;
+    GAME.mapH = data.mapH;
+    GAME.tiles = data.tiles;
+    GAME.towns = data.towns || [];
+    GAME.industries = data.industries || [];
+    GAME.stations = data.stations || [];
+    GAME.stats = data.stats || { totalLifetimeRevenue: 0, deliveriesCount: 0 };
+
+    recalculateAllRoads();
+    recalculateAllRails();
+    checkRoutes();
+
+    if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
+    updateHUD();
+    renderMinimap();
+
+    GAME.audio.fanfare();
+    showToast("📂 Saved game loaded successfully!");
+  } catch (e) {
+    console.error("Load error:", e);
+    showToast("Failed to load saved game file.");
+  }
+}
+
+// Periodic auto-save every 45 seconds
+setInterval(() => {
+  if (GAME.tiles.length > 0) saveGame(true);
+}, 45000);
+
+/* =========================================================================
+   MINIMAP RADAR
    ========================================================================= */
 
 function renderMinimap() {
+  minimapCtx.fillStyle = '#060e12';
+  minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+
   const mw = minimapCanvas.width;
   const mh = minimapCanvas.height;
-  minimapCtx.fillStyle = '#060e12';
-  minimapCtx.fillRect(0, 0, mw, mh);
-
   const sx = mw / GAME.mapW;
   const sy = mh / GAME.mapH;
 
@@ -2059,101 +3418,125 @@ function renderMinimap() {
     for (let x = 0; x < GAME.mapW; x++) {
       const tile = GAME.tiles[y][x];
       if (tile.type === 'water') minimapCtx.fillStyle = '#0284c7';
-      else if (tile.road) minimapCtx.fillStyle = '#facc15';
-      else if (tile.building) minimapCtx.fillStyle = '#f43f5e';
-      else if (tile.tree) minimapCtx.fillStyle = '#15803d';
-      else minimapCtx.fillStyle = '#3f7831';
+      else if (tile.tree) minimapCtx.fillStyle = '#166534';
+      else minimapCtx.fillStyle = '#3f6212';
+      minimapCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
 
-      minimapCtx.fillRect(x * sx, y * sy, Math.max(1, sx), Math.max(1, sy));
+      if (tile.road) {
+        minimapCtx.fillStyle = '#eab308';
+        minimapCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
+      }
+      if (tile.rail) {
+        minimapCtx.fillStyle = '#a855f7';
+        minimapCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
+      }
+      if (tile.building) {
+        minimapCtx.fillStyle = tile.building.type === 'hall' ? '#ef4444' : (tile.building.type === 'station' ? '#38bdf8' : '#f97316');
+        minimapCtx.fillRect(x * sx - 1, y * sy - 1, Math.ceil(sx) + 2, Math.ceil(sy) + 2);
+      }
     }
   }
 
-  GAME.towns.forEach(t => {
-    minimapCtx.fillStyle = '#ffffff';
-    minimapCtx.fillRect(t.x * sx - 2, t.y * sy - 2, 5, 5);
-  });
-
-  const c1 = screenToTile(0, 0);
-  const c2 = screenToTile(canvas.width, canvas.height);
+  // Camera viewport box on radar
+  const isIso = GAME.viewMode === 'iso';
+  const centerTile = screenToTile(canvas.width / 2, canvas.height / 2);
+  const viewSpan = Math.max(4, Math.floor(18 / GAME.cam.zoom));
   minimapCtx.strokeStyle = '#ffffff';
   minimapCtx.lineWidth = 1.5;
-  minimapCtx.strokeRect(c1.x * sx, c1.y * sy, (c2.x - c1.x) * sx, (c2.y - c1.y) * sy);
-
-  document.getElementById('lbl-radar-dim').textContent = `${GAME.mapW}x${GAME.mapH}`;
+  minimapCtx.strokeRect(
+    (centerTile.x - viewSpan / 2) * sx,
+    (centerTile.y - viewSpan / 2) * sy,
+    viewSpan * sx,
+    viewSpan * sy
+  );
 }
 
-minimapCanvas.addEventListener('mousedown', (e) => {
+minimapCanvas.addEventListener('click', (e) => {
   const rect = minimapCanvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
-  const tx = Math.floor((mx / minimapCanvas.width) * GAME.mapW);
-  const ty = Math.floor((my / minimapCanvas.height) * GAME.mapH);
-  centerCameraOn(tx, ty);
+  const targetX = Math.floor((mx / minimapCanvas.width) * GAME.mapW);
+  const targetY = Math.floor((my / minimapCanvas.height) * GAME.mapH);
+  centerCameraOn(targetX, targetY);
   renderMinimap();
 });
 
 /* =========================================================================
-   STARTUP & PRESET DIALOG (TINY, MEDIUM, LARGE, EXTRA LARGE, WORLD, CUSTOM)
+   STARTUP & MAP GENERATOR PRESET DIALOG
    ========================================================================= */
 
-const PRESETS = {
-  tiny: { w: 20, h: 20, towns: 2, water: 15, trees: 12 },
-  medium: { w: 40, h: 40, towns: 5, water: 20, trees: 15 },
-  large: { w: 70, h: 70, towns: 10, water: 25, trees: 18 },
-  xlarge: { w: 110, h: 110, towns: 18, water: 25, trees: 20 },
-  world: { w: 160, h: 160, towns: 28, water: 30, trees: 22 }
-};
+const mapModal = document.getElementById('modal-map-gen');
+const customBox = document.getElementById('custom-box');
+let selectedPreset = 'medium';
 
-let activePreset = 'medium';
+document.getElementById('btn-open-map-dialog').addEventListener('click', () => {
+  GAME.audio.ensure();
+  GAME.audio.click();
+  mapModal.style.display = 'flex';
+});
+
+document.getElementById('btn-close-map-dialog').addEventListener('click', () => {
+  if (GAME.tiles.length > 0) mapModal.style.display = 'none';
+});
 
 document.querySelectorAll('.preset-tile').forEach(tile => {
   tile.addEventListener('click', () => {
+    GAME.audio.ensure();
+    GAME.audio.click();
     document.querySelectorAll('.preset-tile').forEach(t => t.classList.remove('selected'));
     tile.classList.add('selected');
-    activePreset = tile.getAttribute('data-size');
-
-    const customBox = document.getElementById('custom-box');
-    customBox.style.display = activePreset === 'custom' ? 'block' : 'none';
+    selectedPreset = tile.getAttribute('data-size');
+    customBox.style.display = selectedPreset === 'custom' ? 'block' : 'none';
   });
 });
 
-['w', 'h', 'towns', 'water', 'trees'].forEach(k => {
-  const sl = document.getElementById(`sl-${k}`);
-  const val = document.getElementById(`val-sl-${k}`);
-  sl.addEventListener('input', () => {
-    val.textContent = (k === 'water' || k === 'trees') ? `${sl.value}%` : sl.value;
+['sl-w', 'sl-h', 'sl-towns', 'sl-water', 'sl-trees'].forEach(id => {
+  const el = document.getElementById(id);
+  const valEl = document.getElementById(`val-${id}`);
+  el.addEventListener('input', () => {
+    valEl.textContent = id === 'sl-water' || id === 'sl-trees' ? `${el.value}%` : el.value;
   });
-});
-
-document.getElementById('btn-open-map-dialog').addEventListener('click', () => {
-  document.getElementById('modal-map-gen').style.display = 'flex';
 });
 
 document.getElementById('btn-confirm-gen').addEventListener('click', () => {
   GAME.audio.ensure();
-  let conf;
-  if (activePreset === 'custom') {
-    conf = {
-      w: parseInt(document.getElementById('sl-w').value),
-      h: parseInt(document.getElementById('sl-h').value),
-      towns: parseInt(document.getElementById('sl-towns').value),
-      water: parseInt(document.getElementById('sl-water').value),
-      trees: parseInt(document.getElementById('sl-trees').value)
-    };
-  } else {
-    conf = PRESETS[activePreset];
+  GAME.audio.click();
+  let w = 40, h = 40, towns = 5, water = 20, trees = 15;
+
+  if (selectedPreset === 'tiny') { w = 20; h = 20; towns = 2; water = 15; trees = 10; }
+  else if (selectedPreset === 'medium') { w = 40; h = 40; towns = 5; water = 20; trees = 15; }
+  else if (selectedPreset === 'large') { w = 70; h = 70; towns = 10; water = 25; trees = 18; }
+  else if (selectedPreset === 'xlarge') { w = 110; h = 110; towns = 18; water = 28; trees = 20; }
+  else if (selectedPreset === 'world') { w = 160; h = 160; towns = 28; water = 30; trees = 22; }
+  else if (selectedPreset === 'custom') {
+    w = parseInt(document.getElementById('sl-w').value);
+    h = parseInt(document.getElementById('sl-h').value);
+    towns = parseInt(document.getElementById('sl-towns').value);
+    water = parseInt(document.getElementById('sl-water').value);
+    trees = parseInt(document.getElementById('sl-trees').value);
   }
 
-  generateMap(conf.w, conf.h, conf.towns, conf.water, conf.trees);
-  document.getElementById('modal-map-gen').style.display = 'none';
-  showToast(`🗺️ Generated ${conf.w}x${conf.h} map with ${GAME.towns.length} towns!`);
+  document.getElementById('lbl-radar-dim').textContent = `${w}x${h}`;
+  mapModal.style.display = 'none';
+
+  generateMap(w, h, towns, water, trees);
+  showToast(`🗺️ New ${w}x${h} territory generated! Build roads, rails, and supply chains.`);
 });
 
 // Initial boot
-fitCanvas();
-generateMap(40, 40, 5, 20, 15);
-requestAnimationFrame(gameLoop);
-
+window.addEventListener('DOMContentLoaded', () => {
+  fitCanvas();
+  // Auto-check for existing save game
+  if (localStorage.getItem('tt_automation_save')) {
+    loadGame();
+    mapModal.style.display = 'none';
+  } else {
+    // Generate default medium map
+    generateMap(40, 40, 5, 20, 15);
+    mapModal.style.display = 'none';
+  }
+  requestAnimationFrame(gameLoop);
+});
 </script>
 </body>
 </html>
