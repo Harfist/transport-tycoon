@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transport Tycoon: Automation</title>
+<style>
+  :root {
+    --bg-dark: #0f1c24;
+    --panel-main: #244657;
+    --panel-header: #346077;
+    --panel-border: #4d88a7;
+    --panel-shadow: #0b151c;
+    --accent-yellow: #f59e0b;
+    --accent-gold: #fbbf24;
+    --accent-green: #22c55e;
+    --accent-blue: #38bdf8;
+    --accent-red: #ef4444;
+    --text-white: #ffffff;
+    --text-dim: #b6d4e3;
+    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-dark);
+    font-family: var(--font-stack);
+    color: var(--text-white);
+  }
+
+  #game-app {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* TOP HEADER / STATS BAR (Classic Tycoon Style) */
+  #top-bar {
+    height: 50px;
+    background: linear-gradient(180deg, #386780 0%, #204153 100%);
+    border-bottom: 2px solid var(--panel-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    z-index: 50;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 0.5px;
+    color: var(--accent-gold);
+    text-shadow: 1px 1px 2px #000;
+  }
+
+  .stats-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .stat-pill {
+    background: rgba(11, 23, 30, 0.85);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6);
+  }
+
+  .stat-label {
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .stat-val {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--accent-green);
+  }
+  .stat-val.gold { color: var(--accent-gold); }
+  .stat-val.blue { color: var(--accent-blue); }
+
+  /* TOOLBAR */
+  #toolbar {
+    height: 54px;
+    background: linear-gradient(180deg, #2b5268 0%, #1a3543 100%);
+    border-bottom: 2px solid var(--panel-shadow);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    z-index: 45;
+  }
+
+  .tool-cluster {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(10, 20, 26, 0.4);
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .t-btn {
+    background: linear-gradient(180deg, #447791 0%, #285065 100%);
+    border: 1px solid var(--panel-border);
+    border-bottom-color: var(--panel-shadow);
+    border-right-color: var(--panel-shadow);
+    color: #ffffff;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.1s ease;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .t-btn:hover {
+    background: linear-gradient(180deg, #538ea9 0%, #34637b 100%);
+    border-color: #8ac0db;
+  }
+
+  .t-btn:active {
+    transform: translateY(1px);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.6);
+  }
+
+  .t-btn.active {
+    background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+    border-color: #fde68a;
+    box-shadow: inset 1px 1px 4px rgba(0,0,0,0.7);
+  }
+
+  .t-btn.danger.active {
+    background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
+    border-color: #fca5a5;
+  }
+
+  .badge-cost {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.4);
+    color: var(--accent-gold);
+    font-weight: 700;
+  }
+
+  /* VIEWPORT CANVAS */
+  #viewport-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-color: #0b151b;
+    cursor: grab;
+  }
+
+  #viewport-area.panning {
+    cursor: grabbing;
+  }
+  #viewport-area.building-road {
+    cursor: crosshair;
+  }
+  #viewport-area.demolishing {
+    cursor: cell;
+  }
+
+  #canvas-world {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* FLOATING PANELS */
+  .hud-card {
+    position: absolute;
+    background: rgba(18, 38, 49, 0.94);
+    border: 2px solid var(--panel-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+    backdrop-filter: blur(5px);
+    z-index: 40;
+  }
+
+  /* MINIMAP */
+  #minimap-widget {
+    bottom: 20px;
+    right: 20px;
+    width: 210px;
+    height: 210px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .widget-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  #canvas-minimap {
+    flex: 1;
+    width: 100%;
+    background: #060e12;
+    border: 1px solid var(--panel-shadow);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  /* ZOOM & HELPER CONTROLS */
+  #quick-controls {
+    bottom: 20px;
+    left: 20px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .round-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--panel-main);
+    border: 1px solid var(--panel-border);
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+    transition: 0.1s ease;
+  }
+
+  .round-btn:hover {
+    background: var(--panel-header);
+    border-color: #8ac0db;
+    transform: scale(1.05);
+  }
+
+  /* TILE INSPECTOR CARD */
+  #inspector-card {
+    top: 20px;
+    left: 20px;
+    padding: 12px 16px;
+    min-width: 250px;
+    font-size: 13px;
+    line-height: 1.5;
+    pointer-events: none;
+  }
+
+  #inspector-card h4 {
+    color: var(--accent-gold);
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .inspector-sub {
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: monospace;
+    margin-bottom: 6px;
+  }
+
+  /* TOAST NOTIFICATIONS */
+  #toast-rack {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .toast-item {
+    background: rgba(15, 33, 42, 0.96);
+    border: 1px solid var(--accent-gold);
+    color: #ffffff;
+    padding: 9px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    animation: toastPop 3s forwards ease-in-out;
+  }
+
+  @keyframes toastPop {
+    0% { opacity: 0; transform: translateY(-12px); }
+    12% { opacity: 1; transform: translateY(0); }
+    85% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-12px); }
+  }
+
+  /* MODAL: MAP SELECTION */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(6, 14, 18, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(6px);
+  }
+
+  .dialog-box {
+    background: linear-gradient(180deg, #274b5e 0%, #152c38 100%);
+    border: 2px solid var(--panel-border);
+    border-radius: 12px;
+    width: 620px;
+    max-width: 92vw;
+    padding: 26px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.85);
+  }
+
+  .dialog-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent-gold);
+    margin-bottom: 6px;
+    text-shadow: 1px 1px 2px #000;
+  }
+
+  .dialog-subtitle {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 22px;
+  }
+
+  .grid-presets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .preset-tile {
+    background: rgba(12, 24, 32, 0.7);
+    border: 2px solid var(--panel-main);
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .preset-tile:hover {
+    border-color: var(--panel-border);
+    background: rgba(36, 70, 87, 0.7);
+    transform: translateY(-2px);
+  }
+
+  .preset-tile.selected {
+    border-color: var(--accent-gold);
+    background: rgba(43, 85, 107, 0.9);
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
+  }
+
+  .p-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .p-dim {
+    font-family: monospace;
+    color: var(--accent-gold);
+    font-size: 13px;
+  }
+
+  .p-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* CUSTOM CONFIG SLIDERS */
+  #custom-box {
+    background: rgba(8, 18, 24, 0.6);
+    border: 1px solid var(--panel-main);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 13px;
+  }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-row label { color: var(--text-dim); }
+
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  input[type="range"] {
+    accent-color: var(--accent-gold);
+    cursor: pointer;
+  }
+
+  .slider-val {
+    font-family: monospace;
+    font-size: 13px;
+    min-width: 48px;
+    text-align: right;
+    color: var(--accent-gold);
+  }
+
+  .dialog-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .btn-start {
+    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+    border: 1px solid #fde68a;
+    color: #0f1c24;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 11px 28px;
+    border-radius: 7px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    transition: 0.1s ease;
+  }
+  .btn-start:hover {
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+  }
+
+  /* TOWN INFO MODAL */
+  #town-card {
+    display: none;
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 33, 43, 0.96);
+    border: 2px solid var(--accent-gold);
+    border-radius: 10px;
+    padding: 16px 22px;
+    min-width: 340px;
+    z-index: 45;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+  }
+
+  .town-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--accent-gold);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .town-row {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .town-row b { color: #fff; }
+
+  .close-x {
+    cursor: pointer;
+    font-size: 20px;
+    color: var(--text-dim);
+  }
+  .close-x:hover { color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="game-app">
+  <!-- TOP STATUS BAR -->
+  <header id="top-bar">
+    <div class="brand">
+      <span>🚂</span>
+      <span>TRANSPORT TYCOON: AUTOMATION</span>
+    </div>
+
+    <div class="stats-group">
+      <div class="stat-pill">
+        <span class="stat-label">Treasury</span>
+        <span id="txt-money" class="stat-val gold">$50,000</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Date</span>
+        <span id="txt-date" class="stat-val">Year 1950, Apr</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Towns</span>
+        <span id="txt-towns" class="stat-val blue">0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Population</span>
+        <span id="txt-pop" class="stat-val">0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Trade Routes</span>
+        <span id="txt-routes" class="stat-val blue">0 Active</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Net Income</span>
+        <span id="txt-income" class="stat-val">+$0 / mo</span>
+      </div>
+    </div>
+
+    <div class="stats-group">
+      <button class="t-btn" id="btn-audio-toggle">🔊 Audio: ON</button>
+      <button class="t-btn" id="btn-open-map-dialog" style="background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-color: #6ee7b7;">🗺️ New Map</button>
+    </div>
+  </header>
+
+  <!-- ACTION TOOLBAR -->
+  <nav id="toolbar">
+    <div class="tool-cluster">
+      <button class="t-btn active" data-tool="inspect" id="t-inspect">
+        <span>🔍</span>
+        <span>Inspect & Pan</span>
+      </button>
+      <button class="t-btn" data-tool="road" id="t-road">
+        <span>🛣️</span>
+        <span>Lay Street</span>
+        <span class="badge-cost">$20</span>
+      </button>
+      <button class="t-btn" data-tool="town" id="t-town">
+        <span>🏛️</span>
+        <span>Found Town</span>
+        <span class="badge-cost">$2,000</span>
+      </button>
+      <button class="t-btn" data-tool="building" id="t-building">
+        <span>🏠</span>
+        <span>Add House</span>
+        <span class="badge-cost">$150</span>
+      </button>
+      <button class="t-btn" data-tool="trees" id="t-trees">
+        <span>🌲</span>
+        <span>Plant Trees</span>
+        <span class="badge-cost">$10</span>
+      </button>
+      <button class="t-btn danger" data-tool="demolish" id="t-demolish">
+        <span>🚜</span>
+        <span>Bulldozer</span>
+        <span class="badge-cost">$15</span>
+      </button>
+    </div>
+
+    <div class="tool-cluster">
+      <button class="t-btn" id="btn-projection-toggle">📐 View: Isometric</button>
+      <button class="t-btn" id="spd-pause">⏸️</button>
+      <button class="t-btn active" id="spd-1x">1x</button>
+      <button class="t-btn" id="spd-2x">2x</button>
+      <button class="t-btn" id="spd-5x">5x</button>
+    </div>
+  </nav>
+
+  <!-- VIEWPORT & MAP CANVAS -->
+  <main id="viewport-area">
+    <canvas id="canvas-world"></canvas>
+
+    <!-- TILE INSPECTOR CARD -->
+    <div id="inspector-card" class="hud-card">
+      <h4 id="tile-name">Meadow</h4>
+      <div id="tile-pos" class="inspector-sub">Grid (0, 0)</div>
+      <div id="tile-desc">Click tiles or drag with tools to build.</div>
+    </div>
+
+    <!-- MINIMAP WIDGET -->
+    <div id="minimap-widget" class="hud-card">
+      <div class="widget-head">
+        <span>World Radar</span>
+        <span id="lbl-radar-dim">40x40</span>
+      </div>
+      <canvas id="canvas-minimap" width="190" height="190"></canvas>
+    </div>
+
+    <!-- QUICK ZOOM CONTROLS -->
+    <div id="quick-controls" class="hud-card">
+      <button class="round-btn" id="btn-zoom-add" title="Zoom In">+</button>
+      <button class="round-btn" id="btn-zoom-sub" title="Zoom Out">-</button>
+      <button class="round-btn" id="btn-center-capital" title="Center on First Town" style="font-size:14px;">🎯</button>
+    </div>
+
+    <!-- TOAST POPUPS -->
+    <div id="toast-rack"></div>
+
+    <!-- TOWN DETAILS DIALOG -->
+    <div id="town-card">
+      <div class="town-header">
+        <span id="town-title">Westbrook</span>
+        <span class="close-x" id="btn-close-town">&times;</span>
+      </div>
+      <div class="town-row">Population: <b id="town-pop">420</b></div>
+      <div class="town-row">Structures: <b id="town-bldgs">6</b></div>
+      <div class="town-row">Network Status: <b id="town-net" style="color:#4ade80;">Active Trade Route</b></div>
+      <div class="town-row" style="margin-top:8px; font-style:italic; font-size:11px;">
+        💡 Tip: Connect streets to other towns to automatically run cargo vans and earn monthly income!
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MAP CONFIGURATION MODAL (CHOOSING TINY, MEDIUM, LARGE, EXTRA LARGE, WORLD, CUSTOM) -->
+<div class="modal-overlay" id="modal-map-gen">
+  <div class="dialog-box">
+    <h2 class="dialog-title">Select Map Size & World</h2>
+    <p class="dialog-subtitle">Choose your simulation territory size or configure custom dimensions.</p>
+
+    <div class="grid-presets">
+      <div class="preset-tile" data-size="tiny">
+        <div class="p-title">Tiny</div>
+        <div class="p-dim">20 x 20</div>
+        <div class="p-desc">Compact island, 2 towns. Rapid testing.</div>
+      </div>
+      <div class="preset-tile selected" data-size="medium">
+        <div class="p-title">Medium</div>
+        <div class="p-dim">40 x 40</div>
+        <div class="p-desc">Standard balanced region, 5-6 towns.</div>
+      </div>
+      <div class="preset-tile" data-size="large">
+        <div class="p-title">Large</div>
+        <div class="p-dim">70 x 70</div>
+        <div class="p-desc">Broad territory with 10-12 towns.</div>
+      </div>
+      <div class="preset-tile" data-size="xlarge">
+        <div class="p-title">Extra Large</div>
+        <div class="p-dim">110 x 110</div>
+        <div class="p-desc">Massive empire, 18+ towns & lakes.</div>
+      </div>
+      <div class="preset-tile" data-size="world">
+        <div class="p-title">World</div>
+        <div class="p-dim">160 x 160</div>
+        <div class="p-desc">Continental scale, 28+ towns.</div>
+      </div>
+      <div class="preset-tile" data-size="custom">
+        <div class="p-title">Custom</div>
+        <div class="p-dim">Adjustable</div>
+        <div class="p-desc">Configure exact width, height & densities.</div>
+      </div>
+    </div>
+
+    <div id="custom-box">
+      <div class="slider-row">
+        <label>Map Width</label>
+        <div class="slider-wrap">
+          <input type="range" id="sl-w" min="16" max="200" value="50" step="2">
+          <span class="slider-val" id="val-sl-w">50</span>
+        </div>
+      </div>
+      <div class="slider-row">
+        <label>Map Height</label>
+        <div class="slider-wrap">
+          <input type="range" id="sl-h" min="16" max="200" value="50" step="2">
+          <span class="slider-val" id="val-sl-h">50</span>
+        </div>
+      </div>
+      <div class="slider-row">
+        <label>Town Count</label>
+        <div class="slider-wrap">
+          <input type="range" id="sl-towns" min="1" max="40" value="6">
+          <span class="slider-val" id="val-sl-towns">6</span>
+        </div>
+      </div>
+      <div class="slider-row">
+        <label>Water Coverage</label>
+        <div class="slider-wrap">
+          <input type="range" id="sl-water" min="0" max="60" value="20" step="5">
+          <span class="slider-val" id="val-sl-water">20%</span>
+        </div>
+      </div>
+      <div class="slider-row">
+        <label>Tree Density</label>
+        <div class="slider-wrap">
+          <input type="range" id="sl-trees" min="0" max="50" value="15" step="5">
+          <span class="slider-val" id="val-sl-trees">15%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-foot">
+      <button class="btn-start" id="btn-confirm-gen">Generate Map</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   SIMULATION ENGINE & GAME LOGIC
+   ========================================================================= */
+
+// Audio Synthesizer via Web Audio API
+class GameAudio {
+  constructor() {
+    this.ctx = null;
+    this.enabled = true;
+  }
+  ensure() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+  }
+  click() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
+    } catch(e) {}
+  }
+  buildRoad() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(240, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(480, this.ctx.currentTime + 0.07);
+      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.07);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.07);
+    } catch(e) {}
+  }
+  demolish() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const bufSize = this.ctx.sampleRate * 0.12;
+      const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buf;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(360, this.ctx.currentTime);
+      filter.frequency.linearRampToValueAtTime(60, this.ctx.currentTime + 0.12);
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      noise.start();
+    } catch(e) {}
+  }
+  fanfare() {
+    if (!this.enabled || !this.ctx) return;
+    try {
+      const freqs = [261.6, 329.6, 392.0, 523.3];
+      freqs.forEach((f, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.22);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(this.ctx.currentTime + idx * 0.08);
+        osc.stop(this.ctx.currentTime + idx * 0.08 + 0.22);
+      });
+    } catch(e) {}
+  }
+}
+
+// Master Game State
+const GAME = {
+  audio: new GameAudio(),
+  activeTool: 'inspect', // 'inspect'|'road'|'town'|'building'|'trees'|'demolish'
+  viewMode: 'iso',       // 'iso' | 'ortho'
+  money: 50000,
+  simSpeed: 1,           // 0=pause, 1=1x, 2=2x, 5=5x
+  date: { year: 1950, month: 4, day: 1 },
+  mapW: 40,
+  mapH: 40,
+  tiles: [],
+  towns: [],
+  routes: [],
+  vehicles: [],
+  cam: { x: 0, y: 0, zoom: 1.0 },
+  mouse: {
+    x: 0, y: 0,
+    tileX: -1, tileY: -1,
+    isDown: false,
+    dragStartX: 0, dragStartY: 0,
+    dragStartTileX: -1, dragStartTileY: -1,
+    isPanning: false
+  },
+  costs: {
+    road: 20,
+    demolish: 15,
+    town: 2000,
+    building: 150,
+    trees: 10
+  }
+};
+
+const TOWN_NAMES = [
+  "Westbrook", "Portland", "Slough", "Basingstoke", "Oakridge",
+  "Gabrielton", "Kingsport", "Riverdale", "Highfield", "Pine Bluff",
+  "Amberford", "Fairhaven", "Glenwood", "Newhaven", "Eastwood",
+  "Redmond", "Springfield", "Milford", "Bridgewater", "Stonegate",
+  "Ashford", "Sunnydale", "Foxborough", "Kittery", "Camden"
+];
+
+function generateMap(w, h, townCount, waterPct, treePct) {
+  GAME.mapW = w;
+  GAME.mapH = h;
+  GAME.tiles = [];
+  GAME.towns = [];
+  GAME.routes = [];
+  GAME.vehicles = [];
+
+  // 1. Initialize Grid
+  for (let y = 0; y < h; y++) {
+    const row = [];
+    for (let x = 0; x < w; x++) {
+      row.push({
+        type: 'grass',
+        road: 0, // bitmask: 1=N, 2=E, 4=S, 8=W
+        building: null,
+        tree: false
+      });
+    }
+    GAME.tiles.push(row);
+  }
+
+  // 2. Generate Water Bodies
+  const lakeCount = Math.max(1, Math.round((w * h / 450) * (waterPct / 20)));
+  for (let l = 0; l < lakeCount; l++) {
+    const cx = Math.floor(Math.random() * (w - 10)) + 5;
+    const cy = Math.floor(Math.random() * (h - 10)) + 5;
+    const rad = Math.floor(Math.random() * 4) + 2;
+    for (let dy = -rad; dy <= rad; dy++) {
+      for (let dx = -rad; dx <= rad; dx++) {
+        const tx = cx + dx;
+        const ty = cy + dy;
+        if (tx >= 0 && tx < w && ty >= 0 && ty < h) {
+          if (dx * dx + dy * dy <= rad * rad + (Math.random() * 2 - 1)) {
+            GAME.tiles[ty][tx].type = 'water';
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Scatter Natural Trees
+  const treeCount = Math.floor(w * h * (treePct / 100));
+  for (let i = 0; i < treeCount; i++) {
+    const tx = Math.floor(Math.random() * w);
+    const ty = Math.floor(Math.random() * h);
+    if (GAME.tiles[ty][tx].type === 'grass') {
+      GAME.tiles[ty][tx].tree = true;
+    }
+  }
+
+  // 4. Place Initial Towns
+  let placed = 0;
+  let attempts = 0;
+  const namePool = [...TOWN_NAMES].sort(() => Math.random() - 0.5);
+
+  while (placed < townCount && attempts < 250) {
+    attempts++;
+    const cx = Math.floor(Math.random() * (w - 10)) + 5;
+    const cy = Math.floor(Math.random() * (h - 10)) + 5;
+
+    // Minimum distance between towns
+    let ok = true;
+    const minD = Math.max(8, Math.min(w, h) / (townCount * 0.55));
+    for (const t of GAME.towns) {
+      if (Math.hypot(t.x - cx, t.y - cy) < minD) { ok = false; break; }
+    }
+    if (!ok) continue;
+
+    // Check water tiles
+    let waterNear = 0;
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        if (GAME.tiles[cy + dy][cx + dx].type === 'water') waterNear++;
+      }
+    }
+    if (waterNear > 2) continue;
+
+    const townName = namePool[placed % namePool.length] || `Settlement ${placed + 1}`;
+    const townId = placed + 1;
+    const town = {
+      id: townId,
+      name: townName,
+      x: cx,
+      y: cy,
+      population: Math.floor(Math.random() * 350) + 250,
+      buildings: 1
+    };
+
+    // Town Hall at center
+    const center = GAME.tiles[cy][cx];
+    center.type = 'grass';
+    center.tree = false;
+    center.building = { type: 'hall', townId: town.id, name: town.name };
+
+    // Cross roads around Town Hall
+    const roads = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
+    roads.forEach(([rx, ry]) => {
+      if (rx >= 0 && rx < w && ry >= 0 && ry < h) {
+        const rt = GAME.tiles[ry][rx];
+        rt.type = 'grass';
+        rt.tree = false;
+        rt.road = 15;
+      }
+    });
+
+    // 2-3 starter houses
+    const houses = [[cx - 1, cy - 1], [cx + 1, cy - 1], [cx - 1, cy + 1], [cx + 1, cy + 1]];
+    houses.forEach(([hx, hy]) => {
+      if (Math.random() > 0.3 && hx >= 0 && hx < w && hy >= 0 && hy < h) {
+        const ht = GAME.tiles[hy][hx];
+        ht.type = 'grass';
+        ht.tree = false;
+        ht.building = {
+          type: Math.random() > 0.4 ? 'res1' : 'comm',
+          townId: town.id,
+          name: town.name
+        };
+        town.buildings++;
+      }
+    });
+
+    GAME.towns.push(town);
+    placed++;
+  }
+
+  recalculateAllRoads();
+
+  if (GAME.towns.length > 0) {
+    centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
+  } else {
+    centerCameraOn(Math.floor(w / 2), Math.floor(h / 2));
+  }
+
+  updateHUD();
+  renderMinimap();
+}
+
+function updateRoadMask(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+  if (!tile.road) return;
+
+  let mask = 0;
+  if (y > 0 && GAME.tiles[y - 1][x].road) mask |= 1;        // N
+  if (x < GAME.mapW - 1 && GAME.tiles[y][x + 1].road) mask |= 2; // E
+  if (y < GAME.mapH - 1 && GAME.tiles[y + 1][x].road) mask |= 4; // S
+  if (x > 0 && GAME.tiles[y][x - 1].road) mask |= 8;        // W
+  tile.road = mask || 15;
+}
+
+function recalculateAllRoads() {
+  for (let y = 0; y < GAME.mapH; y++) {
+    for (let x = 0; x < GAME.mapW; x++) {
+      if (GAME.tiles[y][x].road) updateRoadMask(x, y);
+    }
+  }
+}
+
+function updateRoadNeighbors(x, y) {
+  updateRoadMask(x, y);
+  if (y > 0) updateRoadMask(x, y - 1);
+  if (x < GAME.mapW - 1) updateRoadMask(x + 1, y);
+  if (y < GAME.mapH - 1) updateRoadMask(x, y + 1);
+  if (x > 0) updateRoadMask(x - 1, y);
+}
+
+// Projections
+const TILE_W = 64;
+const TILE_H = 32;
+
+function tileToScreen(tx, ty) {
+  if (GAME.viewMode === 'iso') {
+    const sx = (tx - ty) * (TILE_W / 2) * GAME.cam.zoom + GAME.cam.x;
+    const sy = (tx + ty) * (TILE_H / 2) * GAME.cam.zoom + GAME.cam.y;
+    return { x: sx, y: sy };
+  } else {
+    const size = 48 * GAME.cam.zoom;
+    return { x: tx * size + GAME.cam.x, y: ty * size + GAME.cam.y };
+  }
+}
+
+function screenToTile(sx, sy) {
+  if (GAME.viewMode === 'iso') {
+    const adjX = (sx - GAME.cam.x) / GAME.cam.zoom;
+    const adjY = (sy - GAME.cam.y) / GAME.cam.zoom;
+    const tx = Math.floor((adjX / (TILE_W / 2) + adjY / (TILE_H / 2)) / 2);
+    const ty = Math.floor((adjY / (TILE_H / 2) - adjX / (TILE_W / 2)) / 2);
+    return { x: tx, y: ty };
+  } else {
+    const size = 48 * GAME.cam.zoom;
+    return {
+      x: Math.floor((sx - GAME.cam.x) / size),
+      y: Math.floor((sy - GAME.cam.y) / size)
+    };
+  }
+}
+
+function centerCameraOn(tx, ty) {
+  const canvas = document.getElementById('canvas-world');
+  if (GAME.viewMode === 'iso') {
+    const wx = (tx - ty) * (TILE_W / 2) * GAME.cam.zoom;
+    const wy = (tx + ty) * (TILE_H / 2) * GAME.cam.zoom;
+    GAME.cam.x = canvas.width / 2 - wx;
+    GAME.cam.y = canvas.height / 2 - wy;
+  } else {
+    const size = 48 * GAME.cam.zoom;
+    GAME.cam.x = canvas.width / 2 - (tx + 0.5) * size;
+    GAME.cam.y = canvas.height / 2 - (ty + 0.5) * size;
+  }
+}
+
+/* =========================================================================
+   CANVAS RENDERING
+   ========================================================================= */
+
+const canvas = document.getElementById('canvas-world');
+const ctx = canvas.getContext('2d');
+const minimapCanvas = document.getElementById('canvas-minimap');
+const minimapCtx = minimapCanvas.getContext('2d');
+
+function fitCanvas() {
+  const vp = document.getElementById('viewport-area');
+  canvas.width = vp.clientWidth;
+  canvas.height = vp.clientHeight;
+}
+window.addEventListener('resize', fitCanvas);
+
+let prevTime = performance.now();
+function gameLoop(now) {
+  const dt = (now - prevTime) / 1000;
+  prevTime = now;
+
+  tickSimulation(dt);
+
+  ctx.fillStyle = '#0a161c';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  renderWorld(now);
+  renderVehicles(now);
+  renderHighlights();
+
+  requestAnimationFrame(gameLoop);
+}
+
+function renderWorld(now) {
+  const zoom = GAME.cam.zoom;
+  const isIso = GAME.viewMode === 'iso';
+  const tw = TILE_W * zoom;
+  const th = TILE_H * zoom;
+  const orthoSize = 48 * zoom;
+
+  for (let y = 0; y < GAME.mapH; y++) {
+    for (let x = 0; x < GAME.mapW; x++) {
+      const tile = GAME.tiles[y][x];
+      const pos = tileToScreen(x, y);
+
+      // Frustum culling
+      if (isIso) {
+        if (pos.x < -tw || pos.x > canvas.width + tw || pos.y < -th * 2 || pos.y > canvas.height + th * 2) continue;
+        drawTileIso(ctx, x, y, tile, pos.x, pos.y, tw, th, now);
+      } else {
+        if (pos.x < -orthoSize || pos.x > canvas.width || pos.y < -orthoSize || pos.y > canvas.height) continue;
+        drawTileOrtho(ctx, x, y, tile, pos.x, pos.y, orthoSize);
+      }
+    }
+  }
+}
+
+function drawTileIso(ctx, x, y, tile, px, py, tw, th, now) {
+  // Diamond tile base
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(px + tw / 2, py + th / 2);
+  ctx.lineTo(px, py + th);
+  ctx.lineTo(px - tw / 2, py + th / 2);
+  ctx.closePath();
+
+  if (tile.type === 'water') {
+    const wave = Math.sin((x + y * 0.5) + now * 0.003) * 6;
+    ctx.fillStyle = `hsl(204, 82%, ${34 + wave * 0.4}%)`;
+    ctx.fill();
+    ctx.strokeStyle = '#1e5a7d';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = (x + y) % 2 === 0 ? '#499336' : '#41862f';
+    ctx.fill();
+    ctx.strokeStyle = '#387328';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  if (tile.road) {
+    drawRoadIso(ctx, px, py, tw, th, tile.road);
+  }
+
+  if (tile.tree && !tile.road && !tile.building) {
+    drawTreeIso(ctx, px, py, tw, th, x, y);
+  }
+
+  if (tile.building) {
+    drawBuildingIso(ctx, px, py, tw, th, tile.building);
+  }
+}
+
+function drawRoadIso(ctx, px, py, tw, th, mask) {
+  const cx = px;
+  const cy = py + th / 2;
+  const rw = tw * 0.28;
+  const rh = th * 0.28;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(px + tw / 2, py + th / 2);
+  ctx.lineTo(px, py + th);
+  ctx.lineTo(px - tw / 2, py + th / 2);
+  ctx.closePath();
+  ctx.clip();
+
+  ctx.fillStyle = '#424649';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (mask & 1) { // North
+    ctx.beginPath();
+    ctx.moveTo(cx - rw * 0.7, cy);
+    ctx.lineTo(px - tw * 0.2, py + th * 0.2);
+    ctx.lineTo(px, py);
+    ctx.lineTo(px + tw * 0.2, py + th * 0.2);
+    ctx.lineTo(cx + rw * 0.7, cy);
+    ctx.fill();
+  }
+  if (mask & 4) { // South
+    ctx.beginPath();
+    ctx.moveTo(cx - rw * 0.7, cy);
+    ctx.lineTo(px - tw * 0.2, py + th * 0.8);
+    ctx.lineTo(px, py + th);
+    ctx.lineTo(px + tw * 0.2, py + th * 0.8);
+    ctx.lineTo(cx + rw * 0.7, cy);
+    ctx.fill();
+  }
+  if (mask & 8) { // West
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - rh * 0.7);
+    ctx.lineTo(px - tw * 0.35, py + th * 0.3);
+    ctx.lineTo(px - tw / 2, py + th / 2);
+    ctx.lineTo(px - tw * 0.35, py + th * 0.7);
+    ctx.lineTo(cx, cy + rh * 0.7);
+    ctx.fill();
+  }
+  if (mask & 2) { // East
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - rh * 0.7);
+    ctx.lineTo(px + tw * 0.35, py + th * 0.3);
+    ctx.lineTo(px + tw / 2, py + th / 2);
+    ctx.lineTo(px + tw * 0.35, py + th * 0.7);
+    ctx.lineTo(cx, cy + rh * 0.7);
+    ctx.fill();
+  }
+
+  // Yellow road dash line
+  ctx.strokeStyle = '#facc15';
+  ctx.lineWidth = Math.max(1, tw * 0.025);
+  ctx.setLineDash([3 * GAME.cam.zoom, 3 * GAME.cam.zoom]);
+  ctx.beginPath();
+  if (mask & 1) { ctx.moveTo(cx, cy); ctx.lineTo(px, py); }
+  if (mask & 4) { ctx.moveTo(cx, cy); ctx.lineTo(px, py + th); }
+  if (mask & 8) { ctx.moveTo(cx, cy); ctx.lineTo(px - tw / 2, py + th / 2); }
+  if (mask & 2) { ctx.moveTo(cx, cy); ctx.lineTo(px + tw / 2, py + th / 2); }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function drawTreeIso(ctx, px, py, tw, th, x, y) {
+  const cx = px;
+  const cy = py + th * 0.55;
+  const h = th * 1.35;
+  const w = tw * 0.35;
+
+  ctx.fillStyle = '#653a1a';
+  ctx.fillRect(cx - 2, cy - h * 0.2, 4, h * 0.25);
+
+  ctx.fillStyle = (x + y) % 3 === 0 ? '#1b5e20' : '#2e7d32';
+  for (let i = 0; i < 3; i++) {
+    const layerY = cy - h * (0.2 + i * 0.28);
+    const layerW = w * (1 - i * 0.22);
+    ctx.beginPath();
+    ctx.moveTo(cx, layerY - h * 0.35);
+    ctx.lineTo(cx + layerW, layerY);
+    ctx.lineTo(cx - layerW, layerY);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function drawBuildingIso(ctx, px, py, tw, th, bldg) {
+  const cx = px;
+  const cy = py + th / 2;
+  const isHall = bldg.type === 'hall';
+  const bH = isHall ? th * 1.8 : th * 1.25;
+  const bW = tw * 0.42;
+
+  // Left wall
+  ctx.fillStyle = isHall ? '#b45309' : '#cbd5e1';
+  ctx.beginPath();
+  ctx.moveTo(cx - bW, cy);
+  ctx.lineTo(cx, cy + th * 0.25);
+  ctx.lineTo(cx, cy + th * 0.25 - bH);
+  ctx.lineTo(cx - bW, cy - bH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#475569';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Right wall
+  ctx.fillStyle = isHall ? '#92400e' : '#94a3b8';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + th * 0.25);
+  ctx.lineTo(cx + bW, cy);
+  ctx.lineTo(cx + bW, cy - bH);
+  ctx.lineTo(cx, cy + th * 0.25 - bH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Roof
+  ctx.fillStyle = isHall ? '#dc2626' : (bldg.type === 'comm' ? '#2563eb' : '#be123c');
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - bH - th * 0.4);
+  ctx.lineTo(cx + bW, cy - bH);
+  ctx.lineTo(cx, cy + th * 0.25 - bH);
+  ctx.lineTo(cx - bW, cy - bH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Town Hall Banner
+  if (isHall) {
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(cx - 3, cy - bH - th * 0.75, 6, th * 0.4);
+
+    // Flag
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.moveTo(cx + 3, cy - bH - th * 0.75);
+    ctx.lineTo(cx + 15, cy - bH - th * 0.65);
+    ctx.lineTo(cx + 3, cy - bH - th * 0.55);
+    ctx.closePath();
+    ctx.fill();
+
+    // Hover badge label
+    ctx.font = 'bold 11px sans-serif';
+    const text = bldg.name;
+    const m = ctx.measureText(text);
+    const badgeW = m.width + 12;
+    const badgeH = 18;
+    const by = cy - bH - th * 1.0;
+
+    ctx.fillStyle = 'rgba(12, 28, 38, 0.88)';
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(cx - badgeW / 2, by - badgeH / 2, badgeW, badgeH, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, cx, by);
+  }
+}
+
+function drawTileOrtho(ctx, x, y, tile, px, py, size) {
+  if (tile.type === 'water') {
+    ctx.fillStyle = '#0284c7';
+  } else {
+    ctx.fillStyle = (x + y) % 2 === 0 ? '#499336' : '#41862f';
+  }
+  ctx.fillRect(px, py, size, size);
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.strokeRect(px, py, size, size);
+
+  if (tile.road) {
+    ctx.fillStyle = '#475569';
+    const rw = size * 0.35;
+    const mid = size * 0.5;
+    ctx.fillRect(px + mid - rw/2, py + mid - rw/2, rw, rw);
+    if (tile.road & 1) ctx.fillRect(px + mid - rw/2, py, rw, mid);
+    if (tile.road & 4) ctx.fillRect(px + mid - rw/2, py + mid, rw, mid);
+    if (tile.road & 8) ctx.fillRect(px, py + mid - rw/2, mid, rw);
+    if (tile.road & 2) ctx.fillRect(px + mid, py + mid - rw/2, mid, rw);
+  }
+
+  if (tile.tree && !tile.road && !tile.building) {
+    ctx.fillStyle = '#15803d';
+    ctx.beginPath();
+    ctx.arc(px + size * 0.5, py + size * 0.5, size * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  if (tile.building) {
+    ctx.fillStyle = tile.building.type === 'hall' ? '#e11d48' : '#f59e0b';
+    ctx.fillRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
+    ctx.strokeStyle = '#000';
+    ctx.strokeRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
+  }
+}
+
+function renderHighlights() {
+  const { tileX, tileY } = GAME.mouse;
+  const isIso = GAME.viewMode === 'iso';
+  const tw = TILE_W * GAME.cam.zoom;
+  const th = TILE_H * GAME.cam.zoom;
+  const size = 48 * GAME.cam.zoom;
+
+  // Road Drag Line Preview
+  if (GAME.mouse.isDown && GAME.activeTool === 'road' && GAME.mouse.dragStartTileX !== -1) {
+    const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, tileX, tileY);
+    line.forEach(({ x, y }) => {
+      if (x >= 0 && x < GAME.mapW && y >= 0 && y < GAME.mapH) {
+        const p = tileToScreen(x, y);
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.45)';
+        if (isIso) drawIsoDiamond(ctx, p.x, p.y, tw, th);
+        else ctx.fillRect(p.x, p.y, size, size);
+      }
+    });
+  } else if (tileX >= 0 && tileX < GAME.mapW && tileY >= 0 && tileY < GAME.mapH) {
+    const p = tileToScreen(tileX, tileY);
+    if (GAME.activeTool === 'demolish') {
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+      ctx.strokeStyle = '#ef4444';
+    } else if (GAME.activeTool === 'inspect') {
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.strokeStyle = '#38bdf8';
+    } else {
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.35)';
+      ctx.strokeStyle = '#22c55e';
+    }
+    ctx.lineWidth = 2;
+
+    if (isIso) {
+      drawIsoDiamond(ctx, p.x, p.y, tw, th, true);
+    } else {
+      ctx.fillRect(p.x, p.y, size, size);
+      ctx.strokeRect(p.x, p.y, size, size);
+    }
+  }
+}
+
+function drawIsoDiamond(ctx, px, py, tw, th, stroke = false) {
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(px + tw / 2, py + th / 2);
+  ctx.lineTo(px, py + th);
+  ctx.lineTo(px - tw / 2, py + th / 2);
+  ctx.closePath();
+  ctx.fill();
+  if (stroke) ctx.stroke();
+}
+
+function getLine(x0, y0, x1, y1) {
+  const points = [];
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  let curX = x0, curY = y0;
+
+  if (dx >= dy) {
+    const stepX = x1 >= x0 ? 1 : -1;
+    const stepY = y1 >= y0 ? 1 : -1;
+    while (curX !== x1) { points.push({ x: curX, y: curY }); curX += stepX; }
+    while (curY !== y1) { points.push({ x: curX, y: curY }); curY += stepY; }
+    points.push({ x: curX, y: curY });
+  } else {
+    const stepX = x1 >= x0 ? 1 : -1;
+    const stepY = y1 >= y0 ? 1 : -1;
+    while (curY !== y1) { points.push({ x: curX, y: curY }); curY += stepY; }
+    while (curX !== x1) { points.push({ x: curX, y: curY }); curX += stepX; }
+    points.push({ x: curX, y: curY });
+  }
+  return points;
+}
+
+/* =========================================================================
+   AUTOMATION: DELIVERY CARGO VEHICLES & TRADE ROUTES
+   ========================================================================= */
+
+function tickSimulation(dt) {
+  if (GAME.simSpeed === 0) return;
+  const spd = GAME.simSpeed;
+
+  GAME.date.day += dt * 4 * spd;
+  if (GAME.date.day >= 30) {
+    GAME.date.day = 1;
+    GAME.date.month++;
+    monthTick();
+    if (GAME.date.month > 12) {
+      GAME.date.month = 1;
+      GAME.date.year++;
+    }
+    updateHUD();
+  }
+
+  // Vehicles movement along roads
+  for (let i = 0; i < GAME.vehicles.length; i++) {
+    const v = GAME.vehicles[i];
+    v.progress += dt * 1.5 * spd;
+    if (v.progress >= 1.0) {
+      v.progress = 0;
+      v.pathIdx++;
+      if (v.pathIdx >= v.path.length - 1) {
+        // Cargo delivered!
+        const revenue = Math.round(v.path.length * 16);
+        GAME.money += revenue;
+        showToast(`🚚 Delivery +$${revenue} to ${v.t2.name}!`);
+
+        // Reverse route
+        const tmp = v.t1;
+        v.t1 = v.t2;
+        v.t2 = tmp;
+        v.path.reverse();
+        v.pathIdx = 0;
+        updateHUD();
+      }
+    }
+  }
+}
+
+function monthTick() {
+  let routeIncome = 0;
+  GAME.routes.forEach(r => routeIncome += r.path.length * 10);
+  GAME.money += routeIncome;
+
+  // Connected towns grow in population
+  GAME.towns.forEach(t => {
+    const isConn = GAME.routes.some(r => r.t1.id === t.id || r.t2.id === t.id);
+    if (isConn) {
+      t.population += Math.floor(Math.random() * 9) + 4;
+    }
+  });
+
+  updateHUD();
+}
+
+function findPath(t1, t2) {
+  const q = [{ x: t1.x, y: t1.y, path: [{ x: t1.x, y: t1.y }] }];
+  const visited = new Set();
+  visited.add(`${t1.x},${t1.y}`);
+
+  while (q.length > 0) {
+    const cur = q.shift();
+    if (Math.abs(cur.x - t2.x) + Math.abs(cur.y - t2.y) <= 1) {
+      cur.path.push({ x: t2.x, y: t2.y });
+      return cur.path;
+    }
+
+    const dirs = [
+      { x: cur.x, y: cur.y - 1 },
+      { x: cur.x + 1, y: cur.y },
+      { x: cur.x, y: cur.y + 1 },
+      { x: cur.x - 1, y: cur.y }
+    ];
+
+    for (const d of dirs) {
+      if (d.x >= 0 && d.x < GAME.mapW && d.y >= 0 && d.y < GAME.mapH) {
+        const key = `${d.x},${d.y}`;
+        if (!visited.has(key)) {
+          const tile = GAME.tiles[d.y][d.x];
+          if (tile.road || (d.x === t2.x && d.y === t2.y)) {
+            visited.add(key);
+            q.push({ x: d.x, y: d.y, path: [...cur.path, { x: d.x, y: d.y }] });
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function checkRoutes() {
+  const newRoutes = [];
+  for (let i = 0; i < GAME.towns.length; i++) {
+    for (let j = i + 1; j < GAME.towns.length; j++) {
+      const t1 = GAME.towns[i];
+      const t2 = GAME.towns[j];
+      const path = findPath(t1, t2);
+      if (path && path.length > 2) {
+        newRoutes.push({ t1, t2, path: [...path] });
+      }
+    }
+  }
+
+  if (newRoutes.length > GAME.routes.length) {
+    GAME.audio.fanfare();
+    showToast(`🎉 New Trade Route Established! Monthly subsidies active.`);
+  }
+
+  GAME.routes = newRoutes;
+
+  // Auto-spawn delivery vehicles
+  GAME.vehicles = [];
+  GAME.routes.forEach(r => {
+    GAME.vehicles.push({
+      t1: r.t1,
+      t2: r.t2,
+      path: [...r.path],
+      pathIdx: 0,
+      progress: 0
+    });
+  });
+
+  updateHUD();
+}
+
+function renderVehicles(now) {
+  const isIso = GAME.viewMode === 'iso';
+  const th = TILE_H * GAME.cam.zoom;
+  const size = 48 * GAME.cam.zoom;
+
+  GAME.vehicles.forEach(v => {
+    if (!v.path || v.pathIdx >= v.path.length - 1) return;
+    const p1 = v.path[v.pathIdx];
+    const p2 = v.path[v.pathIdx + 1];
+
+    const ix = p1.x + (p2.x - p1.x) * v.progress;
+    const iy = p1.y + (p2.y - p1.y) * v.progress;
+
+    if (isIso) {
+      const pos = tileToScreen(ix, iy);
+      const sx = pos.x;
+      const sy = pos.y + th * 0.45;
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(sx - 8 * GAME.cam.zoom, sy - 6 * GAME.cam.zoom, 16 * GAME.cam.zoom, 12 * GAME.cam.zoom, 3);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(sx - 4 * GAME.cam.zoom, sy - 5 * GAME.cam.zoom, 8 * GAME.cam.zoom, 4 * GAME.cam.zoom);
+    } else {
+      const pos = tileToScreen(ix, iy);
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(pos.x + size * 0.5, pos.y + size * 0.5, 6 * GAME.cam.zoom, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+    }
+  });
+}
+
+/* =========================================================================
+   BUILD & DELETE ACTIONS
+   ========================================================================= */
+
+function buildRoad(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+
+  if (tile.type === 'water') {
+    showToast("Cannot place streets over deep water!");
+    return;
+  }
+  if (tile.building) {
+    showToast("Tile is occupied by a building!");
+    return;
+  }
+  if (tile.road) return;
+
+  if (GAME.money < GAME.costs.road) {
+    showToast("Insufficient treasury funds!");
+    return;
+  }
+
+  GAME.money -= GAME.costs.road;
+  tile.road = 15;
+  tile.tree = false;
+  updateRoadNeighbors(x, y);
+  GAME.audio.buildRoad();
+  checkRoutes();
+  updateHUD();
+  renderMinimap();
+}
+
+function demolish(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+  let touched = false;
+
+  if (tile.building) {
+    if (tile.building.type === 'hall') {
+      showToast("Cannot demolish a Town Hall!");
+      return;
+    }
+    tile.building = null;
+    touched = true;
+  }
+  if (tile.road) {
+    tile.road = 0;
+    updateRoadNeighbors(x, y);
+    touched = true;
+  }
+  if (tile.tree) {
+    tile.tree = false;
+    touched = true;
+  }
+
+  if (touched) {
+    GAME.money -= GAME.costs.demolish;
+    GAME.audio.demolish();
+    checkRoutes();
+    updateHUD();
+    renderMinimap();
+  }
+}
+
+function buildTown(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+
+  if (tile.type === 'water' || tile.building || tile.road) {
+    showToast("Town center requires clear land!");
+    return;
+  }
+
+  if (GAME.money < GAME.costs.town) {
+    showToast("Founding a town costs $2,000!");
+    return;
+  }
+
+  GAME.money -= GAME.costs.town;
+  const townId = GAME.towns.length + 1;
+  const town = {
+    id: townId,
+    name: TOWN_NAMES[townId % TOWN_NAMES.length] || `New Town ${townId}`,
+    x: x,
+    y: y,
+    population: 300,
+    buildings: 1
+  };
+
+  tile.tree = false;
+  tile.building = { type: 'hall', townId: town.id, name: town.name };
+  GAME.towns.push(town);
+
+  GAME.audio.fanfare();
+  showToast(`🏛️ New Town Founded: ${town.name}!`);
+  checkRoutes();
+  updateHUD();
+  renderMinimap();
+}
+
+function buildHouse(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+
+  if (tile.type === 'water' || tile.building || tile.road) {
+    showToast("Select open meadow near a road!");
+    return;
+  }
+
+  if (GAME.money < GAME.costs.building) {
+    showToast("Building a house costs $150!");
+    return;
+  }
+
+  let nearest = null;
+  let minD = Infinity;
+  GAME.towns.forEach(t => {
+    const d = Math.hypot(t.x - x, t.y - y);
+    if (d < minD) { minD = d; nearest = t; }
+  });
+
+  if (!nearest || minD > 14) {
+    showToast("Must be within 14 tiles of a town!");
+    return;
+  }
+
+  GAME.money -= GAME.costs.building;
+  tile.tree = false;
+  tile.building = {
+    type: Math.random() > 0.4 ? 'res1' : 'comm',
+    townId: nearest.id,
+    name: nearest.name
+  };
+  nearest.population += Math.floor(Math.random() * 30) + 15;
+  nearest.buildings++;
+
+  GAME.audio.click();
+  updateHUD();
+  renderMinimap();
+}
+
+function plantTrees(x, y) {
+  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
+  const tile = GAME.tiles[y][x];
+  if (tile.type !== 'grass' || tile.road || tile.building || tile.tree) return;
+
+  if (GAME.money < GAME.costs.trees) return;
+  GAME.money -= GAME.costs.trees;
+  tile.tree = true;
+  GAME.audio.click();
+  updateHUD();
+  renderMinimap();
+}
+
+/* =========================================================================
+   USER INPUT CONTROLS
+   ========================================================================= */
+
+const vp = document.getElementById('viewport-area');
+
+vp.addEventListener('mousedown', (e) => {
+  GAME.audio.ensure();
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  GAME.mouse.isDown = true;
+  GAME.mouse.dragStartX = mx;
+  GAME.mouse.dragStartY = my;
+
+  const t = screenToTile(mx, my);
+  GAME.mouse.dragStartTileX = t.x;
+  GAME.mouse.dragStartTileY = t.y;
+
+  if (e.button === 2 || e.button === 1 || GAME.activeTool === 'inspect') {
+    GAME.mouse.isPanning = true;
+    vp.classList.add('panning');
+    return;
+  }
+
+  if (e.button === 0) {
+    if (GAME.activeTool === 'town') buildTown(t.x, t.y);
+    else if (GAME.activeTool === 'building') buildHouse(t.x, t.y);
+    else if (GAME.activeTool === 'trees') plantTrees(t.x, t.y);
+    else if (GAME.activeTool === 'demolish') demolish(t.x, t.y);
+  }
+});
+
+vp.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  GAME.mouse.x = mx;
+  GAME.mouse.y = my;
+
+  if (GAME.mouse.isDown && GAME.mouse.isPanning) {
+    GAME.cam.x += mx - GAME.mouse.dragStartX;
+    GAME.cam.y += my - GAME.mouse.dragStartY;
+    GAME.mouse.dragStartX = mx;
+    GAME.mouse.dragStartY = my;
+    renderMinimap();
+    return;
+  }
+
+  const t = screenToTile(mx, my);
+  GAME.mouse.tileX = t.x;
+  GAME.mouse.tileY = t.y;
+
+  if (GAME.mouse.isDown && GAME.activeTool === 'demolish' && e.buttons === 1) {
+    demolish(t.x, t.y);
+  }
+
+  updateInspector(t.x, t.y);
+});
+
+vp.addEventListener('mouseup', (e) => {
+  if (GAME.mouse.isDown && e.button === 0) {
+    if (GAME.activeTool === 'road' && GAME.mouse.dragStartTileX !== -1) {
+      const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, GAME.mouse.tileX, GAME.mouse.tileY);
+      line.forEach(({ x, y }) => buildRoad(x, y));
+    }
+  }
+
+  GAME.mouse.isDown = false;
+  GAME.mouse.isPanning = false;
+  GAME.mouse.dragStartTileX = -1;
+  GAME.mouse.dragStartTileY = -1;
+  vp.classList.remove('panning');
+});
+
+vp.addEventListener('contextmenu', (e) => e.preventDefault());
+
+vp.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.15 : 0.85;
+  const newZoom = Math.min(2.5, Math.max(0.35, GAME.cam.zoom * factor));
+
+  const mx = GAME.mouse.x;
+  const my = GAME.mouse.y;
+  GAME.cam.x = mx - (mx - GAME.cam.x) * (newZoom / GAME.cam.zoom);
+  GAME.cam.y = my - (my - GAME.cam.y) * (newZoom / GAME.cam.zoom);
+  GAME.cam.zoom = newZoom;
+
+  renderMinimap();
+}, { passive: false });
+
+window.addEventListener('keydown', (e) => {
+  const speed = 35;
+  if (e.key === 'w' || e.key === 'ArrowUp') GAME.cam.y += speed;
+  if (e.key === 's' || e.key === 'ArrowDown') GAME.cam.y -= speed;
+  if (e.key === 'a' || e.key === 'ArrowLeft') GAME.cam.x += speed;
+  if (e.key === 'd' || e.key === 'ArrowRight') GAME.cam.x -= speed;
+  if (e.key === '1') selectTool('inspect');
+  if (e.key === '2') selectTool('road');
+  if (e.key === '3') selectTool('town');
+  if (e.key === '4') selectTool('building');
+  if (e.key === '5') selectTool('trees');
+  if (e.key === '6') selectTool('demolish');
+  renderMinimap();
+});
+
+vp.addEventListener('click', () => {
+  if (GAME.activeTool === 'inspect' && GAME.mouse.tileX >= 0 && GAME.mouse.tileY >= 0) {
+    const tile = GAME.tiles[GAME.mouse.tileY]?.[GAME.mouse.tileX];
+    if (tile && tile.building) {
+      const town = GAME.towns.find(t => t.id === tile.building.townId);
+      if (town) openTownDialog(town);
+    }
+  }
+});
+
+/* =========================================================================
+   UI HELPERS & HUD
+   ========================================================================= */
+
+function updateHUD() {
+  document.getElementById('txt-money').textContent = `$${GAME.money.toLocaleString()}`;
+  document.getElementById('txt-date').textContent = `Year ${GAME.date.year}, ${getMonth(GAME.date.month)}`;
+  document.getElementById('txt-towns').textContent = GAME.towns.length;
+
+  let totalPop = 0;
+  GAME.towns.forEach(t => totalPop += t.population);
+  document.getElementById('txt-pop').textContent = totalPop.toLocaleString();
+
+  document.getElementById('txt-routes').textContent = `${GAME.routes.length} Active`;
+
+  let inc = 0;
+  GAME.routes.forEach(r => inc += r.path.length * 10);
+  document.getElementById('txt-income').textContent = `+$${inc.toLocaleString()} / mo`;
+}
+
+function getMonth(m) {
+  const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return names[(m - 1) % 12];
+}
+
+function showToast(msg) {
+  const rack = document.getElementById('toast-rack');
+  const t = document.createElement('div');
+  t.className = 'toast-item';
+  t.textContent = msg;
+  rack.appendChild(t);
+  setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 3000);
+}
+
+function updateInspector(tx, ty) {
+  const nameEl = document.getElementById('tile-name');
+  const posEl = document.getElementById('tile-pos');
+  const descEl = document.getElementById('tile-desc');
+
+  if (tx < 0 || tx >= GAME.mapW || ty < 0 || ty >= GAME.mapH) {
+    nameEl.textContent = 'Beyond Boundary';
+    posEl.textContent = `Grid (${tx}, ${ty})`;
+    descEl.textContent = 'Uncharted wilderness.';
+    return;
+  }
+
+  const tile = GAME.tiles[ty][tx];
+  posEl.textContent = `Grid (${tx}, ${ty})`;
+
+  if (tile.building) {
+    nameEl.textContent = tile.building.type === 'hall' ? `🏛️ ${tile.building.name} (Town Hall)` : `🏠 House (${tile.building.name})`;
+    const town = GAME.towns.find(t => t.id === tile.building.townId);
+    descEl.textContent = town ? `Town Pop: ${town.population.toLocaleString()} | Click to inspect.` : 'Urban building.';
+  } else if (tile.road) {
+    nameEl.textContent = '🛣️ Paved Street';
+    descEl.textContent = `Mask: ${tile.road} | Street transit route.`;
+  } else if (tile.tree) {
+    nameEl.textContent = '🌲 Forest Timber';
+    descEl.textContent = 'Can be cleared with bulldozer.';
+  } else if (tile.type === 'water') {
+    nameEl.textContent = '🌊 Basin Water';
+    descEl.textContent = 'Deep water body.';
+  } else {
+    nameEl.textContent = '🌱 Open Meadow';
+    descEl.textContent = 'Clear land ready for streets or expansion.';
+  }
+}
+
+function openTownDialog(town) {
+  const card = document.getElementById('town-card');
+  document.getElementById('town-title').textContent = town.name;
+  document.getElementById('town-pop').textContent = town.population.toLocaleString();
+  document.getElementById('town-bldgs').textContent = town.buildings;
+
+  const isConn = GAME.routes.some(r => r.t1.id === town.id || r.t2.id === town.id);
+  const netEl = document.getElementById('town-net');
+  if (isConn) {
+    netEl.textContent = 'Connected (Trading Goods & Passengers)';
+    netEl.style.color = '#4ade80';
+  } else {
+    netEl.textContent = 'Isolated (Lay streets to connect!)';
+    netEl.style.color = '#f87171';
+  }
+  card.style.display = 'block';
+}
+
+document.getElementById('btn-close-town').addEventListener('click', () => {
+  document.getElementById('town-card').style.display = 'none';
+});
+
+function selectTool(name) {
+  GAME.activeTool = name;
+  document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tool') === name);
+  });
+
+  vp.className = '';
+  if (name === 'road') vp.classList.add('building-road');
+  if (name === 'demolish') vp.classList.add('demolishing');
+}
+
+document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(btn => {
+  btn.addEventListener('click', () => selectTool(btn.getAttribute('data-tool')));
+});
+
+document.getElementById('btn-projection-toggle').addEventListener('click', () => {
+  GAME.viewMode = GAME.viewMode === 'iso' ? 'ortho' : 'iso';
+  document.getElementById('btn-projection-toggle').textContent = GAME.viewMode === 'iso' ? '📐 View: Isometric' : '📐 View: Top-Down';
+  centerCameraOn(Math.floor(GAME.mapW / 2), Math.floor(GAME.mapH / 2));
+  renderMinimap();
+});
+
+const speeds = [
+  { id: 'spd-pause', s: 0 },
+  { id: 'spd-1x', s: 1 },
+  { id: 'spd-2x', s: 2 },
+  { id: 'spd-5x', s: 5 }
+];
+speeds.forEach(item => {
+  document.getElementById(item.id).addEventListener('click', () => {
+    GAME.simSpeed = item.s;
+    speeds.forEach(o => document.getElementById(o.id).classList.toggle('active', o.id === item.id));
+  });
+});
+
+document.getElementById('btn-zoom-add').addEventListener('click', () => {
+  GAME.cam.zoom = Math.min(2.5, GAME.cam.zoom * 1.25);
+  renderMinimap();
+});
+document.getElementById('btn-zoom-sub').addEventListener('click', () => {
+  GAME.cam.zoom = Math.max(0.35, GAME.cam.zoom * 0.8);
+  renderMinimap();
+});
+document.getElementById('btn-center-capital').addEventListener('click', () => {
+  if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
+  else centerCameraOn(Math.floor(GAME.mapW / 2), Math.floor(GAME.mapH / 2));
+  renderMinimap();
+});
+
+document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+  GAME.audio.enabled = !GAME.audio.enabled;
+  document.getElementById('btn-audio-toggle').textContent = GAME.audio.enabled ? '🔊 Audio: ON' : '🔇 Audio: OFF';
+});
+
+/* =========================================================================
+   MINIMAP
+   ========================================================================= */
+
+function renderMinimap() {
+  const mw = minimapCanvas.width;
+  const mh = minimapCanvas.height;
+  minimapCtx.fillStyle = '#060e12';
+  minimapCtx.fillRect(0, 0, mw, mh);
+
+  const sx = mw / GAME.mapW;
+  const sy = mh / GAME.mapH;
+
+  for (let y = 0; y < GAME.mapH; y++) {
+    for (let x = 0; x < GAME.mapW; x++) {
+      const tile = GAME.tiles[y][x];
+      if (tile.type === 'water') minimapCtx.fillStyle = '#0284c7';
+      else if (tile.road) minimapCtx.fillStyle = '#facc15';
+      else if (tile.building) minimapCtx.fillStyle = '#f43f5e';
+      else if (tile.tree) minimapCtx.fillStyle = '#15803d';
+      else minimapCtx.fillStyle = '#3f7831';
+
+      minimapCtx.fillRect(x * sx, y * sy, Math.max(1, sx), Math.max(1, sy));
+    }
+  }
+
+  GAME.towns.forEach(t => {
+    minimapCtx.fillStyle = '#ffffff';
+    minimapCtx.fillRect(t.x * sx - 2, t.y * sy - 2, 5, 5);
+  });
+
+  const c1 = screenToTile(0, 0);
+  const c2 = screenToTile(canvas.width, canvas.height);
+  minimapCtx.strokeStyle = '#ffffff';
+  minimapCtx.lineWidth = 1.5;
+  minimapCtx.strokeRect(c1.x * sx, c1.y * sy, (c2.x - c1.x) * sx, (c2.y - c1.y) * sy);
+
+  document.getElementById('lbl-radar-dim').textContent = `${GAME.mapW}x${GAME.mapH}`;
+}
+
+minimapCanvas.addEventListener('mousedown', (e) => {
+  const rect = minimapCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const tx = Math.floor((mx / minimapCanvas.width) * GAME.mapW);
+  const ty = Math.floor((my / minimapCanvas.height) * GAME.mapH);
+  centerCameraOn(tx, ty);
+  renderMinimap();
+});
+
+/* =========================================================================
+   STARTUP & PRESET DIALOG (TINY, MEDIUM, LARGE, EXTRA LARGE, WORLD, CUSTOM)
+   ========================================================================= */
+
+const PRESETS = {
+  tiny: { w: 20, h: 20, towns: 2, water: 15, trees: 12 },
+  medium: { w: 40, h: 40, towns: 5, water: 20, trees: 15 },
+  large: { w: 70, h: 70, towns: 10, water: 25, trees: 18 },
+  xlarge: { w: 110, h: 110, towns: 18, water: 25, trees: 20 },
+  world: { w: 160, h: 160, towns: 28, water: 30, trees: 22 }
+};
+
+let activePreset = 'medium';
+
+document.querySelectorAll('.preset-tile').forEach(tile => {
+  tile.addEventListener('click', () => {
+    document.querySelectorAll('.preset-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    activePreset = tile.getAttribute('data-size');
+
+    const customBox = document.getElementById('custom-box');
+    customBox.style.display = activePreset === 'custom' ? 'block' : 'none';
+  });
+});
+
+['w', 'h', 'towns', 'water', 'trees'].forEach(k => {
+  const sl = document.getElementById(`sl-${k}`);
+  const val = document.getElementById(`val-sl-${k}`);
+  sl.addEventListener('input', () => {
+    val.textContent = (k === 'water' || k === 'trees') ? `${sl.value}%` : sl.value;
+  });
+});
+
+document.getElementById('btn-open-map-dialog').addEventListener('click', () => {
+  document.getElementById('modal-map-gen').style.display = 'flex';
+});
+
+document.getElementById('btn-confirm-gen').addEventListener('click', () => {
+  GAME.audio.ensure();
+  let conf;
+  if (activePreset === 'custom') {
+    conf = {
+      w: parseInt(document.getElementById('sl-w').value),
+      h: parseInt(document.getElementById('sl-h').value),
+      towns: parseInt(document.getElementById('sl-towns').value),
+      water: parseInt(document.getElementById('sl-water').value),
+      trees: parseInt(document.getElementById('sl-trees').value)
+    };
+  } else {
+    conf = PRESETS[activePreset];
+  }
+
+  generateMap(conf.w, conf.h, conf.towns, conf.water, conf.trees);
+  document.getElementById('modal-map-gen').style.display = 'none';
+  showToast(`🗺️ Generated ${conf.w}x${conf.h} map with ${GAME.towns.length} towns!`);
+});
+
+// Initial boot
+fitCanvas();
+generateMap(40, 40, 5, 20, 15);
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>
