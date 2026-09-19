@@ -1,2023 +1,2495 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Burrow & Blade: Rabbit Colony Simulation</title>
-<style>
-  :root {
-    --bg-dark: #111a1e;
-    --panel-bg: rgba(22, 36, 43, 0.94);
-    --panel-header: #2c4c5a;
-    --panel-border: #4d7a8f;
-    --accent-gold: #fbbf24;
-    --accent-carrot: #f97316;
-    --accent-green: #34d399;
-    --accent-blue: #38bdf8;
-    --accent-wood: #b45309;
-    --accent-stone: #94a3b8;
-    --accent-red: #ef4444;
-    --text-main: #f1f5f9;
-    --text-dim: #94a3b8;
-    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Burrow & Blade: Rabbit Colony Simulation</title>
+  <style>
+    :root {
+      --bg-dark: #121815;
+      --panel-bg: rgba(22, 30, 26, 0.94);
+      --panel-border: #3d5245;
+      --accent-gold: #e5b958;
+      --accent-carrot: #e67e22;
+      --accent-green: #48a05c;
+      --text-main: #f0f4f1;
+      --text-muted: #a0b3a6;
+      --font-family: 'Cinzel', 'Trajan Pro', 'Georgia', 'Times New Roman', serif;
+      --font-ui: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-  body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: var(--font-stack); color: var(--text-main); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
 
-  #app { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      font-family: var(--font-ui);
+      color: var(--text-main);
+    }
 
-  /* TOP HUD */
-  #top-bar {
-    height: 52px;
-    background: linear-gradient(180deg, #243e4b 0%, #152730 100%);
-    border-bottom: 2px solid #0b151a;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    z-index: 50;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-  }
+    #canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      cursor: grab;
+    }
+    #canvas-container.panning {
+      cursor: grabbing;
+    }
+    #canvas-container.building-mode {
+      cursor: crosshair;
+    }
 
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 800;
-    font-size: 17px;
-    color: var(--accent-gold);
-    text-shadow: 1px 1px 2px #000;
-  }
-  .brand span.race-tag {
-    font-size: 11px;
-    background: rgba(249, 115, 22, 0.25);
-    border: 1px solid var(--accent-carrot);
-    color: var(--accent-carrot);
-    padding: 2px 7px;
-    border-radius: 12px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
 
-  .res-rack {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+    /* Top Navigation / Resource Bar */
+    #top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      background: linear-gradient(180deg, rgba(14, 20, 17, 0.98) 0%, rgba(18, 26, 22, 0.92) 100%);
+      border-bottom: 2px solid var(--panel-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 10;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
 
-  .res-pill {
-    background: rgba(11, 22, 28, 0.85);
-    border: 1px solid var(--panel-border);
-    border-radius: 6px;
-    padding: 3px 9px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
-  }
-  .res-val { font-family: 'Consolas', monospace; font-weight: 700; color: #fff; }
-  .res-val.carrot { color: #fb923c; }
-  .res-val.wheat { color: #fde047; }
-  .res-val.wood { color: #d97706; }
-  .res-val.stone { color: #cbd5e1; }
-  .res-val.bread { color: #fef08a; }
-  .res-val.gold { color: #facc15; }
+    .view-mode-tabs {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
 
-  .top-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+    .tab-btn {
+      background: #1c2721;
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+      background: #25362d;
+      color: var(--text-main);
+      border-color: var(--accent-gold);
+    }
+    .tab-btn.active {
+      background: linear-gradient(180deg, #2f4539 0%, #1e2e25 100%);
+      color: var(--accent-gold);
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 10px rgba(229, 185, 88, 0.25);
+    }
 
-  /* BUTTONS */
-  .btn {
-    background: linear-gradient(180deg, #3d677b 0%, #254453 100%);
-    border: 1px solid var(--panel-border);
-    color: #fff;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 5px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-    transition: all 0.1s ease;
-  }
-  .btn:hover { background: linear-gradient(180deg, #4d809a 0%, #30576a 100%); border-color: #8ac0db; }
-  .btn:active { transform: translateY(1px); }
-  .btn.active { background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%); border-color: #fdba74; }
-  .btn.world-btn { background: linear-gradient(180deg, #059669 0%, #047857 100%); border-color: #6ee7b7; font-weight: 700; }
-  .btn.world-btn:hover { background: linear-gradient(180deg, #10b981 0%, #059669 100%); }
+    .resources-strip {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 4px 8px;
+    }
 
-  /* TOOLBAR */
-  #toolbar {
-    height: 52px;
-    background: linear-gradient(180deg, #203743 0%, #14242c 100%);
-    border-bottom: 2px solid #091216;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    z-index: 45;
-  }
+    .res-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .res-item .icon {
+      font-size: 16px;
+    }
+    .res-item.gold { color: #f1c40f; }
+    .res-item.carrot { color: #e67e22; }
+    .res-item.wheat { color: #f39c12; }
+    .res-item.bread { color: #e8a87c; }
+    .res-item.wood { color: #a3704c; }
+    .res-item.stone { color: #bdc3c7; }
+    .res-item.pop { color: #2ecc71; }
 
-  .tool-cluster {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(8, 16, 20, 0.4);
-    padding: 3px 6px;
-    border-radius: 7px;
-    border: 1px solid rgba(255,255,255,0.06);
-  }
+    .time-speed-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-  .cost-tag {
-    font-size: 10px;
-    padding: 1px 4px;
-    border-radius: 3px;
-    background: rgba(0,0,0,0.4);
-    color: var(--accent-gold);
-    font-weight: 700;
-  }
+    .speed-btn {
+      background: #1c2721;
+      border: 1px solid var(--panel-border);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .speed-btn:hover {
+      background: #283a30;
+      color: var(--text-main);
+    }
+    .speed-btn.active {
+      background: var(--accent-gold);
+      color: #121815;
+      border-color: var(--accent-gold);
+    }
 
-  /* VIEWPORT AREA */
-  #viewport-area {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-    background: #091318;
-    cursor: grab;
-  }
-  #viewport-area.panning { cursor: grabbing; }
-  #viewport-area.building { cursor: crosshair; }
+    .day-clock {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 8px;
+      white-space: nowrap;
+    }
 
-  #canvas-main {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-  }
+    /* Bottom Action & Building Bar */
+    #bottom-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+    }
 
-  /* FLOATING PANELS */
-  .hud-panel {
-    position: absolute;
-    background: var(--panel-bg);
-    border: 2px solid var(--panel-border);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
-    backdrop-filter: blur(6px);
-    z-index: 40;
-  }
+    .build-btn {
+      background: #19251f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 72px;
+      transition: all 0.2s ease;
+    }
+    .build-btn:hover {
+      background: #25392e;
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+    .build-btn.active {
+      background: #2d4537;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 12px rgba(229, 185, 88, 0.35);
+    }
+    .build-btn .icon {
+      font-size: 22px;
+    }
+    .build-btn .label {
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .build-btn .cost {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
 
-  /* COLONY RADAR */
-  #mini-radar {
-    bottom: 16px;
-    right: 16px;
-    width: 190px;
-    height: 190px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-  }
-  .radar-head {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 5px;
-  }
-  #canvas-radar {
-    flex: 1;
-    width: 100%;
-    background: #060e12;
-    border: 1px solid #000;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+    .divider {
+      width: 1px;
+      height: 38px;
+      background: var(--panel-border);
+      margin: 0 4px;
+    }
 
-  /* ZOOM CONTROLS */
-  #quick-zoom {
-    bottom: 16px;
-    left: 16px;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .round-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: #254453;
-    border: 1px solid var(--panel-border);
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-  }
-  .round-btn:hover { background: #355e73; border-color: #93c5fd; }
+    /* Side Panels / Modals */
+    .floating-card {
+      position: absolute;
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 16px;
+      z-index: 15;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(10px);
+      max-width: 320px;
+      display: none;
+    }
+    .floating-card.visible {
+      display: block;
+      animation: fadeIn 0.15s ease-out;
+    }
 
-  /* CITIZEN ROSTER POPUP */
-  #roster-card {
-    top: 16px;
-    left: 16px;
-    max-width: 320px;
-    padding: 12px 14px;
-    display: none;
-    font-size: 12px;
-  }
-  .roster-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--panel-border);
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-  }
-  .rabbit-avatar {
-    font-size: 28px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 50%;
-    width: 44px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid var(--accent-gold);
-  }
-  .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-dim); }
-  .stat-row b { color: #fff; }
+    #inspector-card {
+      bottom: 90px;
+      right: 20px;
+      width: 300px;
+    }
 
-  /* WORLD MAP MODAL / OVERLAY */
-  #world-overlay-panel {
-    position: absolute;
-    top: 16px;
-    right: 220px;
-    padding: 10px 16px;
-    font-size: 12px;
-    display: none;
-  }
+    #world-tile-card {
+      top: 70px;
+      right: 20px;
+      width: 320px;
+    }
 
-  /* TOAST NOTIFICATIONS */
-  #toast-rack {
-    position: absolute;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 100;
-    pointer-events: none;
-  }
-  .toast-item {
-    background: rgba(15, 33, 42, 0.96);
-    border: 1px solid var(--accent-gold);
-    color: #fff;
-    padding: 8px 18px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
-    animation: toastPop 3.2s forwards ease;
-    white-space: nowrap;
-  }
-  @keyframes toastPop {
-    0% { opacity: 0; transform: translateY(-8px); }
-    12% { opacity: 1; transform: translateY(0); }
-    85% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-8px); }
-  }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-family: var(--font-family);
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .card-close:hover {
+      color: #ff6b6b;
+    }
 
-  /* MODAL WINDOWS */
-  .modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(5, 12, 16, 0.88);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000; backdrop-filter: blur(6px);
-  }
-  .dialog-box {
-    background: linear-gradient(180deg, #24414f 0%, #15262f 100%);
-    border: 2px solid var(--panel-border);
-    border-radius: 12px;
-    width: 680px; max-width: 94vw; max-height: 88vh;
-    overflow-y: auto; padding: 24px;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.85);
-  }
-  .dialog-title {
-    font-size: 20px; font-weight: 800; color: var(--accent-gold);
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 6px;
-  }
-  .close-x { cursor: pointer; font-size: 20px; color: var(--text-dim); }
-  .close-x:hover { color: #fff; }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      color: var(--text-muted);
+    }
+    .stat-val {
+      font-weight: 600;
+      color: var(--text-main);
+    }
 
-  /* CARAVAN DIALOG */
-  .caravan-target-card {
-    background: rgba(9, 19, 25, 0.65);
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-</style>
+    .meter-bar {
+      width: 100%;
+      height: 6px;
+      background: #111a14;
+      border-radius: 3px;
+      margin-top: 2px;
+      overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .meter-fill.hunger { background: #e67e22; }
+    .meter-fill.happiness { background: #2ecc71; }
+    .meter-fill.energy { background: #3498db; }
+
+    .action-btn {
+      width: 100%;
+      background: linear-gradient(180deg, #2b3d32 0%, #1c2720 100%);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      background: #364d3f;
+      box-shadow: 0 0 10px rgba(229, 185, 88, 0.3);
+    }
+
+    /* Roster / Matrix Modal */
+    #roster-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 720px;
+      max-height: 80vh;
+      background: var(--panel-bg);
+      border: 2px solid var(--accent-gold);
+      border-radius: 10px;
+      padding: 20px;
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(12px);
+    }
+    #roster-modal.visible {
+      display: flex;
+    }
+
+    .roster-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+      overflow-y: auto;
+    }
+    .roster-table th, .roster-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .roster-table th {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
+    .job-select {
+      background: #111a14;
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Notification Banner */
+    #toast-container {
+      position: absolute;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(18, 26, 21, 0.95);
+      border: 1px solid var(--accent-gold);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-main);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      animation: slideDown 0.25s ease-out;
+    }
+
+    /* World Map Overlay Guides */
+    .world-legend {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      z-index: 10;
+      display: none;
+    }
+    .world-legend.visible {
+      display: block;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .legend-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
 
-<div id="app">
-  <!-- TOP STATUS BAR -->
-  <header id="top-bar">
-    <div class="brand">
-      <span>🐇</span>
-      <span>BURROW & BLADE</span>
-      <span class="race-tag">Rabbit Colony</span>
-    </div>
-
-    <div class="res-rack">
-      <div class="res-pill" title="Carrots (Staple food for rabbits)">
-        <span>🥕</span>
-        <span id="res-carrots" class="res-val carrot">60</span>
-      </div>
-      <div class="res-pill" title="Wheat (Harvested from fields)">
-        <span>🌾</span>
-        <span id="res-wheat" class="res-val wheat">30</span>
-      </div>
-      <div class="res-pill" title="Carrot Bread (High-nutrition baked goods)">
-        <span>🥖</span>
-        <span id="res-bread" class="res-val bread">20</span>
-      </div>
-      <div class="res-pill" title="Timber (Harvested from forests)">
-        <span>🌲</span>
-        <span id="res-timber" class="res-val wood">80</span>
-      </div>
-      <div class="res-pill" title="Field Stone (Hewn for sturdy burrows)">
-        <span>🪨</span>
-        <span id="res-stone" class="res-val stone">40</span>
-      </div>
-      <div class="res-pill" title="Tools (Crafted at the workshop)">
-        <span>🔨</span>
-        <span id="res-tools" class="res-val">15</span>
-      </div>
-      <div class="res-pill" title="Gold Sovereigns (Earned from world caravans)">
-        <span>🪙</span>
-        <span id="res-gold" class="res-val gold">250</span>
-      </div>
-      <div class="res-pill" title="Rabbit Population: Adults + Kits">
-        <span>👥</span>
-        <span id="res-pop" class="res-val">8 (6 Adults, 2 Kits)</span>
-      </div>
-      <div class="res-pill" title="Current Season & Day">
-        <span id="res-season">🌱 Spring, Day 1 (Yr 1)</span>
-      </div>
-    </div>
-
-    <div class="top-actions">
-      <button class="btn world-btn" id="btn-toggle-view">🗺️ World Map</button>
-      <button class="btn" id="btn-caravan-open">🎒 Trade Caravan</button>
-      <button class="btn" id="btn-colony-roster">📋 Citizens</button>
-      <button class="btn" id="btn-sound">🔊 Sound: ON</button>
-    </div>
-  </header>
-
-  <!-- ACTION TOOLBAR -->
-  <nav id="toolbar">
-    <div class="tool-cluster">
-      <button class="btn active" data-tool="inspect" title="Inspect citizens, burrows, and flora">🔍 Inspect</button>
-      <button class="btn" data-tool="path" title="Pave cobblestone paths (+40% rabbit speed)">
-        <span>🪨</span><span>Stone Path</span><span class="cost-tag">1 Stone</span>
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div class="view-mode-tabs">
+      <button class="tab-btn active" id="tab-town" onclick="game.setViewMode('town')">
+        <span>🏰</span> Cultures Town (Isometric)
       </button>
-      <button class="btn" data-tool="burrow" title="Dig a Cozy Rabbit Burrow (Houses 1 couple + kits)">
-        <span>🏡</span><span>Burrow</span><span class="cost-tag">25 Wood, 10 Stone</span>
+      <button class="tab-btn" id="tab-world" onclick="game.setViewMode('world')">
+        <span>🗺️</span> Regional Map (Square Grid)
       </button>
-      <button class="btn" data-tool="carrot_patch" title="Till a rich carrot patch for foragers and farmers">
-        <span>🥕</span><span>Carrot Patch</span><span class="cost-tag">5 Wood</span>
-      </button>
-      <button class="btn" data-tool="wheat_field" title="Plant wheat fields to mill flour for bakeries">
-        <span>🌾</span><span>Wheat Field</span><span class="cost-tag">8 Wood</span>
-      </button>
-      <button class="btn" data-tool="bakery" title="Bakery & Windmill (Bakes Carrot Bread)">
-        <span>🥖</span><span>Bakery</span><span class="cost-tag">30 Wood, 20 Stone</span>
-      </button>
-      <button class="btn" data-tool="woodcutter" title="Woodcutter Lodge (Harvests timber)">
-        <span>🪓</span><span>Woodcutter</span><span class="cost-tag">20 Wood</span>
-      </button>
-      <button class="btn" data-tool="stonemason" title="Stonemason Shack (Hews quarry stone)">
-        <span>⛏️</span><span>Masonry</span><span class="cost-tag">20 Wood, 10 Stone</span>
-      </button>
-      <button class="btn" data-tool="workshop" title="Tool Workshop (Crafts tools & carts)">
-        <span>🔨</span><span>Workshop</span><span class="cost-tag">35 Wood, 25 Stone</span>
-      </button>
-      <button class="btn" data-tool="hearth" title="Village Hearth & Well (Social gathering place)">
-        <span>🔥</span><span>Hearth</span><span class="cost-tag">15 Stone</span>
-      </button>
-      <button class="btn" data-tool="demolish" style="color:#f87171;" title="Dismantle a structure">🚜 Bulldoze</button>
     </div>
 
-    <div class="tool-cluster">
-      <button class="btn" id="spd-pause">⏸️</button>
-      <button class="btn active" id="spd-1x">1x</button>
-      <button class="btn" id="spd-2x">2x</button>
-      <button class="btn" id="spd-5x">5x</button>
-    </div>
-  </nav>
-
-  <!-- VIEWPORT AREA -->
-  <main id="viewport-area">
-    <canvas id="canvas-main"></canvas>
-
-    <!-- QUICK ZOOM CONTROLS -->
-    <div id="quick-zoom" class="hud-panel">
-      <button class="round-btn" id="btn-zoom-in" title="Zoom In">+</button>
-      <button class="round-btn" id="btn-zoom-out" title="Zoom Out">-</button>
-      <button class="round-btn" id="btn-center" title="Center on Rabbit Warren">🎯</button>
-    </div>
-
-    <!-- RADAR MINIMAP -->
-    <div id="mini-radar" class="hud-panel">
-      <div class="radar-head">
-        <span id="radar-title">Warren Radar</span>
-        <span id="radar-mode">Settlement</span>
+    <div class="resources-strip">
+      <div class="res-item pop" title="Adults / Kits / Elders (Total Living Burrows)">
+        <span class="icon">🐇</span>
+        <span id="res-pop">8/12</span>
       </div>
-      <canvas id="canvas-radar" width="170" height="170"></canvas>
-    </div>
-
-    <!-- WORLD OVERLAY HELPER -->
-    <div id="world-overlay-panel" class="hud-panel">
-      <h4 style="color:var(--accent-gold); margin-bottom:4px;">🌍 Kingdom Regional Map</h4>
-      <p style="color:var(--text-dim); font-size:11px;">Click your Warren (green banner) to zoom in. Click other animal towns to trade!</p>
-    </div>
-
-    <!-- CITIZEN INSPECTOR CARD (CULTURES & RIMWORLD STYLE) -->
-    <div id="roster-card" class="hud-panel">
-      <div class="roster-header">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <div class="rabbit-avatar" id="c-avatar">🐇</div>
-          <div>
-            <h4 id="c-name" style="color:var(--accent-gold); font-size:14px;">Barnaby Long-Ear</h4>
-            <div id="c-profession" style="color:var(--accent-carrot); font-size:11px; font-weight:700;">🥕 Master Carrot Farmer</div>
-          </div>
-        </div>
-        <span class="close-x" id="btn-close-roster">&times;</span>
+      <div class="res-item carrot" title="Carrots (Staple fresh food)">
+        <span class="icon">🥕</span>
+        <span id="res-carrots">40</span>
       </div>
-      <div class="stat-row">Life Stage: <b id="c-stage">Adult Buck (Age 22)</b></div>
-      <div class="stat-row">Spouse / Partner: <b id="c-spouse">Clover Long-Ear</b></div>
-      <div class="stat-row">Home Burrow: <b id="c-home">Bramble Hollow #1</b></div>
-      <div class="stat-row">Current Activity: <b id="c-task" style="color:#38bdf8;">Tending Carrot Patch</b></div>
-      <div class="stat-row">Carrying: <b id="c-carried">None</b></div>
-      <div class="stat-row">Hunger: <b id="c-hunger" style="color:#4ade80;">Full (92%)</b></div>
-      <div class="stat-row">Happiness: <b id="c-happiness" style="color:#fbbf24;">Content (88%)</b></div>
-      <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px;">
-        <label style="font-size:10px; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Assign Profession:</label>
-        <select id="sel-profession" style="width:100%; margin-top:4px; padding:4px; background:#0e1a20; color:#fff; border:1px solid var(--panel-border); border-radius:4px; font-size:11px;">
-          <option value="farmer">🥕 Carrot Farmer</option>
-          <option value="wheat_farmer">🌾 Wheat Farmer</option>
-          <option value="woodcutter">🪓 Woodcutter</option>
-          <option value="mason">⛏️ Stone Mason</option>
-          <option value="baker">🥖 Baker</option>
-          <option value="artisan">🔨 Craftsman / Smith</option>
-          <option value="unassigned">🌱 Colony Builder / Hauler</option>
-        </select>
+      <div class="res-item wheat" title="Wheat (Harvested grain)">
+        <span class="icon">🌾</span>
+        <span id="res-wheat">20</span>
+      </div>
+      <div class="res-item bread" title="Carrot Bread (Baked delicacy, boosts happiness & kits)">
+        <span class="icon">🥖</span>
+        <span id="res-bread">15</span>
+      </div>
+      <div class="res-item wood" title="Timber (Woodcutter logs)">
+        <span class="icon">🪵</span>
+        <span id="res-wood">50</span>
+      </div>
+      <div class="res-item stone" title="Cut Stone (Mason blocks)">
+        <span class="icon">🪨</span>
+        <span id="res-stone">30</span>
+      </div>
+      <div class="res-item gold" title="Gold Sovereigns (From world trade)">
+        <span class="icon">🪙</span>
+        <span id="res-gold">100</span>
       </div>
     </div>
 
-    <!-- TOAST POPUPS -->
-    <div id="toast-rack"></div>
-  </main>
-</div>
-
-<!-- CARAVAN MODAL -->
-<div class="modal-overlay" id="modal-caravan" style="display:none;">
-  <div class="dialog-box">
-    <div class="dialog-title">
-      <span>🎒 Form Trade Caravan</span>
-      <span class="close-x" id="btn-close-caravan">&times;</span>
-    </div>
-    <p style="color:var(--text-dim); font-size:12px; margin-bottom:14px;">
-      Dispatch your brave rabbit traders across the World Map to animal kingdoms to exchange colony goods for gold and exotic treasures.
-    </p>
-
-    <div id="caravan-targets-list">
-      <!-- Target Animal Factions -->
+    <div class="time-speed-controls">
+      <span class="day-clock" id="day-clock">Year 1, Spring • Day 12</span>
+      <button class="speed-btn" id="speed-0" onclick="game.setSpeed(0)">⏸</button>
+      <button class="speed-btn active" id="speed-1" onclick="game.setSpeed(1)">1x</button>
+      <button class="speed-btn" id="speed-2" onclick="game.setSpeed(2)">2x</button>
+      <button class="speed-btn" id="speed-5" onclick="game.setSpeed(5)">5x</button>
+      <button class="tab-btn" style="margin-left:8px;" onclick="game.openRoster()">📋 Warren Citizens</button>
+      <button class="speed-btn" id="audio-toggle" onclick="game.toggleAudio()" title="Sound On/Off">🔊</button>
     </div>
   </div>
-</div>
 
-<!-- CITIZENS MATRIX MODAL -->
-<div class="modal-overlay" id="modal-all-citizens" style="display:none;">
-  <div class="dialog-box" style="width:780px;">
-    <div class="dialog-title">
-      <span>👥 Colony Citizens & Family Tree</span>
-      <span class="close-x" id="btn-close-all-citizens">&times;</span>
+  <!-- Main Canvas -->
+  <div id="canvas-container">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- Bottom Build Bar (Town View Only) -->
+  <div id="bottom-bar">
+    <button class="build-btn" data-build="burrow" onclick="game.selectBuilding('burrow')">
+      <span class="icon">🏡</span>
+      <span class="label">Burrow</span>
+      <span class="cost">15🪵 10🪨</span>
+    </button>
+    <button class="build-btn" data-build="carrot" onclick="game.selectBuilding('carrot')">
+      <span class="icon">🥕</span>
+      <span class="label">Carrot Patch</span>
+      <span class="cost">5🪵</span>
+    </button>
+    <button class="build-btn" data-build="wheat" onclick="game.selectBuilding('wheat')">
+      <span class="icon">🌾</span>
+      <span class="label">Wheat Field</span>
+      <span class="cost">5🪵</span>
+    </button>
+    <button class="build-btn" data-build="bakery" onclick="game.selectBuilding('bakery')">
+      <span class="icon">🥖</span>
+      <span class="label">Bakery & Mill</span>
+      <span class="cost">25🪵 20🪨</span>
+    </button>
+    <button class="build-btn" data-build="woodcutter" onclick="game.selectBuilding('woodcutter')">
+      <span class="icon">🪓</span>
+      <span class="label">Woodcutter</span>
+      <span class="cost">20🪵 5🪨</span>
+    </button>
+    <button class="build-btn" data-build="mason" onclick="game.selectBuilding('mason')">
+      <span class="icon">⛏️</span>
+      <span class="label">Stone Mason</span>
+      <span class="cost">20🪵 15🪨</span>
+    </button>
+    <button class="build-btn" data-build="workshop" onclick="game.selectBuilding('workshop')">
+      <span class="icon">🔨</span>
+      <span class="label">Artisan Shop</span>
+      <span class="cost">30🪵 15🪨</span>
+    </button>
+    <button class="build-btn" data-build="hearth" onclick="game.selectBuilding('hearth')">
+      <span class="icon">🔥</span>
+      <span class="label">Village Hearth</span>
+      <span class="cost">10🪵 25🪨</span>
+    </button>
+    <div class="divider"></div>
+    <button class="build-btn" data-build="path" onclick="game.selectBuilding('path')">
+      <span class="icon">🛤️</span>
+      <span class="label">Stone Path</span>
+      <span class="cost">1🪨 (+50% Spd)</span>
+    </button>
+    <button class="build-btn" id="btn-cancel" onclick="game.cancelBuild()" style="display:none; border-color:#e74c3c;">
+      <span class="icon">❌</span>
+      <span class="label">Cancel</span>
+      <span class="cost">Esc</span>
+    </button>
+  </div>
+
+  <!-- Citizen / Building Inspector Card -->
+  <div class="floating-card" id="inspector-card">
+    <div class="card-header">
+      <div class="card-title" id="inspector-title">🐇 Rabbit Citizen</div>
+      <button class="card-close" onclick="game.closeInspector()">✕</button>
     </div>
-    <p style="color:var(--text-dim); font-size:12px; margin-bottom:14px;">
-      In our rabbit civilization, every individual has a home, partner, and profession. Happy couples with fed burrows bear kits to expand the colony.
-    </p>
+    <div id="inspector-content">
+      <!-- Injected via JS -->
+    </div>
+  </div>
 
-    <div style="max-height:360px; overflow-y:auto; border:1px solid var(--panel-border); border-radius:6px; background:rgba(6,14,18,0.6);">
-      <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+  <!-- World Map Tile Card -->
+  <div class="floating-card" id="world-tile-card">
+    <div class="card-header">
+      <div class="card-title" id="world-card-title">🗺️ Territory Square</div>
+      <button class="card-close" onclick="game.closeWorldCard()">✕</button>
+    </div>
+    <div id="world-card-content">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- Citizen Roster Modal -->
+  <div id="roster-modal">
+    <div class="card-header">
+      <div class="card-title">🐇 Warren Brambleton — Population & Job Assignment</div>
+      <button class="card-close" onclick="game.closeRoster()">✕</button>
+    </div>
+    <div style="overflow-y: auto; max-height: 60vh;">
+      <table class="roster-table">
         <thead>
-          <tr style="background:rgba(20,38,48,0.9); color:var(--text-dim);">
-            <th style="padding:8px 12px;">Rabbit Citizen</th>
-            <th style="padding:8px 12px;">Gender / Age</th>
-            <th style="padding:8px 12px;">Profession</th>
-            <th style="padding:8px 12px;">Burrow Home</th>
-            <th style="padding:8px 12px;">Partner</th>
-            <th style="padding:8px 12px;">Happiness</th>
+          <tr>
+            <th>Name</th>
+            <th>Type / Gender</th>
+            <th>Age</th>
+            <th>Profession</th>
+            <th>Family & Home</th>
+            <th>Happiness</th>
+            <th>Hunger</th>
           </tr>
         </thead>
-        <tbody id="all-citizens-tbody"></tbody>
+        <tbody id="roster-tbody">
+          <!-- Injected via JS -->
+        </tbody>
       </table>
     </div>
+    <button class="action-btn" onclick="game.closeRoster()" style="margin-top: 16px;">Close Citizen Register</button>
   </div>
-</div>
 
-<script>
-/* =========================================================================
-   BURROW & BLADE: GAME ENGINE & SIMULATION
-   ========================================================================= */
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
 
-// Audio Synthesizer via Web Audio API
-class ColonyAudio {
-  constructor() { this.ctx = null; this.enabled = true; }
-  ensure() {
-    if (!this.ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) this.ctx = new AC();
-    }
-  }
-  click() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const g = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.05);
-      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-      osc.connect(g); g.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.05);
-    } catch(e) {}
-  }
-  hop() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const g = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(180, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(280, this.ctx.currentTime + 0.06);
-      g.gain.setValueAtTime(0.04, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
-      osc.connect(g); g.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.06);
-    } catch(e) {}
-  }
-  build() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const osc = this.ctx.createOscillator();
-      const g = this.ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(350, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(550, this.ctx.currentTime + 0.08);
-      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-      osc.connect(g); g.connect(this.ctx.destination);
-      osc.start(); osc.stop(this.ctx.currentTime + 0.08);
-    } catch(e) {}
-  }
-  birthFanfare() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      [330, 440, 550, 660].forEach((f, i) => {
-        const osc = this.ctx.createOscillator();
-        const g = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.09);
-        g.gain.setValueAtTime(0.06, this.ctx.currentTime + i * 0.09);
-        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.09 + 0.2);
-        osc.connect(g); g.connect(this.ctx.destination);
-        osc.start(this.ctx.currentTime + i * 0.09);
-        osc.stop(this.ctx.currentTime + i * 0.09 + 0.2);
-      });
-    } catch(e) {}
-  }
-}
+  <!-- World Legend -->
+  <div class="world-legend" id="world-legend">
+    <div style="font-weight:bold; color:var(--accent-gold); margin-bottom:6px;">Regional Square Grid</div>
+    <div class="legend-item"><div class="legend-box" style="background:#3b7a42;"></div> 🌿 Meadow (Cost 1.0)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#1b4d2e;"></div> 🌲 Deep Woods (Cost 1.5)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#5a6369;"></div> ⛰️ Mountain (Cost 2.5)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#285b7a;"></div> 🌊 River (Cost 2.0)</div>
+    <div class="legend-item"><div class="legend-box" style="background:#7a6b32;"></div> 🌾 Hills (Cost 1.2)</div>
+    <div style="margin-top:8px; font-size:11px; color:var(--text-muted);">
+      Click any square to inspect. Click Brambleton or double-click to dive into Cultures Town view!
+    </div>
+  </div>
 
-// Master Simulation State
-const GAME = {
-  audio: new ColonyAudio(),
-  view: 'settlement', // 'settlement' | 'world'
-  speed: 1,
-  season: 'Spring',
-  day: 1,
-  year: 1,
-  dayTimer: 0,
-  activeTool: 'inspect',
+  <!-- Simulation & Rendering Code -->
+  <script>
+    /* ==========================================================================
+       BURROW & BLADE: CULTURES ISOMETRIC TOWN + SQUARE GRID WORLD MAP
+       ========================================================================== */
 
-  // Colony Treasury & Stockpile
-  res: {
-    carrots: 60,
-    wheat: 30,
-    bread: 20,
-    timber: 80,
-    stone: 40,
-    tools: 15,
-    gold: 250
-  },
+    // Constants
+    const ISO_TILE_W = 64;
+    const ISO_TILE_H = 32;
+    const TOWN_GRID_SIZE = 36;
+    const WORLD_GRID_SIZE = 10;
+    const WORLD_SQUARE_PX = 72;
 
-  // Citizen Rabbits
-  rabbits: [],
-  selectedRabbit: null,
-
-  // Settlement Map (32x32 tiles, top-down 2D bird's-eye)
-  settlement: {
-    w: 32,
-    h: 32,
-    tiles: [],
-    buildings: []
-  },
-
-  // World Map (16x16 regional tiles with neighboring animal kingdoms)
-  world: {
-    w: 16,
-    h: 16,
-    tiles: [],
-    playerX: 8,
-    playerY: 8,
-    kingdoms: [],
-    caravans: []
-  },
-
-  cam: {
-    settlement: { x: 0, y: 0, zoom: 1.4 },
-    world: { x: 0, y: 0, zoom: 1.0 }
-  },
-
-  mouse: {
-    x: 0, y: 0,
-    tileX: -1, tileY: -1,
-    isDown: false,
-    dragStartX: 0, dragStartY: 0,
-    isPanning: false
-  },
-
-  costs: {
-    path: { stone: 1 },
-    burrow: { timber: 25, stone: 10 },
-    carrot_patch: { timber: 5 },
-    wheat_field: { timber: 8 },
-    bakery: { timber: 30, stone: 20 },
-    woodcutter: { timber: 20 },
-    stonemason: { timber: 20, stone: 10 },
-    workshop: { timber: 35, stone: 25 },
-    hearth: { stone: 15 }
-  }
-};
-
-const RABBIT_FIRST_NAMES_M = ["Barnaby", "Pippin", "Rowan", "Bramble", "Jasper", "Oliver", "Chester", "Archie", "Felix", "Gideon", "Milo", "Thistle"];
-const RABBIT_FIRST_NAMES_F = ["Clover", "Hazel", "Juniper", "Willow", "Poppy", "Flora", "Daisy", "Blossom", "Meadow", "Fern", "Primrose", "Ivy"];
-const RABBIT_CLAN_NAMES = ["Long-Ear", "Cotton-Tail", "Bramble-Foot", "Moss-Burrow", "Whisker-Puff", "Quick-Hop", "Fern-Digger", "Briar-Patch", "Thistledown"];
-
-const ANIMAL_KINGDOMS = [
-  { name: "Krag-Hollow", race: "Badgers", icon: "🦡", desc: "Master ironminers & blacksmiths in mountain crags.", buys: "Carrot Bread & Food", pays: "Gold & Iron", x: 4, y: 3 },
-  { name: "Otter-Weir", race: "Otters", icon: "🦦", desc: "River fishers and pearl merchants.", buys: "Timber & Tools", pays: "Gold & River Salt", x: 12, y: 5 },
-  { name: "Reynar's Hold", race: "Foxes", icon: "🦊", desc: "Cunning frontier traders & weavers.", buys: "Carrots & Wheat", pays: "Fine Silk & Gold", x: 13, y: 12 },
-  { name: "Quill-Grove", race: "Hedgehogs", icon: "🦔", desc: "Forest herbalists & master woodcarvers.", buys: "Field Stone & Bread", pays: "Medicinal Herbs & Gold", x: 4, y: 13 }
-];
-
-/* =========================================================================
-   INITIALIZATION & WORLD GENERATION
-   ========================================================================= */
-
-function initGame() {
-  initSettlementMap(32, 32);
-  initWorldMap(16, 16);
-  initStarterRabbits();
-  centerSettlementCamera();
-  updateHUD();
-}
-
-function initSettlementMap(w, h) {
-  GAME.settlement.w = w;
-  GAME.settlement.h = h;
-  GAME.settlement.tiles = [];
-  GAME.settlement.buildings = [];
-
-  for (let y = 0; y < h; y++) {
-    const row = [];
-    for (let x = 0; x < w; x++) {
-      let type = 'grass';
-      // River along one side
-      if (x === 3 || x === 4) type = 'water';
-      // Forest clusters
-      let tree = false;
-      if (type === 'grass' && Math.random() < 0.18 && (x > 8 || y > 8)) tree = true;
-      // Stone boulders
-      let rock = false;
-      if (type === 'grass' && !tree && Math.random() < 0.05) rock = true;
-
-      row.push({ type, tree, rock, path: false, buildingId: null });
-    }
-    GAME.settlement.tiles.push(row);
-  }
-
-  // Clear starter village center
-  const cx = 16, cy = 16;
-  for (let dy = -5; dy <= 5; dy++) {
-    for (let dx = -5; dx <= 5; dx++) {
-      const tile = GAME.settlement.tiles[cy + dy][cx + dx];
-      tile.tree = false;
-      tile.rock = false;
-    }
-  }
-
-  // Place Central Hearth
-  addBuilding('hearth', cx, cy);
-
-  // Place 2 Starter Burrows
-  addBuilding('burrow', cx - 3, cy - 2);
-  addBuilding('burrow', cx + 3, cy - 2);
-
-  // Place Starter Carrot Patch & Woodcutter
-  addBuilding('carrot_patch', cx - 3, cy + 3);
-  addBuilding('woodcutter', cx + 3, cy + 3);
-
-  // Connect with stone pathways
-  for (let x = cx - 4; x <= cx + 4; x++) GAME.settlement.tiles[cy][x].path = true;
-  for (let y = cy - 3; y <= cy + 3; y++) GAME.settlement.tiles[y][cx].path = true;
-}
-
-function initWorldMap(w, h) {
-  GAME.world.w = w;
-  GAME.world.h = h;
-  GAME.world.tiles = [];
-  GAME.world.kingdoms = [...ANIMAL_KINGDOMS];
-  GAME.world.caravans = [];
-
-  for (let y = 0; y < h; y++) {
-    const row = [];
-    for (let x = 0; x < w; x++) {
-      let biome = 'meadow';
-      if (y < 4) biome = 'mountains';
-      else if (x > 11 && y > 8) biome = 'forest';
-      else if (x === 6 || x === 7) biome = 'river';
-      row.push({ biome });
-    }
-    GAME.world.tiles.push(row);
-  }
-}
-
-function initStarterRabbits() {
-  GAME.rabbits = [];
-
-  // Couple 1
-  const b1 = createRabbit("Barnaby", "Long-Ear", "M", 24, "farmer");
-  const d1 = createRabbit("Clover", "Long-Ear", "F", 22, "farmer");
-  b1.spouseId = d1.id;
-  d1.spouseId = b1.id;
-  b1.burrowId = 1;
-  d1.burrowId = 1;
-
-  // Kit for Couple 1
-  const k1 = createRabbit("Pippin", "Long-Ear", "M", 3, "kit");
-  k1.burrowId = 1;
-
-  // Couple 2
-  const b2 = createRabbit("Rowan", "Bramble-Foot", "M", 26, "woodcutter");
-  const d2 = createRabbit("Hazel", "Bramble-Foot", "F", 24, "baker");
-  b2.spouseId = d2.id;
-  d2.spouseId = b2.id;
-  b2.burrowId = 2;
-  d2.burrowId = 2;
-
-  // Kit for Couple 2
-  const k2 = createRabbit("Willow", "Bramble-Foot", "F", 2, "kit");
-  k2.burrowId = 2;
-
-  // 2 young adult helpers
-  const b3 = createRabbit("Jasper", "Cotton-Tail", "M", 19, "mason");
-  const d3 = createRabbit("Juniper", "Cotton-Tail", "F", 18, "unassigned");
-
-  GAME.rabbits.push(b1, d1, k1, b2, d2, k2, b3, d3);
-}
-
-function createRabbit(firstName, clanName, gender, age, profession) {
-  const cx = 16 * 32, cy = 16 * 32;
-  return {
-    id: Math.random().toString(36).substring(2, 9),
-    name: `${firstName} ${clanName}`,
-    firstName,
-    clanName,
-    gender,
-    age, // years
-    lifeStage: age < 5 ? 'kit' : (age > 45 ? 'elder' : 'adult'),
-    spouseId: null,
-    burrowId: null,
-    profession: profession || 'unassigned',
-    workplaceId: null,
-    x: cx + (Math.random() * 80 - 40),
-    y: cy + (Math.random() * 80 - 40),
-    targetX: cx,
-    targetY: cy,
-    vx: 0, vy: 0,
-    speed: 38,
-    state: 'idle',
-    actionTimer: Math.random() * 2,
-    hopPhase: Math.random() * Math.PI,
-    hunger: 80 + Math.random() * 20,
-    happiness: 85 + Math.random() * 15,
-    carried: null, // { type, amount }
-    color: gender === 'M' ? '#d4a373' : '#faedcd'
-  };
-}
-
-function addBuilding(type, tx, ty) {
-  const id = GAME.settlement.buildings.length + 1;
-  const bldg = {
-    id,
-    type,
-    tx, ty,
-    name: getBuildingName(type, id),
-    level: 1,
-    productionTimer: 0
-  };
-  GAME.settlement.buildings.push(bldg);
-
-  // Mark tiles
-  const size = (type === 'hearth' || type === 'bakery' || type === 'burrow') ? 2 : 1;
-  for (let dy = 0; dy < size; dy++) {
-    for (let dx = 0; dx < size; dx++) {
-      if (ty + dy < GAME.settlement.h && tx + dx < GAME.settlement.w) {
-        const t = GAME.settlement.tiles[ty + dy][tx + dx];
-        t.buildingId = id;
-        t.tree = false;
-        t.rock = false;
+    // Web Audio Synthesizer
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+      }
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+        if (!this.enabled) return;
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      }
+      playHop() {
+        this.playTone(340 + Math.random()*60, 'sine', 0.08, 0.03);
+      }
+      playBuild() {
+        this.playTone(220, 'triangle', 0.1, 0.08);
+        setTimeout(() => this.playTone(440, 'triangle', 0.15, 0.08), 80);
+      }
+      playLove() {
+        this.playTone(523.25, 'sine', 0.2, 0.07);
+        setTimeout(() => this.playTone(659.25, 'sine', 0.3, 0.07), 150);
+      }
+      playBirth() {
+        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 'sine', 0.25, 0.08), i * 120);
+        });
+      }
+      playTrade() {
+        this.playTone(440, 'triangle', 0.12, 0.08);
+        setTimeout(() => this.playTone(880, 'sine', 0.2, 0.1), 100);
       }
     }
-  }
-  return bldg;
-}
 
-function getBuildingName(type, id) {
-  if (type === 'burrow') return `Rabbit Burrow #${id}`;
-  if (type === 'carrot_patch') return `Carrot Patch #${id}`;
-  if (type === 'wheat_field') return `Wheat Field #${id}`;
-  if (type === 'bakery') return `Colony Windmill & Bakery`;
-  if (type === 'woodcutter') return `Timber Lodge`;
-  if (type === 'stonemason') return `Masonry Shed`;
-  if (type === 'workshop') return `Artisan Workshop`;
-  if (type === 'hearth') return `Village Green & Hearth`;
-  return `Building #${id}`;
-}
-
-/* =========================================================================
-   SIMULATION TICK: CITIZEN AI, REPRODUCTION & WORK (CULTURES ENGINE)
-   ========================================================================= */
-
-function tickSimulation(dt) {
-  if (GAME.speed === 0) return;
-  const spd = GAME.speed;
-
-  // Time & Calendar (Day/Season)
-  GAME.dayTimer += dt * 0.08 * spd;
-  if (GAME.dayTimer >= 1.0) {
-    GAME.dayTimer = 0;
-    GAME.day++;
-    if (GAME.day > 30) {
-      GAME.day = 1;
-      advanceSeason();
-    }
-    dailySimulationTick();
-    updateHUD();
-  }
-
-  // Rabbit AI Behavior
-  GAME.rabbits.forEach(r => tickRabbitAI(r, dt * spd));
-
-  // Building Production Cycles
-  GAME.settlement.buildings.forEach(b => tickBuilding(b, dt * spd));
-
-  // World Map Caravans
-  tickCaravans(dt * spd);
-}
-
-function advanceSeason() {
-  const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
-  let idx = seasons.indexOf(GAME.season);
-  idx = (idx + 1) % 4;
-  GAME.season = seasons[idx];
-  if (GAME.season === 'Spring') GAME.year++;
-
-  // Rabbits age by 1 year in Spring
-  if (GAME.season === 'Spring') {
-    GAME.rabbits.forEach(r => {
-      r.age++;
-      if (r.lifeStage === 'kit' && r.age >= 5) {
-        r.lifeStage = 'adult';
-        r.profession = 'unassigned';
-        showToast(`🎉 ${r.name} came of age and is now an Adult Rabbit! Ready for a profession.`);
+    // World Map Kingdom Definitions
+    const FACTIONS = {
+      brambleton: {
+        id: 'brambleton',
+        name: 'Warren Brambleton (You)',
+        race: 'Rabbits',
+        icon: '🐇',
+        gx: 4, gy: 5,
+        color: '#e5b958',
+        desc: 'Your peaceful rabbit warren. Renowned for rich carrot agriculture, hearty bread, and burrow engineering.',
+        trades: []
+      },
+      krag_hollow: {
+        id: 'krag_hollow',
+        name: 'Krag-Hollow Bastion',
+        race: 'Badger Clan',
+        icon: '🦡',
+        gx: 8, gy: 2,
+        color: '#95a5a6',
+        desc: 'Sturdy mountain badgers who smelt iron ore and forge heavy masterwork tools. Longing for fresh agricultural greens.',
+        trades: [
+          { give: { bread: 4, carrots: 10 }, get: { stone: 20, gold: 35 }, label: 'Export Food for Mountain Cut Stone & Gold' }
+        ]
+      },
+      otter_weir: {
+        id: 'otter_weir',
+        name: 'Otter-Weir Shallows',
+        race: 'Otter Guild',
+        icon: '🦦',
+        gx: 2, gy: 8,
+        color: '#3498db',
+        desc: 'Cheerful river fishers and salvage divers. They gladly barter river pearls and salt for timber and crafted wagons.',
+        trades: [
+          { give: { wood: 20, bread: 3 }, get: { gold: 45 }, label: 'Supply River Timber for Otters Guild Gold' }
+        ]
+      },
+      reynar_hold: {
+        id: 'reynar_hold',
+        name: "Reynar's Hold",
+        race: 'Red Foxes',
+        icon: '🦊',
+        gx: 9, gy: 7,
+        color: '#e67e22',
+        desc: 'Sophisticated frontier merchants dealing in fine silks, dyes, and spice blends. Quick at bargaining.',
+        trades: [
+          { give: { carrots: 25, bread: 5 }, get: { gold: 60 }, label: 'Caravan Feast Provisions for Fox Gold' }
+        ]
+      },
+      quill_grove: {
+        id: 'quill_grove',
+        name: 'Quill-Grove Enclave',
+        race: 'Hedgehog Herbalists',
+        icon: '🦔',
+        gx: 1, gy: 2,
+        color: '#2ecc71',
+        desc: 'Quiet woodland herbalists who prepare rare medicinal salves and forest seeds. Deep respect for rabbit gardeners.',
+        trades: [
+          { give: { carrots: 15 }, get: { wood: 15, gold: 20 }, label: 'Herbal Exchange for Timber & Gold' }
+        ]
       }
-      if (r.lifeStage === 'adult' && r.age >= 45) {
-        r.lifeStage = 'elder';
-        showToast(`👴 ${r.name} has become a respected Village Elder.`);
+    };
+
+    // Citizen Name Generator
+    const FIRST_NAMES_BUCK = ['Barnaby', 'Pippin', 'Bramble', 'Jasper', 'Rowan', 'Clover', 'Thistle', 'Basil', 'Otis', 'Finley', 'Cobalt', 'Rolo'];
+    const FIRST_NAMES_DOE = ['Hazel', 'Willow', 'Daisie', 'Poppy', 'Honey', 'Marigold', 'Lily', 'Clover', 'Briar', 'Fern', 'Nutmeg', 'Blossom'];
+    const CLAN_NAMES = ['Cottonfoot', 'Thistlewood', 'Meadowbark', 'Quickhop', 'Dewberry', 'Brierthorn', 'Softpaw', 'Greenhollow', 'Oakhaven'];
+
+    class RabbitPawn {
+      constructor(options = {}) {
+        this.id = 'pawn_' + Math.random().toString(36).substr(2, 9);
+        this.gender = options.gender || (Math.random() > 0.5 ? 'Buck' : 'Doe');
+        const firstList = this.gender === 'Buck' ? FIRST_NAMES_BUCK : FIRST_NAMES_DOE;
+        this.firstName = options.firstName || firstList[Math.floor(Math.random() * firstList.length)];
+        this.clanName = options.clanName || CLAN_NAMES[Math.floor(Math.random() * CLAN_NAMES.length)];
+        this.name = `${this.firstName} ${this.clanName}`;
+        
+        this.age = options.age !== undefined ? options.age : 18 + Math.floor(Math.random() * 12);
+        this.profession = options.profession || 'Farmer'; // Farmer, Baker, Woodcutter, Mason, Artisan, Trader, Elder, Kit
+        this.furColor = options.furColor || ['#d5b895', '#c89d7c', '#e6dec8', '#8c7b70', '#5c4e43', '#f2f0eb'][Math.floor(Math.random() * 6)];
+        
+        // Coordinates on Town Grid (floating point for smooth movement)
+        this.gx = options.gx !== undefined ? options.gx : 18 + (Math.random() * 6 - 3);
+        this.gy = options.gy !== undefined ? options.gy : 18 + (Math.random() * 6 - 3);
+        this.targetGx = this.gx;
+        this.targetGy = this.gy;
+        
+        // Cultures-style Life Cycle & Relationships
+        this.homeBurrowId = options.homeBurrowId || null;
+        this.workplaceId = options.workplaceId || null;
+        this.spouseId = options.spouseId || null;
+        this.children = []; // Kit IDs
+        
+        // Needs
+        this.hunger = 80 + Math.random() * 20; // 0 (starving) to 100 (full)
+        this.happiness = 85 + Math.random() * 15; // 0 to 100
+        this.energy = 90 + Math.random() * 10;
+        
+        // States & Animations
+        this.state = 'idle'; // idle, walking, working, courting, sleeping, eating
+        this.stateTimer = Math.random() * 4;
+        this.carriedItem = null; // 'carrot', 'wheat', 'bread', 'wood', 'stone'
+        this.hopPhase = Math.random() * Math.PI * 2;
+        this.speechBubble = null; // { text: '❤️', timer: 3.0 }
       }
-    });
-  }
 
-  showToast(`📅 Season changed: Welcome to ${GAME.season}, Year ${GAME.year}!`);
-  updateHUD();
-}
+      get isKit() { return this.age < 5; }
+      get isElder() { return this.age >= 45; }
+      get isAdult() { return this.age >= 5 && this.age < 45; }
 
-function dailySimulationTick() {
-  // 1. Food Consumption
-  GAME.rabbits.forEach(r => {
-    if (GAME.res.bread >= 1) {
-      GAME.res.bread -= 0.5;
-      r.hunger = Math.min(100, r.hunger + 25);
-      r.happiness = Math.min(100, r.happiness + 8);
-    } else if (GAME.res.carrots >= 1) {
-      GAME.res.carrots -= 1;
-      r.hunger = Math.min(100, r.hunger + 15);
-    } else {
-      r.hunger = Math.max(0, r.hunger - 20);
-      r.happiness = Math.max(0, r.happiness - 15);
+      say(text, duration = 3) {
+        this.speechBubble = { text, timer: duration };
+      }
+
+      update(dt, town) {
+        // Speech bubble timer
+        if (this.speechBubble) {
+          this.speechBubble.timer -= dt;
+          if (this.speechBubble.timer <= 0) this.speechBubble = null;
+        }
+
+        // Needs degradation
+        this.hunger = Math.max(0, this.hunger - dt * 0.4);
+        if (this.hunger < 25) {
+          this.happiness = Math.max(0, this.happiness - dt * 0.8);
+          if (Math.random() < 0.02 && !this.speechBubble) this.say(town.resources.bread > 0 ? '🥖?' : '🥕?');
+        } else {
+          this.happiness = Math.min(100, this.happiness + dt * 0.2);
+        }
+
+        // Movement towards target
+        const dx = this.targetGx - this.gx;
+        const dy = this.targetGy - this.gy;
+        const dist = Math.hypot(dx, dy);
+
+        // Path speed bonus if on cobblestone path
+        const currentTile = town.getTile(Math.round(this.gx), Math.round(this.gy));
+        const speedBonus = (currentTile && currentTile.hasPath) ? 1.5 : 1.0;
+        const moveSpeed = (this.isKit ? 2.4 : 1.8) * speedBonus;
+
+        if (dist > 0.08) {
+          const step = Math.min(dist, moveSpeed * dt);
+          this.gx += (dx / dist) * step;
+          this.gy += (dy / dist) * step;
+          this.hopPhase += dt * (moveSpeed * 5);
+        } else {
+          this.gx = this.targetGx;
+          this.gy = this.targetGy;
+          this.hopPhase = 0;
+          this.handleStateLogic(dt, town);
+        }
+      }
+
+      handleStateLogic(dt, town) {
+        this.stateTimer -= dt;
+        if (this.stateTimer > 0) return;
+
+        // Kit Behavior: hop around village green / hearth
+        if (this.isKit) {
+          this.stateTimer = 2 + Math.random() * 4;
+          const hearth = town.buildings.find(b => b.type === 'hearth');
+          const center = hearth ? { gx: hearth.gx, gy: hearth.gy } : { gx: 18, gy: 18 };
+          this.targetGx = center.gx + (Math.random() * 6 - 3);
+          this.targetGy = center.gy + (Math.random() * 6 - 3);
+          if (Math.random() < 0.3) this.say('✨');
+          return;
+        }
+
+        // Adult hunger: search for food if low
+        if (this.hunger < 40) {
+          if (town.resources.bread > 0) {
+            town.resources.bread--;
+            this.hunger = 100;
+            this.happiness = Math.min(100, this.happiness + 15);
+            this.say('🥖😋');
+            this.stateTimer = 3;
+            return;
+          } else if (town.resources.carrots > 0) {
+            town.resources.carrots--;
+            this.hunger = 90;
+            this.happiness = Math.min(100, this.happiness + 5);
+            this.say('🥕😋');
+            this.stateTimer = 3;
+            return;
+          }
+        }
+
+        // Courtship check: If adult, unmarried, and near hearth
+        if (!this.spouseId && this.isAdult && town.resources.burrowsCapacity > town.citizens.length) {
+          const eligiblePartner = town.citizens.find(c => 
+            c.id !== this.id && 
+            !c.spouseId && 
+            c.isAdult && 
+            c.gender !== this.gender && 
+            Math.hypot(c.gx - this.gx, c.gy - this.gy) < 4
+          );
+
+          if (eligiblePartner && Math.random() < 0.25) {
+            // Marriage ceremony!
+            this.spouseId = eligiblePartner.id;
+            eligiblePartner.spouseId = this.id;
+            this.say('❤️ Ring! ❤️');
+            eligiblePartner.say('💍 Yes! 💖');
+            town.sound.playLove();
+            town.addToast(`💍 Celebration! ${this.name} & ${eligiblePartner.name} have married!`);
+            
+            // Move into an available burrow together
+            const freeBurrow = town.buildings.find(b => b.type === 'burrow' && b.occupants.length < 2);
+            if (freeBurrow) {
+              this.homeBurrowId = freeBurrow.id;
+              eligiblePartner.homeBurrowId = freeBurrow.id;
+              freeBurrow.occupants.push(this.id, eligiblePartner.id);
+            }
+            this.stateTimer = 5;
+            return;
+          }
+        }
+
+        // Job Work Cycle
+        this.performJobCycle(town);
+      }
+
+      performJobCycle(town) {
+        this.stateTimer = 2.5 + Math.random() * 3;
+
+        if (this.profession === 'Carrot Farmer') {
+          const patch = town.buildings.find(b => b.type === 'carrot');
+          if (patch) {
+            if (!this.carriedItem) {
+              this.targetGx = patch.gx + (Math.random() * 2 - 1);
+              this.targetGy = patch.gy + (Math.random() * 2 - 1);
+              this.carriedItem = 'carrot';
+              this.say('🌱');
+            } else {
+              // Haul to burrow or hearth
+              const hearth = town.buildings.find(b => b.type === 'hearth') || { gx: 18, gy: 18 };
+              this.targetGx = hearth.gx;
+              this.targetGy = hearth.gy;
+              town.resources.carrots += 4;
+              this.carriedItem = null;
+              this.say('🥕+4');
+            }
+            return;
+          }
+        }
+
+        if (this.profession === 'Wheat Farmer') {
+          const field = town.buildings.find(b => b.type === 'wheat');
+          if (field) {
+            if (!this.carriedItem) {
+              this.targetGx = field.gx + (Math.random() * 2 - 1);
+              this.targetGy = field.gy + (Math.random() * 2 - 1);
+              this.carriedItem = 'wheat';
+              this.say('🌾');
+            } else {
+              const bakery = town.buildings.find(b => b.type === 'bakery') || { gx: 18, gy: 18 };
+              this.targetGx = bakery.gx;
+              this.targetGy = bakery.gy;
+              town.resources.wheat += 3;
+              this.carriedItem = null;
+              this.say('🌾+3');
+            }
+            return;
+          }
+        }
+
+        if (this.profession === 'Baker') {
+          const bakery = town.buildings.find(b => b.type === 'bakery');
+          if (bakery) {
+            this.targetGx = bakery.gx + (Math.random() * 1.5 - 0.75);
+            this.targetGy = bakery.gy + (Math.random() * 1.5 - 0.75);
+            if (town.resources.wheat >= 2 && town.resources.carrots >= 1) {
+              town.resources.wheat -= 2;
+              town.resources.carrots -= 1;
+              town.resources.bread += 2;
+              this.say('🥖 Fresh Loaf!');
+            } else {
+              this.say('🌾 Need Flour');
+            }
+            return;
+          }
+        }
+
+        if (this.profession === 'Woodcutter') {
+          const woodLodge = town.buildings.find(b => b.type === 'woodcutter');
+          if (woodLodge) {
+            if (!this.carriedItem) {
+              // Move near forest edges
+              this.targetGx = Math.max(3, Math.min(TOWN_GRID_SIZE - 4, woodLodge.gx + (Math.random() * 8 - 4)));
+              this.targetGy = Math.max(3, Math.min(TOWN_GRID_SIZE - 4, woodLodge.gy + (Math.random() * 8 - 4)));
+              this.carriedItem = 'wood';
+              this.say('🪓 Timber!');
+            } else {
+              this.targetGx = woodLodge.gx;
+              this.targetGy = woodLodge.gy;
+              town.resources.wood += 4;
+              this.carriedItem = null;
+              this.say('🪵+4');
+            }
+            return;
+          }
+        }
+
+        if (this.profession === 'Stone Mason') {
+          const mason = town.buildings.find(b => b.type === 'mason');
+          if (mason) {
+            if (!this.carriedItem) {
+              this.targetGx = Math.max(3, Math.min(TOWN_GRID_SIZE - 4, mason.gx + (Math.random() * 6 - 3)));
+              this.targetGy = Math.max(3, Math.min(TOWN_GRID_SIZE - 4, mason.gy + (Math.random() * 6 - 3)));
+              this.carriedItem = 'stone';
+              this.say('⛏️ Hew stone');
+            } else {
+              this.targetGx = mason.gx;
+              this.targetGy = mason.gy;
+              town.resources.stone += 3;
+              this.carriedItem = null;
+              this.say('🪨+3');
+            }
+            return;
+          }
+        }
+
+        // Default stroll around burrow or hearth
+        const hearth = town.buildings.find(b => b.type === 'hearth');
+        const cx = hearth ? hearth.gx : 18;
+        const cy = hearth ? hearth.gy : 18;
+        this.targetGx = Math.max(2, Math.min(TOWN_GRID_SIZE - 3, cx + (Math.random() * 8 - 4)));
+        this.targetGy = Math.max(2, Math.min(TOWN_GRID_SIZE - 3, cy + (Math.random() * 8 - 4)));
+      }
     }
-  });
 
-  // 2. Cultures Reproduction Cycle
-  // Married couples in a burrow with good food and happiness bear Kits!
-  const burrows = GAME.settlement.buildings.filter(b => b.type === 'burrow');
-  burrows.forEach(b => {
-    const residents = GAME.rabbits.filter(r => r.burrowId === b.id);
-    const buck = residents.find(r => r.gender === 'M' && r.lifeStage === 'adult');
-    const doe = residents.find(r => r.gender === 'F' && r.lifeStage === 'adult');
-    const kitCount = residents.filter(r => r.lifeStage === 'kit').length;
+    // Colony Building Data
+    class Building {
+      constructor(type, gx, gy) {
+        this.id = 'bld_' + Math.random().toString(36).substr(2, 9);
+        this.type = type;
+        this.gx = gx;
+        this.gy = gy;
+        this.occupants = []; // IDs of rabbits living here (burrow)
+        this.animationTimer = Math.random() * 10;
+      }
+    }
 
-    if (buck && doe && buck.spouseId === doe.id && kitCount < 2) {
-      if (buck.hunger > 60 && doe.hunger > 60 && buck.happiness > 70 && doe.happiness > 70) {
-        // Chance to have a kit
-        if (Math.random() < 0.28) {
-          const gender = Math.random() > 0.5 ? 'M' : 'F';
-          const namePool = gender === 'M' ? RABBIT_FIRST_NAMES_M : RABBIT_FIRST_NAMES_F;
-          const firstName = namePool[Math.floor(Math.random() * namePool.length)];
-          const kit = createRabbit(firstName, doe.clanName, gender, 0, 'kit');
-          kit.burrowId = b.id;
-          kit.x = b.tx * 32 + 16;
-          kit.y = b.ty * 32 + 16;
-          GAME.rabbits.push(kit);
+    // World Map Caravan Entity
+    class Caravan {
+      constructor(originId, targetId, cargo = {}) {
+        this.id = 'caravan_' + Math.random().toString(36).substr(2, 9);
+        this.originId = originId;
+        this.targetId = targetId;
+        this.cargo = cargo; // e.g. { bread: 4, carrots: 10 }
+        
+        const origin = FACTIONS[originId];
+        const target = FACTIONS[targetId];
+        this.gx = origin.gx;
+        this.gy = origin.gy;
+        this.targetGx = target.gx;
+        this.targetGy = target.gy;
+        
+        this.progress = 0; // 0 to 1
+        this.speed = 0.08; // speed along path per second
+        this.state = 'traveling_to'; // traveling_to, trading, returning, arrived
+      }
 
-          GAME.audio.birthFanfare();
-          showToast(`🍼 A healthy new rabbit kit, ${kit.name}, was born in ${b.name}!`);
-          updateHUD();
+      update(dt, game) {
+        if (this.state === 'traveling_to') {
+          this.progress += dt * this.speed;
+          this.gx = FACTIONS[this.originId].gx + (this.targetGx - FACTIONS[this.originId].gx) * this.progress;
+          this.gy = FACTIONS[this.originId].gy + (this.targetGy - FACTIONS[this.originId].gy) * this.progress;
+          
+          if (this.progress >= 1) {
+            this.progress = 1;
+            this.state = 'trading';
+            game.completeCaravanTrade(this);
+          }
+        } else if (this.state === 'returning') {
+          this.progress -= dt * this.speed;
+          this.gx = FACTIONS[this.originId].gx + (this.targetGx - FACTIONS[this.originId].gx) * this.progress;
+          this.gy = FACTIONS[this.originId].gy + (this.targetGy - FACTIONS[this.originId].gy) * this.progress;
+          
+          if (this.progress <= 0) {
+            this.progress = 0;
+            this.state = 'arrived';
+            game.caravanReturned(this);
+          }
         }
       }
     }
-  });
 
-  // 3. Unmarried Adult Matching (Courting)
-  const singleBucks = GAME.rabbits.filter(r => r.lifeStage === 'adult' && !r.spouseId && r.gender === 'M');
-  const singleDoes = GAME.rabbits.filter(r => r.lifeStage === 'adult' && !r.spouseId && r.gender === 'F');
-  if (singleBucks.length > 0 && singleDoes.length > 0) {
-    const openBurrow = burrows.find(b => GAME.rabbits.filter(r => r.burrowId === b.id).length === 0);
-    if (openBurrow) {
-      const b = singleBucks[0];
-      const d = singleDoes[0];
-      b.spouseId = d.id;
-      d.spouseId = b.id;
-      b.burrowId = openBurrow.id;
-      d.burrowId = openBurrow.id;
-      showToast(`💍 ${b.name} & ${d.name} have married and moved into ${openBurrow.name}!`);
-    }
-  }
-}
+    // Main Game Controller
+    class RabbitSimulationGame {
+      constructor() {
+        this.canvas = document.getElementById('game-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.sound = new SoundEngine();
 
-function tickRabbitAI(r, dt) {
-  r.hopPhase += dt * 8;
-  r.actionTimer -= dt;
+        this.viewMode = 'town'; // 'town' (Cultures Isometric) or 'world' (Square Grid)
+        this.gameSpeed = 1; // 0, 1, 2, 5
+        
+        // Simulation Calendar
+        this.gameTime = 0;
+        this.day = 12;
+        this.year = 1;
+        this.season = 'Spring';
 
-  // Movement towards target
-  const dx = r.targetX - r.x;
-  const dy = r.targetY - r.y;
-  const dist = Math.hypot(dx, dy);
+        // Colony Resources
+        this.resources = {
+          carrots: 50,
+          wheat: 25,
+          bread: 18,
+          wood: 60,
+          stone: 35,
+          gold: 120,
+          burrowsCapacity: 12
+        };
 
-  if (dist > 6) {
-    // Speed boosted on cobblestone paths
-    const curTx = Math.floor(r.x / 32);
-    const curTy = Math.floor(r.y / 32);
-    const onPath = (curTx >= 0 && curTx < GAME.settlement.w && curTy >= 0 && curTy < GAME.settlement.h && GAME.settlement.tiles[curTy][curTx].path);
-    const spd = r.speed * (onPath ? 1.45 : 1.0);
+        // Camera for Isometric Town
+        this.cam = {
+          x: 0,
+          y: 0,
+          zoom: 1.1,
+          isDragging: false,
+          lastMouseX: 0,
+          lastMouseY: 0
+        };
 
-    r.x += (dx / dist) * spd * dt;
-    r.y += (dy / dist) * spd * dt;
-    r.state = 'walking';
-  } else {
-    // Arrived at destination
-    r.state = 'working';
-    if (r.actionTimer <= 0) {
-      decideNextRabbitTask(r);
-    }
-  }
-}
+        // Town Map Tile Grid
+        this.townGrid = [];
+        this.buildings = [];
+        this.citizens = [];
 
-function decideNextRabbitTask(r) {
-  r.actionTimer = 2.5 + Math.random() * 3.0;
+        // World Map Grid & Caravans
+        this.worldGrid = [];
+        this.caravans = [];
+        this.selectedWorldSquare = null;
 
-  // 1. Kit Behavior: play, chase butterflies around hearth or meadows
-  if (r.lifeStage === 'kit') {
-    const hearth = GAME.settlement.buildings.find(b => b.type === 'hearth');
-    const hx = hearth ? hearth.tx * 32 + 16 : 16 * 32;
-    const hy = hearth ? hearth.ty * 32 + 16 : 16 * 32;
-    r.targetX = hx + (Math.random() * 120 - 60);
-    r.targetY = hy + (Math.random() * 120 - 60);
-    r.state = 'playing';
-    return;
-  }
+        // Interaction State
+        this.selectedBuildType = null;
+        this.selectedEntity = null; // rabbit or building
+        this.hoveredTile = null;
 
-  // 2. Profession-Based Workflow
-  if (r.profession === 'farmer') {
-    const patch = GAME.settlement.buildings.find(b => b.type === 'carrot_patch');
-    if (patch) {
-      if (!r.carried) {
-        // Go harvest
-        r.targetX = patch.tx * 32 + 16;
-        r.targetY = patch.ty * 32 + 16;
-        r.carried = { type: 'carrots', amount: 3 };
-      } else {
-        // Return to home or hearth
-        const burrow = GAME.settlement.buildings.find(b => b.id === r.burrowId);
-        r.targetX = burrow ? burrow.tx * 32 + 16 : 16 * 32;
-        r.targetY = burrow ? burrow.ty * 32 + 16 : 16 * 32;
-        GAME.res.carrots += r.carried.amount;
-        r.carried = null;
-        updateHUD();
-      }
-      return;
-    }
-  }
+        this.initTownMap();
+        this.initWorldMap();
+        this.initCitizens();
+        this.setupEventListeners();
+        this.resizeCanvas();
 
-  if (r.profession === 'wheat_farmer') {
-    const field = GAME.settlement.buildings.find(b => b.type === 'wheat_field');
-    if (field) {
-      if (!r.carried) {
-        r.targetX = field.tx * 32 + 16;
-        r.targetY = field.ty * 32 + 16;
-        r.carried = { type: 'wheat', amount: 2 };
-      } else {
-        const bakery = GAME.settlement.buildings.find(b => b.type === 'bakery');
-        r.targetX = bakery ? bakery.tx * 32 + 16 : 16 * 32;
-        r.targetY = bakery ? bakery.ty * 32 + 16 : 16 * 32;
-        GAME.res.wheat += r.carried.amount;
-        r.carried = null;
-        updateHUD();
-      }
-      return;
-    }
-  }
+        // Center town camera
+        const centerIso = this.worldToIso(TOWN_GRID_SIZE / 2, TOWN_GRID_SIZE / 2);
+        this.cam.x = window.innerWidth / 2 - centerIso.x * this.cam.zoom;
+        this.cam.y = window.innerHeight / 2 - centerIso.y * this.cam.zoom;
 
-  if (r.profession === 'woodcutter') {
-    const lodge = GAME.settlement.buildings.find(b => b.type === 'woodcutter');
-    if (lodge) {
-      r.targetX = lodge.tx * 32 + (Math.random() * 60 - 30);
-      r.targetY = lodge.ty * 32 + (Math.random() * 60 - 30);
-      GAME.res.timber += 2;
-      updateHUD();
-      return;
-    }
-  }
+        // Reproduction & Kit Birth Loop
+        this.birthTimer = 18;
 
-  if (r.profession === 'mason') {
-    const mason = GAME.settlement.buildings.find(b => b.type === 'stonemason');
-    if (mason) {
-      r.targetX = mason.tx * 32 + 16;
-      r.targetY = mason.ty * 32 + 16;
-      GAME.res.stone += 1;
-      updateHUD();
-      return;
-    }
-  }
-
-  if (r.profession === 'baker') {
-    const bakery = GAME.settlement.buildings.find(b => b.type === 'bakery');
-    if (bakery) {
-      r.targetX = bakery.tx * 32 + 16;
-      r.targetY = bakery.ty * 32 + 16;
-      if (GAME.res.wheat >= 2) {
-        GAME.res.wheat -= 2;
-        GAME.res.bread += 2;
-        updateHUD();
-      }
-      return;
-    }
-  }
-
-  // Default wander / socialize near village hearth
-  const hearth = GAME.settlement.buildings.find(b => b.type === 'hearth');
-  const cx = hearth ? hearth.tx * 32 + 16 : 16 * 32;
-  const cy = hearth ? hearth.ty * 32 + 16 : 16 * 32;
-  r.targetX = cx + (Math.random() * 90 - 45);
-  r.targetY = cy + (Math.random() * 90 - 45);
-}
-
-function tickBuilding(b, dt) {
-  b.productionTimer += dt;
-  if (b.type === 'carrot_patch' && b.productionTimer > 12) {
-    b.productionTimer = 0;
-    GAME.res.carrots += 1;
-    updateHUD();
-  }
-}
-
-function tickCaravans(dt) {
-  for (let i = GAME.world.caravans.length - 1; i >= 0; i--) {
-    const c = GAME.world.caravans[i];
-    c.progress += dt * 0.12;
-    if (c.progress >= 1.0) {
-      // Arrived at foreign animal kingdom!
-      GAME.res.gold += c.goldReward;
-      showToast(`🪙 Caravan returned from ${c.target.name}! Earned +$${c.goldReward} Gold.`);
-      GAME.world.caravans.splice(i, 1);
-      updateHUD();
-    }
-  }
-}
-
-/* =========================================================================
-   CANVAS RENDERING: 2D TOP-DOWN (SETTLEMENT & WORLD VIEWS)
-   ========================================================================= */
-
-const canvas = document.getElementById('canvas-main');
-const ctx = canvas.getContext('2d');
-const radarCanvas = document.getElementById('canvas-radar');
-const radarCtx = radarCanvas.getContext('2d');
-
-function fitCanvas() {
-  const vp = document.getElementById('viewport-area');
-  canvas.width = vp.clientWidth;
-  canvas.height = vp.clientHeight;
-}
-window.addEventListener('resize', fitCanvas);
-
-let prevTime = performance.now();
-function gameLoop(now) {
-  const dt = (now - prevTime) / 1000;
-  prevTime = now;
-
-  tickSimulation(dt);
-
-  ctx.fillStyle = '#091318';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  if (GAME.view === 'settlement') {
-    renderSettlementView();
-    renderRabbits();
-  } else {
-    renderWorldView();
-  }
-
-  renderMinimap();
-  requestAnimationFrame(gameLoop);
-}
-
-// 1. Settlement 2D Top-Down View
-function renderSettlementView() {
-  const cam = GAME.cam.settlement;
-  const tileSize = 32 * cam.zoom;
-
-  const startX = Math.max(0, Math.floor(-cam.x / tileSize));
-  const endX = Math.min(GAME.settlement.w, Math.ceil((canvas.width - cam.x) / tileSize));
-  const startY = Math.max(0, Math.floor(-cam.y / tileSize));
-  const endY = Math.min(GAME.settlement.h, Math.ceil((canvas.height - cam.y) / tileSize));
-
-  // Render ground tiles
-  for (let y = startY; y < endY; y++) {
-    for (let x = startX; x < endX; x++) {
-      const tile = GAME.settlement.tiles[y][x];
-      const px = x * tileSize + cam.x;
-      const py = y * tileSize + cam.y;
-
-      if (tile.type === 'water') {
-        ctx.fillStyle = '#0284c7';
-      } else {
-        ctx.fillStyle = (x + y) % 2 === 0 ? '#3f782f' : '#396d29';
-      }
-      ctx.fillRect(px, py, Math.ceil(tileSize), Math.ceil(tileSize));
-
-      // Cobblestone path
-      if (tile.path) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(px + tileSize * 0.15, py + tileSize * 0.15, tileSize * 0.7, tileSize * 0.7);
-        ctx.strokeStyle = '#64748b';
-        ctx.strokeRect(px + tileSize * 0.15, py + tileSize * 0.15, tileSize * 0.7, tileSize * 0.7);
+        // Start Loop
+        this.lastFrameTime = performance.now();
+        requestAnimationFrame((t) => this.gameLoop(t));
       }
 
-      // Natural Trees
-      if (tile.tree) {
-        drawTree2D(px + tileSize / 2, py + tileSize / 2, tileSize * 0.42);
+      initTownMap() {
+        for (let y = 0; y < TOWN_GRID_SIZE; y++) {
+          const row = [];
+          for (let x = 0; x < TOWN_GRID_SIZE; x++) {
+            // Natural river winding from top-left to bottom-right
+            const isRiver = Math.abs(x - (y * 0.8 + 6)) < 1.8 && (x + y > 10);
+            const isWaterShore = Math.abs(x - (y * 0.8 + 6)) < 2.5 && !isRiver && (x + y > 10);
+            
+            // Random trees and rocks
+            const hasTree = !isRiver && !isWaterShore && Math.random() < 0.08;
+            const hasRock = !isRiver && !isWaterShore && !hasTree && Math.random() < 0.03;
+            const hasFlowers = !isRiver && !isWaterShore && !hasTree && !hasRock && Math.random() < 0.12;
+
+            row.push({
+              gx: x,
+              gy: y,
+              elevation: 0,
+              isRiver,
+              isWaterShore,
+              hasTree,
+              hasRock,
+              hasFlowers,
+              flowerColor: ['#f1c40f', '#e74c3c', '#9b59b6', '#3498db'][Math.floor(Math.random() * 4)],
+              hasPath: false
+            });
+          }
+          this.townGrid.push(row);
+        }
+
+        // Starting Buildings in Brambleton
+        this.buildings.push(new Building('hearth', 18, 18));
+        this.buildings.push(new Building('burrow', 15, 17));
+        this.buildings.push(new Building('burrow', 21, 17));
+        this.buildings.push(new Building('carrot', 15, 21));
+        this.buildings.push(new Building('wheat', 21, 21));
+        this.buildings.push(new Building('bakery', 18, 14));
+        this.buildings.push(new Building('woodcutter', 12, 14));
+        this.buildings.push(new Building('mason', 24, 14));
+
+        // Connect central buildings with cobblestone pathways
+        for (let x = 14; x <= 22; x++) this.getTile(x, 18).hasPath = true;
+        for (let y = 14; y <= 22; y++) this.getTile(18, y).hasPath = true;
       }
 
-      // Natural Stone Boulders
-      if (tile.rock) {
-        ctx.fillStyle = '#64748b';
+      initWorldMap() {
+        // Strict Square Grid 10x10
+        for (let y = 0; y < WORLD_GRID_SIZE; y++) {
+          const row = [];
+          for (let x = 0; x < WORLD_GRID_SIZE; x++) {
+            let biome = 'meadow';
+            let icon = '🌿';
+            let moveCost = 1.0;
+
+            if (x >= 7 && y <= 3) {
+              biome = 'mountain';
+              icon = '⛰️';
+              moveCost = 2.5;
+            } else if ((x === 2 || x === 3) && y >= 6) {
+              biome = 'river';
+              icon = '🌊';
+              moveCost = 2.0;
+            } else if (x <= 2 && y <= 4) {
+              biome = 'forest';
+              icon = '🌲';
+              moveCost = 1.5;
+            } else if (x >= 7 && y >= 6) {
+              biome = 'hills';
+              icon = '🌾';
+              moveCost = 1.2;
+            }
+
+            row.push({
+              gx: x,
+              gy: y,
+              biome,
+              icon,
+              moveCost,
+              factionId: null
+            });
+          }
+          this.worldGrid.push(row);
+        }
+
+        // Place Faction Territories on Square Grid
+        Object.values(FACTIONS).forEach(fac => {
+          if (this.worldGrid[fac.gy] && this.worldGrid[fac.gy][fac.gx]) {
+            this.worldGrid[fac.gy][fac.gx].factionId = fac.id;
+          }
+        });
+      }
+
+      initCitizens() {
+        // Initial founding colony rabbits (Cultures family couples)
+        const c1 = new RabbitPawn({ firstName: 'Barnaby', clanName: 'Cottonfoot', gender: 'Buck', age: 24, profession: 'Carrot Farmer', gx: 16, gy: 18 });
+        const c2 = new RabbitPawn({ firstName: 'Hazel', clanName: 'Cottonfoot', gender: 'Doe', age: 22, profession: 'Baker', gx: 17, gy: 18 });
+        c1.spouseId = c2.id;
+        c2.spouseId = c1.id;
+        const b1 = this.buildings.find(b => b.type === 'burrow');
+        if (b1) {
+          c1.homeBurrowId = b1.id;
+          c2.homeBurrowId = b1.id;
+          b1.occupants.push(c1.id, c2.id);
+        }
+
+        const c3 = new RabbitPawn({ firstName: 'Pippin', clanName: 'Thistlewood', gender: 'Buck', age: 28, profession: 'Wheat Farmer', gx: 20, gy: 18 });
+        const c4 = new RabbitPawn({ firstName: 'Clover', clanName: 'Thistlewood', gender: 'Doe', age: 26, profession: 'Carrot Farmer', gx: 19, gy: 18 });
+        c3.spouseId = c4.id;
+        c4.spouseId = c3.id;
+        const b2 = this.buildings.filter(b => b.type === 'burrow')[1];
+        if (b2) {
+          c3.homeBurrowId = b2.id;
+          c4.homeBurrowId = b2.id;
+          b2.occupants.push(c3.id, c4.id);
+        }
+
+        // Single adult specialists
+        const c5 = new RabbitPawn({ firstName: 'Bramble', clanName: 'Quickhop', gender: 'Buck', age: 30, profession: 'Woodcutter', gx: 13, gy: 15 });
+        const c6 = new RabbitPawn({ firstName: 'Willow', clanName: 'Meadowbark', gender: 'Doe', age: 25, profession: 'Stone Mason', gx: 23, gy: 15 });
+        
+        // Elder guide
+        const c7 = new RabbitPawn({ firstName: 'Rowan', clanName: 'Oakhaven', gender: 'Buck', age: 52, profession: 'Elder', gx: 18, gy: 19 });
+
+        // A playful newborn Kit!
+        const kit1 = new RabbitPawn({ firstName: 'Pip', clanName: 'Cottonfoot', gender: 'Doe', age: 2, profession: 'Kit', gx: 16.5, gy: 17.5 });
+        kit1.homeBurrowId = b1 ? b1.id : null;
+        c1.children.push(kit1.id);
+        c2.children.push(kit1.id);
+
+        this.citizens = [c1, c2, c3, c4, c5, c6, c7, kit1];
+      }
+
+      getTile(gx, gy) {
+        if (gx >= 0 && gx < TOWN_GRID_SIZE && gy >= 0 && gy < TOWN_GRID_SIZE) {
+          return this.townGrid[gy][gx];
+        }
+        return null;
+      }
+
+      // Coordinate Projections
+      worldToIso(gx, gy) {
+        return {
+          x: (gx - gy) * (ISO_TILE_W / 2),
+          y: (gx + gy) * (ISO_TILE_H / 2)
+        };
+      }
+
+      isoToWorld(screenX, screenY) {
+        const sx = (screenX - this.cam.x) / this.cam.zoom;
+        const sy = (screenY - this.cam.y) / this.cam.zoom;
+        const gx = (sx / (ISO_TILE_W / 2) + sy / (ISO_TILE_H / 2)) / 2;
+        const gy = (sy / (ISO_TILE_H / 2) - sx / (ISO_TILE_W / 2)) / 2;
+        return { gx, gy };
+      }
+
+      setViewMode(mode) {
+        this.viewMode = mode;
+        document.getElementById('tab-town').classList.toggle('active', mode === 'town');
+        document.getElementById('tab-world').classList.toggle('active', mode === 'world');
+        document.getElementById('bottom-bar').style.display = mode === 'town' ? 'flex' : 'none';
+        document.getElementById('world-legend').classList.toggle('visible', mode === 'world');
+        
+        if (mode === 'town') {
+          this.closeWorldCard();
+          this.addToast('Entering Warren Brambleton (Cultures Isometric View)');
+        } else {
+          this.closeInspector();
+          this.cancelBuild();
+          this.addToast('Opening Regional Map (Square Grid View)');
+        }
+      }
+
+      setSpeed(speed) {
+        this.gameSpeed = speed;
+        ['speed-0', 'speed-1', 'speed-2', 'speed-5'].forEach(id => {
+          document.getElementById(id).classList.remove('active');
+        });
+        document.getElementById(`speed-${speed}`).classList.add('active');
+      }
+
+      toggleAudio() {
+        this.sound.enabled = !this.sound.enabled;
+        const btn = document.getElementById('audio-toggle');
+        btn.textContent = this.sound.enabled ? '🔊' : '🔇';
+        this.addToast(this.sound.enabled ? 'Audio Unmuted' : 'Audio Muted');
+      }
+
+      addToast(msg) {
+        const container = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        container.appendChild(t);
+        setTimeout(() => {
+          t.style.opacity = '0';
+          t.style.transition = 'opacity 0.4s ease';
+          setTimeout(() => t.remove(), 400);
+        }, 3200);
+      }
+
+      // Building Construction
+      selectBuilding(type) {
+        this.sound.init();
+        this.selectedBuildType = type;
+        document.querySelectorAll('.build-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.querySelector(`.build-btn[data-build="${type}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        document.getElementById('btn-cancel').style.display = 'flex';
+        document.getElementById('canvas-container').classList.add('building-mode');
+      }
+
+      cancelBuild() {
+        this.selectedBuildType = null;
+        document.querySelectorAll('.build-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-cancel').style.display = 'none';
+        document.getElementById('canvas-container').classList.remove('building-mode');
+      }
+
+      tryPlaceBuilding(gx, gy) {
+        const tile = this.getTile(gx, gy);
+        if (!tile || tile.isRiver) {
+          this.addToast('Cannot build on water!');
+          return;
+        }
+
+        if (this.selectedBuildType === 'path') {
+          if (this.resources.stone < 1) {
+            this.addToast('Need 1 Cut Stone for pathway!');
+            return;
+          }
+          if (tile.hasPath) return;
+          this.resources.stone -= 1;
+          tile.hasPath = true;
+          tile.hasTree = false;
+          tile.hasRock = false;
+          this.sound.playBuild();
+          this.updateHUD();
+          return;
+        }
+
+        // Check costs
+        const costs = {
+          burrow: { wood: 15, stone: 10 },
+          carrot: { wood: 5, stone: 0 },
+          wheat: { wood: 5, stone: 0 },
+          bakery: { wood: 25, stone: 20 },
+          woodcutter: { wood: 20, stone: 5 },
+          mason: { wood: 20, stone: 15 },
+          workshop: { wood: 30, stone: 15 },
+          hearth: { wood: 10, stone: 25 }
+        };
+
+        const cost = costs[this.selectedBuildType];
+        if (cost) {
+          if (this.resources.wood < cost.wood || this.resources.stone < cost.stone) {
+            this.addToast(`Insufficient materials! Requires ${cost.wood}🪵, ${cost.stone}🪨`);
+            return;
+          }
+
+          // Check if space already occupied
+          const existing = this.buildings.find(b => Math.hypot(b.gx - gx, b.gy - gy) < 1.6);
+          if (existing) {
+            this.addToast('Space already occupied by a building!');
+            return;
+          }
+
+          this.resources.wood -= cost.wood;
+          this.resources.stone -= cost.stone;
+          if (this.selectedBuildType === 'burrow') {
+            this.resources.burrowsCapacity += 4;
+          }
+
+          this.buildings.push(new Building(this.selectedBuildType, gx, gy));
+          tile.hasTree = false;
+          tile.hasRock = false;
+          this.sound.playBuild();
+          this.addToast(`Constructed new ${this.selectedBuildType}!`);
+          this.updateHUD();
+        }
+      }
+
+      // Event Listeners
+      setupEventListeners() {
+        window.addEventListener('resize', () => this.resizeCanvas());
+
+        const container = document.getElementById('canvas-container');
+
+        container.addEventListener('mousedown', (e) => {
+          if (e.button === 0) { // Left click
+            if (this.viewMode === 'town') {
+              if (this.selectedBuildType) {
+                const worldPos = this.isoToWorld(e.clientX, e.clientY);
+                this.tryPlaceBuilding(Math.round(worldPos.gx), Math.round(worldPos.gy));
+              } else {
+                this.handleTownClick(e.clientX, e.clientY);
+              }
+            } else {
+              this.handleWorldClick(e.clientX, e.clientY);
+            }
+          } else if (e.button === 2) { // Right click cancel
+            this.cancelBuild();
+            this.closeInspector();
+          }
+
+          // Drag / Pan start
+          this.cam.isDragging = true;
+          this.cam.lastMouseX = e.clientX;
+          this.cam.lastMouseY = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (this.cam.isDragging && !this.selectedBuildType) {
+            const dx = e.clientX - this.cam.lastMouseX;
+            const dy = e.clientY - this.cam.lastMouseY;
+            this.cam.x += dx;
+            this.cam.y += dy;
+            this.cam.lastMouseX = e.clientX;
+            this.cam.lastMouseY = e.clientY;
+          }
+
+          if (this.viewMode === 'town') {
+            const wPos = this.isoToWorld(e.clientX, e.clientY);
+            this.hoveredTile = { gx: Math.round(wPos.gx), gy: Math.round(wPos.gy) };
+          }
+        });
+
+        window.addEventListener('mouseup', () => {
+          this.cam.isDragging = false;
+        });
+
+        container.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          if (this.viewMode === 'town') {
+            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+            const newZoom = Math.min(2.4, Math.max(0.65, this.cam.zoom * zoomFactor));
+
+            // Zoom smoothly towards cursor
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            this.cam.x = mouseX - (mouseX - this.cam.x) * (newZoom / this.cam.zoom);
+            this.cam.y = mouseY - (mouseY - this.cam.y) * (newZoom / this.cam.zoom);
+            this.cam.zoom = newZoom;
+          }
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.cancelBuild();
+            this.closeInspector();
+            this.closeRoster();
+            this.closeWorldCard();
+          }
+        });
+
+        // Context menu disable
+        container.addEventListener('contextmenu', e => e.preventDefault());
+      }
+
+      handleTownClick(clientX, clientY) {
+        const wPos = this.isoToWorld(clientX, clientY);
+
+        // Check if clicked a rabbit pawn
+        let clickedPawn = null;
+        let minDist = 1.0;
+        this.citizens.forEach(c => {
+          const d = Math.hypot(c.gx - wPos.gx, c.gy - wPos.gy);
+          if (d < minDist) {
+            minDist = d;
+            clickedPawn = c;
+          }
+        });
+
+        if (clickedPawn) {
+          this.sound.playHop();
+          this.inspectRabbit(clickedPawn);
+          return;
+        }
+
+        // Check if clicked a building
+        const clickedBuilding = this.buildings.find(b => Math.hypot(b.gx - Math.round(wPos.gx), b.gy - Math.round(wPos.gy)) < 1.2);
+        if (clickedBuilding) {
+          this.inspectBuilding(clickedBuilding);
+          return;
+        }
+
+        this.closeInspector();
+      }
+
+      handleWorldClick(clientX, clientY) {
+        // Calculate square grid tile from center
+        const gridPixelW = WORLD_GRID_SIZE * WORLD_SQUARE_PX;
+        const offsetX = (window.innerWidth - gridPixelW) / 2;
+        const offsetY = (window.innerHeight - gridPixelW) / 2 + 20;
+
+        const gx = Math.floor((clientX - offsetX) / WORLD_SQUARE_PX);
+        const gy = Math.floor((clientY - offsetY) / WORLD_SQUARE_PX);
+
+        if (gx >= 0 && gx < WORLD_GRID_SIZE && gy >= 0 && gy < WORLD_GRID_SIZE) {
+          const sq = this.worldGrid[gy][gx];
+          this.inspectWorldSquare(sq);
+        }
+      }
+
+      inspectRabbit(pawn) {
+        this.selectedEntity = pawn;
+        const card = document.getElementById('inspector-card');
+        const title = document.getElementById('inspector-title');
+        const content = document.getElementById('inspector-content');
+
+        title.innerHTML = `<span>${pawn.gender === 'Buck' ? '♂' : '♀'}</span> ${pawn.name}`;
+        
+        let spouseName = 'Unmarried';
+        if (pawn.spouseId) {
+          const spouse = this.citizens.find(c => c.id === pawn.spouseId);
+          if (spouse) spouseName = spouse.name;
+        }
+
+        let homeDesc = 'Homeless (Needs Burrow)';
+        if (pawn.homeBurrowId) {
+          const b = this.buildings.find(b => b.id === pawn.homeBurrowId);
+          if (b) homeDesc = `Burrow @ [${b.gx}, ${b.gy}]`;
+        }
+
+        content.innerHTML = `
+          <div class="stat-row">
+            <span class="stat-label">Stage & Age:</span>
+            <span class="stat-val">${pawn.isKit ? '🍼 Kit' : (pawn.isElder ? '👴 Elder' : 'Adult')} • ${Math.floor(pawn.age)} years</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Spouse:</span>
+            <span class="stat-val">${spouseName}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Home:</span>
+            <span class="stat-val">${homeDesc}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Profession:</span>
+            <span class="stat-val">${pawn.profession}</span>
+          </div>
+          <div style="margin: 10px 0 6px 0;">
+            <div class="stat-row"><span class="stat-label">Hunger:</span><span class="stat-val">${Math.round(pawn.hunger)}%</span></div>
+            <div class="meter-bar"><div class="meter-fill hunger" style="width:${pawn.hunger}%"></div></div>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <div class="stat-row"><span class="stat-label">Happiness:</span><span class="stat-val">${Math.round(pawn.happiness)}%</span></div>
+            <div class="meter-bar"><div class="meter-fill happiness" style="width:${pawn.happiness}%"></div></div>
+          </div>
+          ${!pawn.isKit && !pawn.isElder ? `
+            <div style="margin-top:12px;">
+              <span class="stat-label" style="font-size:11px; font-weight:600;">Reassign Profession:</span>
+              <select class="job-select" style="width:100%; margin-top:4px;" onchange="game.changeProfession('${pawn.id}', this.value)">
+                <option value="Carrot Farmer" ${pawn.profession==='Carrot Farmer'?'selected':''}>🥕 Carrot Farmer</option>
+                <option value="Wheat Farmer" ${pawn.profession==='Wheat Farmer'?'selected':''}>🌾 Wheat Farmer</option>
+                <option value="Baker" ${pawn.profession==='Baker'?'selected':''}>🥖 Baker & Miller</option>
+                <option value="Woodcutter" ${pawn.profession==='Woodcutter'?'selected':''}>🪓 Woodcutter</option>
+                <option value="Stone Mason" ${pawn.profession==='Stone Mason'?'selected':''}>⛏️ Stone Mason</option>
+                <option value="Artisan" ${pawn.profession==='Artisan'?'selected':''}>🔨 Artisan Craftsman</option>
+              </select>
+            </div>
+          ` : ''}
+        `;
+        card.classList.add('visible');
+      }
+
+      inspectBuilding(bld) {
+        this.selectedEntity = bld;
+        const card = document.getElementById('inspector-card');
+        const title = document.getElementById('inspector-title');
+        const content = document.getElementById('inspector-content');
+
+        const names = {
+          hearth: 'Village Hearth & Firepit',
+          burrow: 'Earthen Thatched Burrow',
+          carrot: 'Tilled Carrot Garden',
+          wheat: 'Golden Wheat Field',
+          bakery: 'Windmill & Bakery',
+          woodcutter: 'Woodcutter Timber Lodge',
+          mason: 'Stone Mason Yard',
+          workshop: 'Artisan Workshop'
+        };
+
+        title.innerHTML = `🏛️ ${names[bld.type] || bld.type}`;
+
+        let details = '';
+        if (bld.type === 'burrow') {
+          const occs = bld.occupants.map(id => {
+            const p = this.citizens.find(c => c.id === id);
+            return p ? p.name : 'Unknown';
+          }).join(', ') || 'Vacant';
+          details = `
+            <div class="stat-row"><span class="stat-label">Residents:</span><span class="stat-val">${occs}</span></div>
+            <div class="stat-row"><span class="stat-label">Capacity:</span><span class="stat-val">2 Adults + Kits</span></div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+              Married rabbit couples reside here and give birth to kits when well-fed with Carrots and fresh Carrot Bread!
+            </div>
+          `;
+        } else if (bld.type === 'carrot') {
+          details = `<div style="font-size:11px; color:var(--text-muted);">Yields staple raw carrots for colony nourishment and trade caravans.</div>`;
+        } else if (bld.type === 'wheat') {
+          details = `<div style="font-size:11px; color:var(--text-muted);">Supplies grain to the Bakery to mill flour and bake rich bread.</div>`;
+        } else if (bld.type === 'bakery') {
+          details = `<div style="font-size:11px; color:var(--text-muted);">Mills grain and bakes hearty Carrot Bread, creating deep community contentment and boosting kit reproduction.</div>`;
+        } else if (bld.type === 'hearth') {
+          details = `<div style="font-size:11px; color:var(--text-muted);">The central social gathering hearth where single bucks and does court, play, and fall in love!</div>`;
+        }
+
+        content.innerHTML = `
+          <div class="stat-row"><span class="stat-label">Location:</span><span class="stat-val">[${bld.gx}, ${bld.gy}]</span></div>
+          ${details}
+        `;
+        card.classList.add('visible');
+      }
+
+      inspectWorldSquare(sq) {
+        this.selectedWorldSquare = sq;
+        const card = document.getElementById('world-tile-card');
+        const title = document.getElementById('world-card-title');
+        const content = document.getElementById('world-card-content');
+
+        const fac = sq.factionId ? FACTIONS[sq.factionId] : null;
+
+        title.innerHTML = fac ? `${fac.icon} ${fac.name}` : `${sq.icon} Square [${sq.gx}, ${sq.gy}]`;
+
+        if (fac && fac.id === 'brambleton') {
+          content.innerHTML = `
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">${fac.desc}</div>
+            <button class="action-btn" onclick="game.setViewMode('town')">🏰 Enter Warren (Cultures Isometric View)</button>
+          `;
+        } else if (fac) {
+          let tradesHtml = '';
+          fac.trades.forEach((t, idx) => {
+            const giveStr = Object.entries(t.give).map(([k, v]) => `${v} ${k}`).join(', ');
+            const getStr = Object.entries(t.get).map(([k, v]) => `${v} ${k}`).join(', ');
+            tradesHtml += `
+              <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); padding:8px; border-radius:6px; margin-top:8px;">
+                <div style="font-weight:600; font-size:12px; color:var(--accent-gold);">${t.label}</div>
+                <div style="font-size:11px; color:var(--text-muted); margin:4px 0;">Give: ${giveStr} → Receive: ${getStr}</div>
+                <button class="action-btn" style="padding:4px 8px; font-size:11px;" onclick="game.dispatchCaravan('${fac.id}', ${idx})">
+                  🎒 Dispatch Trade Caravan
+                </button>
+              </div>
+            `;
+          });
+
+          content.innerHTML = `
+            <div class="stat-row"><span class="stat-label">Faction:</span><span class="stat-val">${fac.race}</span></div>
+            <div class="stat-row"><span class="stat-label">Terrain:</span><span class="stat-val">${sq.biome.toUpperCase()} (Move Cost: ${sq.moveCost})</span></div>
+            <div style="font-size:12px; color:var(--text-muted); margin:8px 0;">${fac.desc}</div>
+            <div style="font-weight:bold; font-size:12px; color:var(--accent-gold); margin-top:10px;">Available Caravan Treaties:</div>
+            ${tradesHtml}
+          `;
+        } else {
+          content.innerHTML = `
+            <div class="stat-row"><span class="stat-label">Biome:</span><span class="stat-val">${sq.biome.toUpperCase()}</span></div>
+            <div class="stat-row"><span class="stat-label">Movement Cost:</span><span class="stat-val">${sq.moveCost} days</span></div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">Unclaimed wilderness square. Caravans journey through here between animal settlements.</div>
+          `;
+        }
+
+        card.classList.add('visible');
+      }
+
+      dispatchCaravan(targetFactionId, tradeIndex) {
+        const fac = FACTIONS[targetFactionId];
+        const trade = fac.trades[tradeIndex];
+
+        // Check resources
+        for (let [res, amt] of Object.entries(trade.give)) {
+          if (this.resources[res] < amt) {
+            this.addToast(`Not enough ${res}! Need ${amt}`);
+            return;
+          }
+        }
+
+        // Deduct resources
+        for (let [res, amt] of Object.entries(trade.give)) {
+          this.resources[res] -= amt;
+        }
+
+        const caravan = new Caravan('brambleton', targetFactionId, trade);
+        this.caravans.push(caravan);
+        this.sound.playTrade();
+        this.addToast(`🎒 Caravan dispatched to ${fac.name}!`);
+        this.updateHUD();
+      }
+
+      completeCaravanTrade(caravan) {
+        const fac = FACTIONS[caravan.targetId];
+        this.sound.playTrade();
+        this.addToast(`✨ Trade deal struck at ${fac.name}! Caravan loading returned goods...`);
+        caravan.state = 'returning';
+      }
+
+      caravanReturned(caravan) {
+        // Grant rewards
+        for (let [res, amt] of Object.entries(caravan.cargo.get)) {
+          this.resources[res] = (this.resources[res] || 0) + amt;
+        }
+        this.sound.playTrade();
+        this.addToast(`🎉 Caravan returned home to Brambleton with riches!`);
+        this.updateHUD();
+        // Remove caravan
+        this.caravans = this.caravans.filter(c => c.id !== caravan.id);
+      }
+
+      closeInspector() {
+        document.getElementById('inspector-card').classList.remove('visible');
+        this.selectedEntity = null;
+      }
+
+      closeWorldCard() {
+        document.getElementById('world-tile-card').classList.remove('visible');
+        this.selectedWorldSquare = null;
+      }
+
+      openRoster() {
+        const tbody = document.getElementById('roster-tbody');
+        tbody.innerHTML = '';
+        this.citizens.forEach(c => {
+          let spouseName = 'Unmarried';
+          if (c.spouseId) {
+            const sp = this.citizens.find(o => o.id === c.spouseId);
+            if (sp) spouseName = sp.name;
+          }
+
+          let homeDesc = 'None';
+          if (c.homeBurrowId) {
+            const b = this.buildings.find(b => b.id === c.homeBurrowId);
+            if (b) homeDesc = `Burrow [${b.gx},${b.gy}]`;
+          }
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="font-weight:600;">${c.name}</td>
+            <td>${c.isKit ? '🍼 Kit' : (c.isElder ? '👴 Elder' : 'Adult')} (${c.gender === 'Buck' ? '♂ Buck' : '♀ Doe'})</td>
+            <td>${Math.floor(c.age)}</td>
+            <td>
+              ${!c.isKit && !c.isElder ? `
+                <select class="job-select" onchange="game.changeProfession('${c.id}', this.value)">
+                  <option value="Carrot Farmer" ${c.profession==='Carrot Farmer'?'selected':''}>🥕 Farmer</option>
+                  <option value="Wheat Farmer" ${c.profession==='Wheat Farmer'?'selected':''}>🌾 Wheat</option>
+                  <option value="Baker" ${c.profession==='Baker'?'selected':''}>🥖 Baker</option>
+                  <option value="Woodcutter" ${c.profession==='Woodcutter'?'selected':''}>🪓 Woodcutter</option>
+                  <option value="Stone Mason" ${c.profession==='Stone Mason'?'selected':''}>⛏️ Mason</option>
+                  <option value="Artisan" ${c.profession==='Artisan'?'selected':''}>🔨 Artisan</option>
+                </select>
+              ` : `<span>${c.profession}</span>`}
+            </td>
+            <td>${spouseName} • ${homeDesc}</td>
+            <td style="color:#2ecc71;">${Math.round(c.happiness)}%</td>
+            <td style="color:#e67e22;">${Math.round(c.hunger)}%</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        document.getElementById('roster-modal').classList.add('visible');
+      }
+
+      closeRoster() {
+        document.getElementById('roster-modal').classList.remove('visible');
+      }
+
+      changeProfession(pawnId, newJob) {
+        const pawn = this.citizens.find(c => c.id === pawnId);
+        if (pawn) {
+          pawn.profession = newJob;
+          this.sound.playBuild();
+          this.addToast(`${pawn.name} is now a ${newJob}!`);
+          if (this.selectedEntity === pawn) this.inspectRabbit(pawn);
+        }
+      }
+
+      // Reproduction Simulation
+      updateReproduction(dt) {
+        this.birthTimer -= dt;
+        if (this.birthTimer <= 0) {
+          this.birthTimer = 25 + Math.random() * 15;
+
+          // Check if food and burrows available
+          if (this.resources.burrowsCapacity > this.citizens.length && (this.resources.carrots > 15 || this.resources.bread > 5)) {
+            // Find married couple residing together
+            const eligibleCouples = [];
+            this.buildings.filter(b => b.type === 'burrow' && b.occupants.length >= 2).forEach(b => {
+              const r1 = this.citizens.find(c => c.id === b.occupants[0]);
+              const r2 = this.citizens.find(c => c.id === b.occupants[1]);
+              if (r1 && r2 && r1.spouseId === r2.id && r1.happiness > 60 && r2.happiness > 60) {
+                eligibleCouples.push({ b, r1, r2 });
+              }
+            });
+
+            if (eligibleCouples.length > 0) {
+              const pair = eligibleCouples[Math.floor(Math.random() * eligibleCouples.length)];
+              const newKit = new RabbitPawn({
+                clanName: pair.r1.clanName,
+                age: 0,
+                profession: 'Kit',
+                homeBurrowId: pair.b.id,
+                gx: pair.b.gx + 0.5,
+                gy: pair.b.gy + 0.5
+              });
+              
+              pair.r1.children.push(newKit.id);
+              pair.r2.children.push(newKit.id);
+              this.citizens.push(newKit);
+              this.sound.playBirth();
+              this.addToast(`👶 Joy! A healthy new kit was born to ${pair.r1.firstName} & ${pair.r2.firstName}!`);
+              pair.r1.say('🍼 Newborn!');
+              pair.r2.say('🍼 My Baby!');
+              this.updateHUD();
+            }
+          }
+
+          // Aging loop
+          this.citizens.forEach(c => {
+            c.age += 0.25;
+            // Kit graduation to adult
+            if (c.age >= 5 && c.profession === 'Kit') {
+              c.profession = 'Carrot Farmer';
+              this.sound.playBuild();
+              this.addToast(`🎓 Coming of Age: ${c.name} has grown into an adult rabbit!`);
+              c.say('🥕 Ready to work!');
+            }
+          });
+        }
+      }
+
+      updateHUD() {
+        const adults = this.citizens.filter(c => c.isAdult).length;
+        const kits = this.citizens.filter(c => c.isKit).length;
+        const elders = this.citizens.filter(c => c.isElder).length;
+        document.getElementById('res-pop').textContent = `${this.citizens.length} (${adults}A, ${kits}K, ${elders}E) / ${this.resources.burrowsCapacity}`;
+        document.getElementById('res-carrots').textContent = Math.floor(this.resources.carrots);
+        document.getElementById('res-wheat').textContent = Math.floor(this.resources.wheat);
+        document.getElementById('res-bread').textContent = Math.floor(this.resources.bread);
+        document.getElementById('res-wood').textContent = Math.floor(this.resources.wood);
+        document.getElementById('res-stone').textContent = Math.floor(this.resources.stone);
+        document.getElementById('res-gold').textContent = Math.floor(this.resources.gold);
+      }
+
+      // Simulation Loop
+      gameLoop(currentTime) {
+        const dt = Math.min((currentTime - this.lastFrameTime) / 1000, 0.1) * this.gameSpeed;
+        this.lastFrameTime = currentTime;
+
+        if (this.gameSpeed > 0) {
+          this.gameTime += dt;
+          this.day = 12 + Math.floor(this.gameTime / 15);
+          document.getElementById('day-clock').textContent = `Year ${this.year}, ${this.season} • Day ${this.day}`;
+
+          // Update rabbits
+          this.citizens.forEach(c => c.update(dt, this));
+
+          // Update caravans
+          this.caravans.forEach(c => c.update(dt, this));
+
+          // Life cycle & reproduction
+          this.updateReproduction(dt);
+
+          // Periodic HUD sync
+          this.updateHUD();
+        }
+
+        // Render Frame
+        this.render();
+
+        requestAnimationFrame((t) => this.gameLoop(t));
+      }
+
+      render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        if (this.viewMode === 'town') {
+          this.renderCulturesIsometricTown();
+        } else {
+          this.renderSquareGridWorldMap();
+        }
+      }
+
+      // =========================================================================
+      // 1. CULTURES ISOMETRIC TOWN RENDERING
+      // =========================================================================
+      renderCulturesIsometricTown() {
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.translate(this.cam.x, this.cam.y);
+        ctx.scale(this.cam.zoom, this.cam.zoom);
+
+        // 1. Draw Ground Tiles in Isometric Order
+        for (let y = 0; y < TOWN_GRID_SIZE; y++) {
+          for (let x = 0; x < TOWN_GRID_SIZE; x++) {
+            const tile = this.townGrid[y][x];
+            const iso = this.worldToIso(x, y);
+
+            // Diamond Tile Geometry
+            ctx.beginPath();
+            ctx.moveTo(iso.x, iso.y);
+            ctx.lineTo(iso.x + ISO_TILE_W / 2, iso.y + ISO_TILE_H / 2);
+            ctx.lineTo(iso.x, iso.y + ISO_TILE_H);
+            ctx.lineTo(iso.x - ISO_TILE_W / 2, iso.y + ISO_TILE_H / 2);
+            ctx.closePath();
+
+            if (tile.isRiver) {
+              // Shimmering Water
+              const waterGlow = Math.sin(this.gameTime * 2 + x * 0.5 + y * 0.5) * 10;
+              ctx.fillStyle = `rgb(42, ${110 + waterGlow}, ${150 + waterGlow})`;
+              ctx.fill();
+              ctx.strokeStyle = '#3a8ab5';
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+
+              // Water waves
+              ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+              ctx.beginPath();
+              ctx.arc(iso.x, iso.y + ISO_TILE_H * 0.5, 6, 0, Math.PI);
+              ctx.stroke();
+            } else {
+              // Meadow Grass (Cultures vibrant palette)
+              ctx.fillStyle = ((x + y) % 2 === 0) ? '#4a8542' : '#427c3a';
+              ctx.fill();
+              ctx.strokeStyle = '#396b32';
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+
+              // Cobblestone Path overlay
+              if (tile.hasPath) {
+                ctx.fillStyle = '#7a7d79';
+                ctx.beginPath();
+                ctx.ellipse(iso.x, iso.y + ISO_TILE_H * 0.5, 18, 9, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#5a5c59';
+                ctx.stroke();
+              } else if (tile.hasFlowers) {
+                ctx.fillStyle = tile.flowerColor;
+                ctx.beginPath();
+                ctx.arc(iso.x - 4, iso.y + ISO_TILE_H * 0.4, 2, 0, Math.PI * 2);
+                ctx.arc(iso.x + 4, iso.y + ISO_TILE_H * 0.6, 2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+
+            // Tile Hover in Build Mode
+            if (this.hoveredTile && this.hoveredTile.gx === x && this.hoveredTile.gy === y) {
+              ctx.fillStyle = 'rgba(229, 185, 88, 0.35)';
+              ctx.fill();
+              ctx.strokeStyle = '#e5b958';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+            }
+          }
+        }
+
+        // 2. Collect Entities for 2.5D Depth Sorting
+        const renderList = [];
+
+        // Environment Props (Trees & Boulders)
+        for (let y = 0; y < TOWN_GRID_SIZE; y++) {
+          for (let x = 0; x < TOWN_GRID_SIZE; x++) {
+            const tile = this.townGrid[y][x];
+            if (tile.hasTree) {
+              renderList.push({ type: 'tree', gx: x, gy: y, sortOrder: x + y });
+            } else if (tile.hasRock) {
+              renderList.push({ type: 'rock', gx: x, gy: y, sortOrder: x + y });
+            }
+          }
+        }
+
+        // Buildings
+        this.buildings.forEach(b => {
+          renderList.push({ type: 'building', entity: b, gx: b.gx, gy: b.gy, sortOrder: b.gx + b.gy });
+        });
+
+        // Rabbits
+        this.citizens.forEach(c => {
+          renderList.push({ type: 'rabbit', entity: c, gx: c.gx, gy: c.gy, sortOrder: c.gx + c.gy });
+        });
+
+        // Sort back-to-front
+        renderList.sort((a, b) => a.sortOrder - b.sortOrder);
+
+        // 3. Draw Depth-Sorted Entities
+        renderList.forEach(item => {
+          if (item.type === 'tree') {
+            this.drawIsoTree(ctx, item.gx, item.gy);
+          } else if (item.type === 'rock') {
+            this.drawIsoRock(ctx, item.gx, item.gy);
+          } else if (item.type === 'building') {
+            this.drawIsoBuilding(ctx, item.entity);
+          } else if (item.type === 'rabbit') {
+            this.drawIsoRabbit(ctx, item.entity);
+          }
+        });
+
+        ctx.restore();
+      }
+
+      // Drawing Helpers for Cultures 2.5D Isometric Style
+      drawIsoTree(ctx, gx, gy) {
+        const iso = this.worldToIso(gx, gy);
+        const bx = iso.x;
+        const by = iso.y + ISO_TILE_H * 0.5;
+
+        // Ground shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
         ctx.beginPath();
-        ctx.ellipse(px + tileSize * 0.5, py + tileSize * 0.5, tileSize * 0.28, tileSize * 0.22, 0, 0, Math.PI * 2);
+        ctx.ellipse(bx + 6, by + 2, 14, 7, 0, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#334155';
-        ctx.stroke();
+
+        // Trunk
+        ctx.fillStyle = '#5c4033';
+        ctx.fillRect(bx - 3, by - 16, 6, 16);
+
+        // Lush Foliage
+        ctx.fillStyle = '#2d6b38';
+        ctx.beginPath();
+        ctx.arc(bx, by - 24, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#398547';
+        ctx.beginPath();
+        ctx.arc(bx - 3, by - 28, 11, 0, Math.PI * 2);
+        ctx.fill();
       }
-    }
-  }
 
-  // Render Buildings
-  GAME.settlement.buildings.forEach(b => {
-    drawBuilding2D(b, cam.x, cam.y, tileSize);
-  });
-}
+      drawIsoRock(ctx, gx, gy) {
+        const iso = this.worldToIso(gx, gy);
+        const bx = iso.x;
+        const by = iso.y + ISO_TILE_H * 0.5;
 
-function drawTree2D(cx, cy, r) {
-  ctx.fillStyle = '#166534';
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#22c55e';
-  ctx.beginPath();
-  ctx.arc(cx - r * 0.2, cy - r * 0.2, r * 0.55, 0, Math.PI * 2);
-  ctx.fill();
-}
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath();
+        ctx.ellipse(bx, by + 1, 10, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-function drawBuilding2D(b, camX, camY, tileSize) {
-  const px = b.tx * tileSize + camX;
-  const py = b.ty * tileSize + camY;
+        ctx.fillStyle = '#7f8c8d';
+        ctx.beginPath();
+        ctx.moveTo(bx - 8, by);
+        ctx.lineTo(bx - 2, by - 10);
+        ctx.lineTo(bx + 8, by - 4);
+        ctx.lineTo(bx + 6, by + 4);
+        ctx.closePath();
+        ctx.fill();
+      }
 
-  if (b.type === 'burrow') {
-    // Rabbit Mound Burrow with Round Door & Chimney
-    const w = tileSize * 2;
-    const h = tileSize * 2;
-    ctx.fillStyle = '#5c4033'; // Earth mound
-    ctx.beginPath();
-    ctx.arc(px + w / 2, py + h / 2, w * 0.44, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#3e2723';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+      drawIsoBuilding(ctx, b) {
+        const iso = this.worldToIso(b.gx, b.gy);
+        const bx = iso.x;
+        const by = iso.y + ISO_TILE_H * 0.5;
 
-    // Grass turf roof
-    ctx.fillStyle = '#4d7c0f';
-    ctx.beginPath();
-    ctx.arc(px + w / 2, py + h / 2, w * 0.34, 0, Math.PI * 2);
-    ctx.fill();
+        // Building Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.28)';
+        ctx.beginPath();
+        ctx.ellipse(bx, by + 4, 32, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-    // Round wooden door
-    ctx.fillStyle = '#b45309';
-    ctx.beginPath();
-    ctx.arc(px + w / 2, py + h * 0.72, w * 0.15, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#f59e0b';
-    ctx.stroke();
+        if (b.type === 'burrow') {
+          // Cozy Cultures Earthen Burrow: Grassy green mound with round timber door and chimney
+          ctx.fillStyle = '#3d7237';
+          ctx.beginPath();
+          ctx.ellipse(bx, by - 8, 28, 20, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#2d5428';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
 
-    // Burrow Sign
-    drawBadge2D(px + w / 2, py - 6, `🏡 ${b.name}`);
-  } else if (b.type === 'carrot_patch') {
-    const s = tileSize;
-    ctx.fillStyle = '#78350f'; // tilled soil
-    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
-    // Green carrot tops & orange tips
-    ctx.fillStyle = '#f97316';
-    ctx.fillRect(px + s * 0.35, py + s * 0.4, s * 0.3, s * 0.3);
-    ctx.fillStyle = '#22c55e';
-    ctx.fillRect(px + s * 0.35, py + s * 0.15, s * 0.3, s * 0.25);
-  } else if (b.type === 'wheat_field') {
-    const s = tileSize;
-    ctx.fillStyle = '#ca8a04';
-    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
-    ctx.fillStyle = '#fef08a';
-    for (let k = 0; k < 3; k++) ctx.fillRect(px + s * 0.2 + k * 8, py + s * 0.2, 4, s * 0.6);
-  } else if (b.type === 'bakery') {
-    const w = tileSize * 2;
-    const h = tileSize * 2;
-    ctx.fillStyle = '#e2e8f0';
-    ctx.fillRect(px + 4, py + 4, w - 8, h - 8);
-    // Red gabled roof
-    ctx.fillStyle = '#dc2626';
-    ctx.fillRect(px + 4, py + 4, w - 8, h * 0.35);
-    drawBadge2D(px + w / 2, py - 6, `🥖 Bakery`);
-  } else if (b.type === 'woodcutter') {
-    const s = tileSize;
-    ctx.fillStyle = '#92400e';
-    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
-    ctx.fillStyle = '#15803d';
-    ctx.fillRect(px + 4, py + 4, s - 8, s * 0.4);
-    drawBadge2D(px + s / 2, py - 6, `🪓 Timber`);
-  } else if (b.type === 'stonemason') {
-    const s = tileSize;
-    ctx.fillStyle = '#64748b';
-    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
-    drawBadge2D(px + s / 2, py - 6, `⛏️ Masonry`);
-  } else if (b.type === 'workshop') {
-    const w = tileSize * 2;
-    const h = tileSize * 2;
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(px + 4, py + 4, w - 8, h - 8);
-    drawBadge2D(px + w / 2, py - 6, `🔨 Workshop`);
-  } else if (b.type === 'hearth') {
-    const w = tileSize * 2;
-    const h = tileSize * 2;
-    // Cobblestone plaza
-    ctx.fillStyle = '#94a3b8';
-    ctx.beginPath();
-    ctx.arc(px + w / 2, py + h / 2, w * 0.45, 0, Math.PI * 2);
-    ctx.fill();
-    // Firepit
-    ctx.fillStyle = '#dc2626';
-    ctx.beginPath();
-    ctx.arc(px + w / 2, py + h / 2, w * 0.18, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#facc15';
-    ctx.beginPath();
-    ctx.arc(px + w / 2, py + h / 2, w * 0.1, 0, Math.PI * 2);
-    ctx.fill();
-    drawBadge2D(px + w / 2, py - 6, `🔥 Village Hearth`);
-  }
-}
+          // Round Timber Door
+          ctx.fillStyle = '#8b5a2b';
+          ctx.beginPath();
+          ctx.ellipse(bx, by - 2, 8, 10, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#5a3818';
+          ctx.stroke();
 
-function drawBadge2D(bx, by, text) {
-  ctx.font = 'bold 11px sans-serif';
-  const m = ctx.measureText(text);
-  const bw = m.width + 10;
-  const bh = 18;
-  ctx.fillStyle = 'rgba(15, 28, 35, 0.9)';
-  ctx.strokeStyle = '#facc15';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.roundRect(bx - bw / 2, by - bh / 2, bw, bh, 3);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, bx, by);
-}
+          // Brass handle
+          ctx.fillStyle = '#f1c40f';
+          ctx.beginPath();
+          ctx.arc(bx + 4, by - 2, 1.5, 0, Math.PI * 2);
+          ctx.fill();
 
-// 2. Rabbit Pawns Rendering (Top-Down with Ears and Animation)
-function renderRabbits() {
-  const cam = GAME.cam.settlement;
-  const z = cam.zoom;
+          // Chimney & Puffing Smoke
+          ctx.fillStyle = '#7f8c8d';
+          ctx.fillRect(bx + 12, by - 30, 6, 14);
+          const smokeY = (this.gameTime * 15) % 30;
+          ctx.fillStyle = 'rgba(240, 240, 240, 0.45)';
+          ctx.beginPath();
+          ctx.arc(bx + 15, by - 32 - smokeY, 4 + smokeY * 0.2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (b.type === 'carrot') {
+          // Raised garden beds with orange carrots
+          ctx.fillStyle = '#5c3a21';
+          ctx.beginPath();
+          ctx.ellipse(bx, by - 2, 22, 12, 0, 0, Math.PI * 2);
+          ctx.fill();
 
-  GAME.rabbits.forEach(r => {
-    const sx = r.x * z + cam.x;
-    const sy = r.y * z + cam.y;
-    const isKit = r.lifeStage === 'kit';
-    const bodyR = (isKit ? 6 : 9) * z;
-    const hopOffset = Math.abs(Math.sin(r.hopPhase)) * (isKit ? 5 : 3) * z;
+          // Orange carrots with green leaf tops
+          for (let i = -12; i <= 12; i += 6) {
+            ctx.fillStyle = '#e67e22';
+            ctx.beginPath();
+            ctx.arc(bx + i, by - 4, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(bx + i - 1, by - 8, 2, 4);
+          }
+        } else if (b.type === 'wheat') {
+          // Golden grain field
+          ctx.fillStyle = '#8c703b';
+          ctx.beginPath();
+          ctx.ellipse(bx, by - 2, 22, 12, 0, 0, Math.PI * 2);
+          ctx.fill();
 
-    ctx.save();
-    ctx.translate(sx, sy - hopOffset);
+          ctx.fillStyle = '#f1c40f';
+          for (let i = -14; i <= 14; i += 5) {
+            const sway = Math.sin(this.gameTime * 3 + i) * 2;
+            ctx.fillRect(bx + i + sway, by - 12, 2.5, 10);
+          }
+        } else if (b.type === 'bakery') {
+          // Half-timbered Bakery & Windmill
+          ctx.fillStyle = '#e5d3b3';
+          ctx.fillRect(bx - 16, by - 32, 32, 28);
+          // Timber frames
+          ctx.strokeStyle = '#5a3818';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(bx - 16, by - 32, 32, 28);
+          ctx.beginPath();
+          ctx.moveTo(bx - 16, by - 32); ctx.lineTo(bx + 16, by - 4);
+          ctx.stroke();
 
-    // Rabbit Shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath();
-    ctx.ellipse(0, hopOffset + 4 * z, bodyR, bodyR * 0.55, 0, 0, Math.PI * 2);
-    ctx.fill();
+          // Red Tile Roof
+          ctx.fillStyle = '#a93226';
+          ctx.beginPath();
+          ctx.moveTo(bx - 20, by - 32);
+          ctx.lineTo(bx, by - 50);
+          ctx.lineTo(bx + 20, by - 32);
+          ctx.closePath();
+          ctx.fill();
 
-    // Rabbit Body
-    ctx.fillStyle = r.color;
-    ctx.beginPath();
-    ctx.arc(0, 0, bodyR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#78350f';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+          // Rotating Windmill Sails
+          const angle = this.gameTime * 2;
+          ctx.save();
+          ctx.translate(bx, by - 50);
+          ctx.strokeStyle = '#f4ecd8';
+          ctx.lineWidth = 2.5;
+          for (let s = 0; s < 4; s++) {
+            const sa = angle + s * Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(sa) * 24, Math.sin(sa) * 24);
+            ctx.stroke();
+          }
+          ctx.restore();
+        } else if (b.type === 'woodcutter') {
+          // Timber cabin & Log piles
+          ctx.fillStyle = '#785332';
+          ctx.fillRect(bx - 16, by - 26, 32, 22);
+          ctx.fillStyle = '#4a6b40';
+          ctx.beginPath();
+          ctx.moveTo(bx - 20, by - 26);
+          ctx.lineTo(bx, by - 42);
+          ctx.lineTo(bx + 20, by - 26);
+          ctx.closePath();
+          ctx.fill();
+          // Log piles
+          ctx.fillStyle = '#a3704c';
+          ctx.beginPath();
+          ctx.arc(bx + 14, by - 2, 4, 0, Math.PI * 2);
+          ctx.arc(bx + 20, by - 2, 4, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (b.type === 'mason') {
+          // Stone Mason yard
+          ctx.fillStyle = '#7f8c8d';
+          ctx.fillRect(bx - 14, by - 24, 28, 20);
+          ctx.fillStyle = '#95a5a6';
+          ctx.fillRect(bx - 10, by - 6, 8, 6);
+          ctx.fillRect(bx + 2, by - 6, 8, 6);
+        } else if (b.type === 'hearth') {
+          // Central firepit with animated flames
+          ctx.fillStyle = '#5a5c59';
+          ctx.beginPath();
+          ctx.ellipse(bx, by, 18, 9, 0, 0, Math.PI * 2);
+          ctx.fill();
 
-    // Long Rabbit Ears!
-    ctx.fillStyle = '#faedcd';
-    ctx.strokeStyle = '#d4a373';
-    // Left ear
-    ctx.beginPath();
-    ctx.ellipse(-bodyR * 0.45, -bodyR * 0.9, bodyR * 0.28, bodyR * 0.75, -0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    // Right ear
-    ctx.beginPath();
-    ctx.ellipse(bodyR * 0.45, -bodyR * 0.9, bodyR * 0.28, bodyR * 0.75, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+          // Flames
+          const flameH = 10 + Math.sin(this.gameTime * 12) * 3;
+          ctx.fillStyle = '#f39c12';
+          ctx.beginPath();
+          ctx.moveTo(bx - 6, by);
+          ctx.lineTo(bx, by - flameH);
+          ctx.lineTo(bx + 6, by);
+          ctx.fill();
 
-    // Whiskers & Pink nose
-    ctx.fillStyle = '#f43f5e';
-    ctx.beginPath();
-    ctx.arc(0, 1 * z, 1.8 * z, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Carried Item Icon
-    if (r.carried) {
-      ctx.font = `${Math.floor(10 * z)}px sans-serif`;
-      ctx.fillText(r.carried.type === 'carrots' ? '🥕' : '🌾', bodyR * 0.8, -bodyR * 0.5);
-    }
-
-    // Name label
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText(r.firstName, 0, bodyR + 10 * z);
-
-    ctx.restore();
-  });
-}
-
-// 3. World Regional Map Rendering
-function renderWorldView() {
-  const cam = GAME.cam.world;
-  const tileSize = 44 * cam.zoom;
-
-  // Background grid
-  for (let y = 0; y < GAME.world.h; y++) {
-    for (let x = 0; x < GAME.world.w; x++) {
-      const tile = GAME.world.tiles[y][x];
-      const px = x * tileSize + cam.x;
-      const py = y * tileSize + cam.y;
-
-      if (tile.biome === 'mountains') ctx.fillStyle = '#64748b';
-      else if (tile.biome === 'forest') ctx.fillStyle = '#1e3a2b';
-      else if (tile.biome === 'river') ctx.fillStyle = '#0284c7';
-      else ctx.fillStyle = '#365e3b';
-
-      ctx.fillRect(px, py, tileSize, tileSize);
-      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-      ctx.strokeRect(px, py, tileSize, tileSize);
-    }
-  }
-
-  // Player Colony Square (Warren Brambleton)
-  const px = GAME.world.playerX * tileSize + cam.x;
-  const py = GAME.world.playerY * tileSize + cam.y;
-  ctx.fillStyle = 'rgba(34, 197, 94, 0.4)';
-  ctx.fillRect(px, py, tileSize, tileSize);
-  ctx.strokeStyle = '#22c55e';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(px, py, tileSize, tileSize);
-  drawBadge2D(px + tileSize / 2, py + tileSize / 2, `🐇 Brambleton (Your Warren)`);
-
-  // Foreign Animal Kingdoms
-  GAME.world.kingdoms.forEach(k => {
-    const kx = k.x * tileSize + cam.x;
-    const ky = k.y * tileSize + cam.y;
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(kx + 4, ky + 4, tileSize - 8, tileSize - 8);
-    ctx.strokeStyle = '#fbbf24';
-    ctx.strokeRect(kx + 4, ky + 4, tileSize - 8, tileSize - 8);
-    drawBadge2D(kx + tileSize / 2, ky + tileSize / 2, `${k.icon} ${k.name} (${k.race})`);
-  });
-
-  // Active Caravans on World Map
-  GAME.world.caravans.forEach(c => {
-    const startX = GAME.world.playerX * tileSize + cam.x + tileSize / 2;
-    const startY = GAME.world.playerY * tileSize + cam.y + tileSize / 2;
-    const targetX = c.target.x * tileSize + cam.x + tileSize / 2;
-    const targetY = c.target.y * tileSize + cam.y + tileSize / 2;
-
-    const curX = startX + (targetX - startX) * c.progress;
-    const curY = startY + (targetY - startY) * c.progress;
-
-    // Draw route dashed line
-    ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(targetX, targetY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Caravan icon
-    ctx.font = '18px sans-serif';
-    ctx.fillText('🎒🐇', curX - 10, curY);
-  });
-}
-
-// 4. Minimap Radar
-function renderMinimap() {
-  radarCtx.fillStyle = '#060e12';
-  radarCtx.fillRect(0, 0, radarCanvas.width, radarCanvas.height);
-
-  if (GAME.view === 'settlement') {
-    const sx = radarCanvas.width / GAME.settlement.w;
-    const sy = radarCanvas.height / GAME.settlement.h;
-
-    for (let y = 0; y < GAME.settlement.h; y++) {
-      for (let x = 0; x < GAME.settlement.w; x++) {
-        const t = GAME.settlement.tiles[y][x];
-        radarCtx.fillStyle = t.type === 'water' ? '#0284c7' : (t.tree ? '#14532d' : '#3f782f');
-        radarCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
-        if (t.path) {
-          radarCtx.fillStyle = '#cbd5e1';
-          radarCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
+          ctx.fillStyle = '#f1c40f';
+          ctx.beginPath();
+          ctx.moveTo(bx - 3, by);
+          ctx.lineTo(bx, by - flameH * 0.7);
+          ctx.lineTo(bx + 3, by);
+          ctx.fill();
         }
       }
-    }
 
-    GAME.settlement.buildings.forEach(b => {
-      radarCtx.fillStyle = b.type === 'burrow' ? '#f59e0b' : '#38bdf8';
-      radarCtx.fillRect(b.tx * sx - 1, b.ty * sy - 1, sx * 2, sy * 2);
-    });
+      drawIsoRabbit(ctx, c) {
+        const iso = this.worldToIso(c.gx, c.gy);
+        const bx = iso.x;
+        // Hopping physics bounce
+        const hopY = Math.abs(Math.sin(c.hopPhase)) * 8;
+        const by = iso.y + ISO_TILE_H * 0.5 - hopY;
 
-    GAME.rabbits.forEach(r => {
-      const rx = (r.x / 32) * sx;
-      const ry = (r.y / 32) * sy;
-      radarCtx.fillStyle = '#ffffff';
-      radarCtx.fillRect(rx - 1, ry - 1, 3, 3);
-    });
-  } else {
-    // World radar
-    const sx = radarCanvas.width / GAME.world.w;
-    const sy = radarCanvas.height / GAME.world.h;
-    for (let y = 0; y < GAME.world.h; y++) {
-      for (let x = 0; x < GAME.world.w; x++) {
-        const t = GAME.world.tiles[y][x];
-        radarCtx.fillStyle = t.biome === 'mountains' ? '#64748b' : (t.biome === 'forest' ? '#14532d' : '#365e3b');
-        radarCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
-      }
-    }
-    // Player Warren
-    radarCtx.fillStyle = '#22c55e';
-    radarCtx.fillRect(GAME.world.playerX * sx - 2, GAME.world.playerY * sy - 2, sx + 4, sy + 4);
-  }
-}
+        // Rabbit Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath();
+        ctx.ellipse(iso.x, iso.y + ISO_TILE_H * 0.5, 7 - hopY * 0.2, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-/* =========================================================================
-   USER CONTROLS & CAMERA
-   ========================================================================= */
+        // Rabbit Body (Cute Cultures 2.5D Sprite)
+        const scale = c.isKit ? 0.65 : 1.0;
+        ctx.save();
+        ctx.translate(bx, by);
+        ctx.scale(scale, scale);
 
-const vp = document.getElementById('viewport-area');
+        // Body
+        ctx.fillStyle = c.furColor;
+        ctx.beginPath();
+        ctx.ellipse(0, -6, 7, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-function centerSettlementCamera() {
-  const tileSize = 32 * GAME.cam.settlement.zoom;
-  GAME.cam.settlement.x = canvas.width / 2 - 16 * tileSize;
-  GAME.cam.settlement.y = canvas.height / 2 - 16 * tileSize;
-}
+        // Head
+        ctx.beginPath();
+        ctx.ellipse(0, -16, 6, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-function centerWorldCamera() {
-  const tileSize = 44 * GAME.cam.world.zoom;
-  GAME.cam.world.x = canvas.width / 2 - GAME.world.playerX * tileSize;
-  GAME.cam.world.y = canvas.height / 2 - GAME.world.playerY * tileSize;
-}
+        // Floppy Ears
+        const earTilt = Math.sin(this.gameTime * 4 + c.hopPhase) * 2;
+        ctx.fillStyle = c.furColor;
+        // Left Ear
+        ctx.beginPath();
+        ctx.ellipse(-3 + earTilt * 0.5, -24, 2.5, 7, -0.15, 0, Math.PI * 2);
+        ctx.fill();
+        // Right Ear
+        ctx.beginPath();
+        ctx.ellipse(3 + earTilt * 0.5, -24, 2.5, 7, 0.15, 0, Math.PI * 2);
+        ctx.fill();
 
-vp.addEventListener('mousedown', (e) => {
-  GAME.audio.ensure();
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+        // Ear inner pink
+        ctx.fillStyle = '#ffb6c1';
+        ctx.beginPath();
+        ctx.ellipse(-3 + earTilt * 0.5, -24, 1.2, 4.5, -0.15, 0, Math.PI * 2);
+        ctx.ellipse(3 + earTilt * 0.5, -24, 1.2, 4.5, 0.15, 0, Math.PI * 2);
+        ctx.fill();
 
-  GAME.mouse.isDown = true;
-  GAME.mouse.dragStartX = mx;
-  GAME.mouse.dragStartY = my;
+        // Tunic / Cloak
+        if (c.profession === 'Carrot Farmer') ctx.fillStyle = '#27ae60';
+        else if (c.profession === 'Baker') ctx.fillStyle = '#f39c12';
+        else if (c.profession === 'Woodcutter') ctx.fillStyle = '#d35400';
+        else if (c.profession === 'Stone Mason') ctx.fillStyle = '#7f8c8d';
+        else if (c.profession === 'Elder') ctx.fillStyle = '#8e44ad';
+        else ctx.fillStyle = '#2980b9';
 
-  if (e.button === 1 || e.button === 2 || GAME.activeTool === 'inspect') {
-    GAME.mouse.isPanning = true;
-    vp.classList.add('panning');
-    if (e.button === 0) handleInspectClick(mx, my);
-    return;
-  }
+        ctx.fillRect(-5, -9, 10, 6);
 
-  if (e.button === 0 && GAME.view === 'settlement') {
-    const cam = GAME.cam.settlement;
-    const tileSize = 32 * cam.zoom;
-    const tx = Math.floor((mx - cam.x) / tileSize);
-    const ty = Math.floor((my - cam.y) / tileSize);
-    handleSettlementBuild(tx, ty);
-  }
-});
+        // Fluffy Cotton Tail
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-6, -3, 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
-vp.addEventListener('mousemove', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
+        // Eyes
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.arc(-2, -16, 1, 0, Math.PI * 2);
+        ctx.arc(2, -16, 1, 0, Math.PI * 2);
+        ctx.fill();
 
-  if (GAME.mouse.isDown && GAME.mouse.isPanning) {
-    const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
-    cam.x += mx - GAME.mouse.dragStartX;
-    cam.y += my - GAME.mouse.dragStartY;
-    GAME.mouse.dragStartX = mx;
-    GAME.mouse.dragStartY = my;
-  }
-});
+        // Carried Item in Paws
+        if (c.carriedItem === 'carrot') {
+          ctx.fillStyle = '#e67e22';
+          ctx.fillRect(4, -10, 4, 8);
+          ctx.fillStyle = '#2ecc71';
+          ctx.fillRect(4, -13, 3, 3);
+        } else if (c.carriedItem === 'wheat') {
+          ctx.fillStyle = '#f1c40f';
+          ctx.fillRect(4, -12, 3, 9);
+        } else if (c.carriedItem === 'wood') {
+          ctx.fillStyle = '#8b5a2b';
+          ctx.fillRect(3, -9, 8, 4);
+        } else if (c.carriedItem === 'stone') {
+          ctx.fillStyle = '#95a5a6';
+          ctx.fillRect(3, -8, 6, 6);
+        }
 
-vp.addEventListener('mouseup', () => {
-  GAME.mouse.isDown = false;
-  GAME.mouse.isPanning = false;
-  vp.classList.remove('panning');
-});
+        ctx.restore();
 
-vp.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.15 : 0.85;
-  const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
-  const minZ = GAME.view === 'settlement' ? 0.6 : 0.5;
-  const maxZ = GAME.view === 'settlement' ? 2.5 : 2.0;
-  cam.zoom = Math.min(maxZ, Math.max(minZ, cam.zoom * factor));
-}, { passive: false });
+        // Speech Bubble
+        if (c.speechBubble) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+          ctx.strokeStyle = '#121815';
+          ctx.lineWidth = 1;
+          const bubbleY = by - 32 * scale;
+          ctx.beginPath();
+          ctx.roundRect(bx - 16, bubbleY - 14, 32, 18, 6);
+          ctx.fill();
+          ctx.stroke();
 
-function handleInspectClick(mx, my) {
-  if (GAME.view === 'settlement') {
-    const cam = GAME.cam.settlement;
-    const z = cam.zoom;
+          ctx.fillStyle = '#121815';
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(c.speechBubble.text, bx, bubbleY - 1);
+        }
 
-    // Check if clicked on a rabbit
-    let foundRabbit = null;
-    for (const r of GAME.rabbits) {
-      const rx = r.x * z + cam.x;
-      const ry = r.y * z + cam.y;
-      if (Math.hypot(rx - mx, ry - my) < 18 * z) {
-        foundRabbit = r;
-        break;
-      }
-    }
-
-    if (foundRabbit) {
-      openRabbitInspector(foundRabbit);
-      return;
-    }
-
-    // Check if clicked on a building
-    const tileSize = 32 * z;
-    const tx = Math.floor((mx - cam.x) / tileSize);
-    const ty = Math.floor((my - cam.y) / tileSize);
-    if (tx >= 0 && tx < GAME.settlement.w && ty >= 0 && ty < GAME.settlement.h) {
-      const bldgId = GAME.settlement.tiles[ty][tx].buildingId;
-      if (bldgId) {
-        const b = GAME.settlement.buildings.find(item => item.id === bldgId);
-        if (b) showToast(`🏛️ Selected ${b.name}`);
-      }
-    }
-  } else {
-    // World view click: check if clicked player Warren or kingdom
-    const cam = GAME.cam.world;
-    const tileSize = 44 * cam.zoom;
-    const tx = Math.floor((mx - cam.x) / tileSize);
-    const ty = Math.floor((my - cam.y) / tileSize);
-
-    if (tx === GAME.world.playerX && ty === GAME.world.playerY) {
-      // Zoom into settlement!
-      switchToView('settlement');
-      showToast("🏡 Zooming into Brambleton Settlement!");
-      return;
-    }
-
-    const kingdom = GAME.world.kingdoms.find(k => k.x === tx && k.y === ty);
-    if (kingdom) {
-      openCaravanModal(kingdom);
-    }
-  }
-}
-
-function handleSettlementBuild(tx, ty) {
-  if (tx < 0 || tx >= GAME.settlement.w || ty < 0 || ty >= GAME.settlement.h) return;
-  const tool = GAME.activeTool;
-  const tile = GAME.settlement.tiles[ty][tx];
-
-  if (tool === 'path') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.stone < 1) { showToast("Requires 1 Stone!"); return; }
-    GAME.res.stone -= 1;
-    tile.path = true;
-    GAME.audio.build();
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'burrow') {
-    if (tile.type === 'water' || tile.buildingId) { showToast("Select open ground!"); return; }
-    if (GAME.res.timber < 25 || GAME.res.stone < 10) { showToast("Requires 25 Timber & 10 Stone!"); return; }
-    GAME.res.timber -= 25; GAME.res.stone -= 10;
-    addBuilding('burrow', tx, ty);
-    GAME.audio.build();
-    showToast("🏡 Cozy Rabbit Burrow constructed!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'carrot_patch') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.timber < 5) { showToast("Requires 5 Timber!"); return; }
-    GAME.res.timber -= 5;
-    addBuilding('carrot_patch', tx, ty);
-    GAME.audio.build();
-    showToast("🥕 Tilled Carrot Patch!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'wheat_field') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.timber < 8) { showToast("Requires 8 Timber!"); return; }
-    GAME.res.timber -= 8;
-    addBuilding('wheat_field', tx, ty);
-    GAME.audio.build();
-    showToast("🌾 Planted Wheat Field!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'bakery') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.timber < 30 || GAME.res.stone < 20) { showToast("Requires 30 Timber & 20 Stone!"); return; }
-    GAME.res.timber -= 30; GAME.res.stone -= 20;
-    addBuilding('bakery', tx, ty);
-    GAME.audio.build();
-    showToast("🥖 Colony Windmill & Bakery opened!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'woodcutter') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.timber < 20) { showToast("Requires 20 Timber!"); return; }
-    GAME.res.timber -= 20;
-    addBuilding('woodcutter', tx, ty);
-    GAME.audio.build();
-    showToast("🪓 Woodcutter Lodge ready!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'stonemason') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.timber < 20 || GAME.res.stone < 10) { showToast("Requires 20 Timber & 10 Stone!"); return; }
-    GAME.res.timber -= 20; GAME.res.stone -= 10;
-    addBuilding('stonemason', tx, ty);
-    GAME.audio.build();
-    showToast("⛏️ Masonry Shed constructed!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'workshop') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.timber < 35 || GAME.res.stone < 25) { showToast("Requires 35 Timber & 25 Stone!"); return; }
-    GAME.res.timber -= 35; GAME.res.stone -= 25;
-    addBuilding('workshop', tx, ty);
-    GAME.audio.build();
-    showToast("🔨 Artisan Workshop built!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'hearth') {
-    if (tile.type === 'water' || tile.buildingId) return;
-    if (GAME.res.stone < 15) { showToast("Requires 15 Stone!"); return; }
-    GAME.res.stone -= 15;
-    addBuilding('hearth', tx, ty);
-    GAME.audio.build();
-    showToast("🔥 Village Green Hearth built!");
-    updateHUD();
-    return;
-  }
-
-  if (tool === 'demolish') {
-    if (tile.buildingId) {
-      const bid = tile.buildingId;
-      GAME.settlement.buildings = GAME.settlement.buildings.filter(b => b.id !== bid);
-      for (let r = 0; r < GAME.settlement.h; r++) {
-        for (let c = 0; c < GAME.settlement.w; c++) {
-          if (GAME.settlement.tiles[r][c].buildingId === bid) GAME.settlement.tiles[r][c].buildingId = null;
+        // Selection Ring
+        if (this.selectedEntity === c) {
+          ctx.strokeStyle = '#e5b958';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.ellipse(iso.x, iso.y + ISO_TILE_H * 0.5, 12, 6, 0, 0, Math.PI * 2);
+          ctx.stroke();
         }
       }
-      showToast("Demolished building!");
+
+      // =========================================================================
+      // 2. REGIONAL SQUARE GRID WORLD MAP RENDERING
+      // =========================================================================
+      renderSquareGridWorldMap() {
+        const ctx = this.ctx;
+        const gridPixelW = WORLD_GRID_SIZE * WORLD_SQUARE_PX;
+        const offsetX = (window.innerWidth - gridPixelW) / 2;
+        const offsetY = (window.innerHeight - gridPixelW) / 2 + 20;
+
+        // Background Frame
+        ctx.fillStyle = '#0e1411';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // World Map Title Header
+        ctx.fillStyle = '#e5b958';
+        ctx.font = 'bold 22px Cinzel, Georgia, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Regional World Map (Square Grid)', window.innerWidth / 2, offsetY - 25);
+
+        // 1. Draw Clean Square Tiles
+        for (let y = 0; y < WORLD_GRID_SIZE; y++) {
+          for (let x = 0; x < WORLD_GRID_SIZE; x++) {
+            const sq = this.worldGrid[y][x];
+            const px = offsetX + x * WORLD_SQUARE_PX;
+            const py = offsetY + y * WORLD_SQUARE_PX;
+
+            // Square Base Color by Biome
+            let biomeColor = '#3b7a42'; // meadow
+            if (sq.biome === 'mountain') biomeColor = '#5a6369';
+            else if (sq.biome === 'river') biomeColor = '#285b7a';
+            else if (sq.biome === 'forest') biomeColor = '#1b4d2e';
+            else if (sq.biome === 'hills') biomeColor = '#7a6b32';
+
+            ctx.fillStyle = biomeColor;
+            ctx.fillRect(px, py, WORLD_SQUARE_PX, WORLD_SQUARE_PX);
+
+            // Clean Square Grid Borders
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(px, py, WORLD_SQUARE_PX, WORLD_SQUARE_PX);
+
+            // Coordinates in corner
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.font = '9px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${x},${y}`, px + 4, py + 12);
+
+            // Biome Icon
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(sq.icon, px + WORLD_SQUARE_PX / 2, py + 26);
+
+            // Faction Banner / Insignia
+            if (sq.factionId) {
+              const fac = FACTIONS[sq.factionId];
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+              ctx.fillRect(px + 4, py + 34, WORLD_SQUARE_PX - 8, 30);
+              ctx.strokeStyle = fac.color;
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(px + 4, py + 34, WORLD_SQUARE_PX - 8, 30);
+
+              ctx.fillStyle = fac.color;
+              ctx.font = 'bold 10px sans-serif';
+              ctx.fillText(fac.icon + ' ' + (fac.id === 'brambleton' ? 'You' : fac.race.split(' ')[0]), px + WORLD_SQUARE_PX / 2, py + 48);
+              ctx.fillStyle = '#ffffff';
+              ctx.font = '9px sans-serif';
+              ctx.fillText(fac.id === 'brambleton' ? 'Brambleton' : fac.name.split(' ')[0], px + WORLD_SQUARE_PX / 2, py + 60);
+            }
+
+            // Selected Square Highlight
+            if (this.selectedWorldSquare && this.selectedWorldSquare.gx === x && this.selectedWorldSquare.gy === y) {
+              ctx.strokeStyle = '#e5b958';
+              ctx.lineWidth = 3;
+              ctx.strokeRect(px + 1, py + 1, WORLD_SQUARE_PX - 2, WORLD_SQUARE_PX - 2);
+            }
+          }
+        }
+
+        // 2. Draw Caravans Moving Along Square Grid
+        this.caravans.forEach(car => {
+          const cpx = offsetX + car.gx * WORLD_SQUARE_PX + WORLD_SQUARE_PX / 2;
+          const cpy = offsetY + car.gy * WORLD_SQUARE_PX + WORLD_SQUARE_PX / 2;
+
+          // Route dashed line
+          const target = FACTIONS[car.targetId];
+          const origin = FACTIONS[car.originId];
+          ctx.strokeStyle = '#f1c40f';
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(offsetX + origin.gx * WORLD_SQUARE_PX + WORLD_SQUARE_PX / 2, offsetY + origin.gy * WORLD_SQUARE_PX + WORLD_SQUARE_PX / 2);
+          ctx.lineTo(offsetX + target.gx * WORLD_SQUARE_PX + WORLD_SQUARE_PX / 2, offsetY + target.gy * WORLD_SQUARE_PX + WORLD_SQUARE_PX / 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Caravan Token on Square Tile
+          ctx.fillStyle = 'rgba(0,0,0,0.7)';
+          ctx.beginPath();
+          ctx.arc(cpx, cpy, 16, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#e5b958';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.font = '16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🎒', cpx, cpy + 5);
+        });
+      }
+
+      resizeCanvas() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
     }
-    if (tile.path) tile.path = false;
-    if (tile.tree) tile.tree = false;
-    if (tile.rock) tile.rock = false;
-  }
-}
 
-/* =========================================================================
-   HUD & UI MODALS
-   ========================================================================= */
-
-function updateHUD() {
-  document.getElementById('res-carrots').textContent = Math.floor(GAME.res.carrots);
-  document.getElementById('res-wheat').textContent = Math.floor(GAME.res.wheat);
-  document.getElementById('res-bread').textContent = Math.floor(GAME.res.bread);
-  document.getElementById('res-timber').textContent = Math.floor(GAME.res.timber);
-  document.getElementById('res-stone').textContent = Math.floor(GAME.res.stone);
-  document.getElementById('res-tools').textContent = Math.floor(GAME.res.tools);
-  document.getElementById('res-gold').textContent = Math.floor(GAME.res.gold);
-
-  const adults = GAME.rabbits.filter(r => r.lifeStage !== 'kit').length;
-  const kits = GAME.rabbits.filter(r => r.lifeStage === 'kit').length;
-  document.getElementById('res-pop').textContent = `${GAME.rabbits.length} (${adults} Adults, ${kits} Kits)`;
-  document.getElementById('res-season').textContent = `🌱 ${GAME.season}, Day ${GAME.day} (Yr ${GAME.year})`;
-}
-
-// View switcher
-const btnToggleView = document.getElementById('btn-toggle-view');
-const worldPanel = document.getElementById('world-overlay-panel');
-
-btnToggleView.addEventListener('click', () => {
-  switchToView(GAME.view === 'settlement' ? 'world' : 'settlement');
-});
-
-function switchToView(newView) {
-  GAME.view = newView;
-  btnToggleView.textContent = newView === 'settlement' ? '🗺️ World Map' : '🏡 Settlement';
-  worldPanel.style.display = newView === 'world' ? 'block' : 'none';
-  document.getElementById('radar-mode').textContent = newView === 'settlement' ? 'Settlement' : 'World Map';
-  if (newView === 'world') centerWorldCamera();
-  else centerSettlementCamera();
-  showToast(newView === 'settlement' ? 'Entered Local Warren View' : 'Entered Kingdom World Map');
-}
-
-// Toolbar clicks
-document.querySelectorAll('#toolbar .btn[data-tool]').forEach(b => {
-  b.addEventListener('click', () => {
-    GAME.audio.ensure();
-    GAME.audio.click();
-    document.querySelectorAll('#toolbar .btn[data-tool]').forEach(btn => btn.classList.remove('active'));
-    b.classList.add('active');
-    GAME.activeTool = b.getAttribute('data-tool');
-    vp.classList.remove('building');
-    if (GAME.activeTool !== 'inspect') vp.classList.add('building');
-  });
-});
-
-// Citizen Inspector
-function openRabbitInspector(r) {
-  GAME.selectedRabbit = r;
-  const card = document.getElementById('roster-card');
-  document.getElementById('c-name').textContent = r.name;
-  document.getElementById('c-profession').textContent = `Profession: ${r.profession.toUpperCase()}`;
-  document.getElementById('c-stage').textContent = `${r.gender === 'M' ? 'Buck' : 'Doe'} (${r.lifeStage}, age ${r.age})`;
-
-  const spouse = GAME.rabbits.find(s => s.id === r.spouseId);
-  document.getElementById('c-spouse').textContent = spouse ? spouse.name : 'Unmarried';
-
-  const burrow = GAME.settlement.buildings.find(b => b.id === r.burrowId);
-  document.getElementById('c-home').textContent = burrow ? burrow.name : 'Homeless (Needs Burrow)';
-
-  document.getElementById('c-task').textContent = r.state.toUpperCase();
-  document.getElementById('c-carried').textContent = r.carried ? `${r.carried.amount} ${r.carried.type}` : 'None';
-  document.getElementById('c-hunger').textContent = `${Math.floor(r.hunger)}%`;
-  document.getElementById('c-happiness').textContent = `${Math.floor(r.happiness)}%`;
-
-  const sel = document.getElementById('sel-profession');
-  sel.value = r.profession;
-  card.style.display = 'block';
-}
-
-document.getElementById('sel-profession').addEventListener('change', (e) => {
-  if (GAME.selectedRabbit && GAME.selectedRabbit.lifeStage !== 'kit') {
-    GAME.selectedRabbit.profession = e.target.value;
-    showToast(`Assigned ${GAME.selectedRabbit.name} to ${e.target.value}!`);
-    openRabbitInspector(GAME.selectedRabbit);
-  }
-});
-
-document.getElementById('btn-close-roster').addEventListener('click', () => {
-  document.getElementById('roster-card').style.display = 'none';
-});
-
-// Citizens Matrix Modal
-document.getElementById('btn-colony-roster').addEventListener('click', () => {
-  const tbody = document.getElementById('all-citizens-tbody');
-  tbody.innerHTML = '';
-  GAME.rabbits.forEach(r => {
-    const spouse = GAME.rabbits.find(s => s.id === r.spouseId);
-    const burrow = GAME.settlement.buildings.find(b => b.id === r.burrowId);
-    const tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
-    tr.innerHTML = `
-      <td style="padding:8px 12px;"><b>${r.name}</b></td>
-      <td style="padding:8px 12px;">${r.gender === 'M' ? 'Buck' : 'Doe'}, age ${r.age} (${r.lifeStage})</td>
-      <td style="padding:8px 12px; color:var(--accent-carrot); font-weight:600;">${r.profession}</td>
-      <td style="padding:8px 12px;">${burrow ? burrow.name : 'Homeless'}</td>
-      <td style="padding:8px 12px;">${spouse ? spouse.name : 'None'}</td>
-      <td style="padding:8px 12px; color:#4ade80;">${Math.floor(r.happiness)}%</td>
-    `;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('modal-all-citizens').style.display = 'flex';
-});
-
-document.getElementById('btn-close-all-citizens').addEventListener('click', () => {
-  document.getElementById('modal-all-citizens').style.display = 'none';
-});
-
-// Caravan Trade Modal
-document.getElementById('btn-caravan-open').addEventListener('click', () => {
-  openCaravanModal(null);
-});
-
-function openCaravanModal(preselectedKingdom) {
-  const list = document.getElementById('caravan-targets-list');
-  list.innerHTML = '';
-  GAME.world.kingdoms.forEach(k => {
-    const div = document.createElement('div');
-    div.className = 'caravan-target-card';
-    div.innerHTML = `
-      <div>
-        <h4 style="color:var(--accent-gold);">${k.icon} ${k.name} (${k.race})</h4>
-        <p style="color:var(--text-dim); font-size:11px;">${k.desc}</p>
-        <p style="font-size:11px; margin-top:4px;">Demands: <b style="color:#fdba74;">${k.buys}</b> | Pays: <b style="color:#facc15;">${k.pays}</b></p>
-      </div>
-      <button class="btn" onclick="window.dispatchCaravanTo('${k.name}')" style="font-weight:700;">🎒 Dispatch Caravan (Costs 15 Bread, 10 Carrots)</button>
-    `;
-    list.appendChild(div);
-  });
-  document.getElementById('modal-caravan').style.display = 'flex';
-}
-
-document.getElementById('btn-close-caravan').addEventListener('click', () => {
-  document.getElementById('modal-caravan').style.display = 'none';
-});
-
-window.dispatchCaravanTo = function(kName) {
-  const k = GAME.world.kingdoms.find(item => item.name === kName);
-  if (!k) return;
-
-  if (GAME.res.bread < 15 || GAME.res.carrots < 10) {
-    showToast("Not enough supplies! Caravan requires 15 Bread and 10 Carrots.");
-    return;
-  }
-
-  GAME.res.bread -= 15;
-  GAME.res.carrots -= 10;
-  GAME.world.caravans.push({
-    target: k,
-    progress: 0,
-    goldReward: Math.floor(Math.random() * 120) + 180
-  });
-
-  document.getElementById('modal-caravan').style.display = 'none';
-  GAME.audio.birthFanfare();
-  showToast(`🎒 Dispatched trade caravan to ${k.name}!`);
-  updateHUD();
-};
-
-// Toast notification
-function showToast(msg) {
-  const rack = document.getElementById('toast-rack');
-  const el = document.createElement('div');
-  el.className = 'toast-item';
-  el.textContent = msg;
-  rack.appendChild(el);
-  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 3200);
-}
-
-// Speed buttons
-const spdButtons = [
-  { id: 'spd-pause', spd: 0 },
-  { id: 'spd-1x', spd: 1 },
-  { id: 'spd-2x', spd: 2 },
-  { id: 'spd-5x', spd: 5 }
-];
-spdButtons.forEach(({ id, spd }) => {
-  document.getElementById(id).addEventListener('click', () => {
-    GAME.audio.ensure();
-    GAME.audio.click();
-    GAME.speed = spd;
-    spdButtons.forEach(b => document.getElementById(b.id).classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  });
-});
-
-// Zoom & Center
-document.getElementById('btn-zoom-in').addEventListener('click', () => {
-  const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
-  cam.zoom = Math.min(2.5, cam.zoom * 1.25);
-});
-document.getElementById('btn-zoom-out').addEventListener('click', () => {
-  const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
-  cam.zoom = Math.max(0.5, cam.zoom * 0.8);
-});
-document.getElementById('btn-center').addEventListener('click', () => {
-  if (GAME.view === 'settlement') centerSettlementCamera();
-  else centerWorldCamera();
-});
-
-// Sound Toggle
-document.getElementById('btn-sound').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.enabled = !GAME.audio.enabled;
-  document.getElementById('btn-sound').textContent = GAME.audio.enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
-});
-
-// Boot Game
-function bootGame() {
-  fitCanvas();
-  initGame();
-  requestAnimationFrame(gameLoop);
-}
-
-if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', bootGame);
-} else {
-  bootGame();
-}
-
-</script>
+    // Start Simulation on Load
+    let game;
+    window.addEventListener('DOMContentLoaded', () => {
+      game = new RabbitSimulationGame();
+    });
+  </script>
 </body>
 </html>
