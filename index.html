@@ -3,303 +3,262 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Transport Tycoon: Automation</title>
+<title>Burrow & Blade: Rabbit Colony Simulation</title>
 <style>
   :root {
-    --bg-dark: #0f1c24;
-    --panel-main: #244657;
-    --panel-header: #346077;
-    --panel-border: #4d88a7;
-    --panel-shadow: #0b151c;
-    --accent-yellow: #f59e0b;
+    --bg-dark: #111a1e;
+    --panel-bg: rgba(22, 36, 43, 0.94);
+    --panel-header: #2c4c5a;
+    --panel-border: #4d7a8f;
     --accent-gold: #fbbf24;
-    --accent-green: #22c55e;
+    --accent-carrot: #f97316;
+    --accent-green: #34d399;
     --accent-blue: #38bdf8;
-    --accent-purple: #c084fc;
+    --accent-wood: #b45309;
+    --accent-stone: #94a3b8;
     --accent-red: #ef4444;
-    --text-white: #ffffff;
-    --text-dim: #b6d4e3;
-    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --text-main: #f1f5f9;
+    --text-dim: #94a3b8;
+    --font-stack: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-    -webkit-user-select: none;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+  body, html { width: 100%; height: 100%; overflow: hidden; background: var(--bg-dark); font-family: var(--font-stack); color: var(--text-main); }
 
-  body, html {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--bg-dark);
-    font-family: var(--font-stack);
-    color: var(--text-white);
-  }
+  #app { display: flex; flex-direction: column; width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
-  #game-app {
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* TOP HEADER / STATS BAR */
+  /* TOP HUD */
   #top-bar {
     height: 52px;
-    background: linear-gradient(180deg, #386780 0%, #204153 100%);
-    border-bottom: 2px solid var(--panel-shadow);
+    background: linear-gradient(180deg, #243e4b 0%, #152730 100%);
+    border-bottom: 2px solid #0b151a;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 14px;
+    padding: 0 16px;
     z-index: 50;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.55);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
   }
 
   .brand {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-weight: 800;
-    font-size: 16px;
-    letter-spacing: 0.5px;
+    font-size: 17px;
     color: var(--accent-gold);
     text-shadow: 1px 1px 2px #000;
-    white-space: nowrap;
+  }
+  .brand span.race-tag {
+    font-size: 11px;
+    background: rgba(249, 115, 22, 0.25);
+    border: 1px solid var(--accent-carrot);
+    color: var(--accent-carrot);
+    padding: 2px 7px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    font-weight: 700;
   }
 
-  .stats-group {
+  .res-rack {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
   }
 
-  .stat-pill {
-    background: rgba(11, 23, 30, 0.85);
+  .res-pill {
+    background: rgba(11, 22, 28, 0.85);
     border: 1px solid var(--panel-border);
     border-radius: 6px;
-    padding: 3px 10px;
+    padding: 3px 9px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     font-size: 12px;
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.6);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
+  }
+  .res-val { font-family: 'Consolas', monospace; font-weight: 700; color: #fff; }
+  .res-val.carrot { color: #fb923c; }
+  .res-val.wheat { color: #fde047; }
+  .res-val.wood { color: #d97706; }
+  .res-val.stone { color: #cbd5e1; }
+  .res-val.bread { color: #fef08a; }
+  .res-val.gold { color: #facc15; }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .stat-label {
-    color: var(--text-dim);
-    font-size: 10px;
-    text-transform: uppercase;
+  /* BUTTONS */
+  .btn {
+    background: linear-gradient(180deg, #3d677b 0%, #254453 100%);
+    border: 1px solid var(--panel-border);
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 12px;
     font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    transition: all 0.1s ease;
   }
-
-  .stat-val {
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-weight: 700;
-    color: var(--accent-green);
-  }
-  .stat-val.gold { color: var(--accent-gold); }
-  .stat-val.blue { color: var(--accent-blue); }
-  .stat-val.purple { color: var(--accent-purple); }
+  .btn:hover { background: linear-gradient(180deg, #4d809a 0%, #30576a 100%); border-color: #8ac0db; }
+  .btn:active { transform: translateY(1px); }
+  .btn.active { background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%); border-color: #fdba74; }
+  .btn.world-btn { background: linear-gradient(180deg, #059669 0%, #047857 100%); border-color: #6ee7b7; font-weight: 700; }
+  .btn.world-btn:hover { background: linear-gradient(180deg, #10b981 0%, #059669 100%); }
 
   /* TOOLBAR */
   #toolbar {
-    height: 54px;
-    background: linear-gradient(180deg, #2b5268 0%, #1a3543 100%);
-    border-bottom: 2px solid var(--panel-shadow);
-    border-top: 1px solid rgba(255,255,255,0.12);
+    height: 52px;
+    background: linear-gradient(180deg, #203743 0%, #14242c 100%);
+    border-bottom: 2px solid #091216;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 10px;
+    padding: 0 12px;
     z-index: 45;
-    overflow-x: auto;
   }
 
   .tool-cluster {
     display: flex;
     align-items: center;
-    gap: 5px;
-    background: rgba(10, 20, 26, 0.4);
+    gap: 6px;
+    background: rgba(8, 16, 20, 0.4);
     padding: 3px 6px;
-    border-radius: 8px;
+    border-radius: 7px;
     border: 1px solid rgba(255,255,255,0.06);
-    flex-shrink: 0;
   }
 
-  .t-btn {
-    background: linear-gradient(180deg, #447791 0%, #285065 100%);
-    border: 1px solid var(--panel-border);
-    border-bottom-color: var(--panel-shadow);
-    border-right-color: var(--panel-shadow);
-    color: #ffffff;
-    padding: 6px 11px;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.1s ease;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-    white-space: nowrap;
-  }
-
-  .t-btn:hover {
-    background: linear-gradient(180deg, #538ea9 0%, #34637b 100%);
-    border-color: #8ac0db;
-  }
-
-  .t-btn:active {
-    transform: translateY(1px);
-    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.6);
-  }
-
-  .t-btn.active {
-    background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
-    border-color: #fde68a;
-    box-shadow: inset 1px 1px 4px rgba(0,0,0,0.7);
-  }
-
-  .t-btn.danger.active {
-    background: linear-gradient(180deg, #dc2626 0%, #991b1b 100%);
-    border-color: #fca5a5;
-  }
-
-  .badge-cost {
+  .cost-tag {
     font-size: 10px;
     padding: 1px 4px;
     border-radius: 3px;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.4);
     color: var(--accent-gold);
     font-weight: 700;
   }
 
-  /* VIEWPORT CANVAS */
+  /* VIEWPORT AREA */
   #viewport-area {
     flex: 1;
     position: relative;
     overflow: hidden;
-    background-color: #081116;
+    background: #091318;
     cursor: grab;
   }
-
   #viewport-area.panning { cursor: grabbing; }
-  #viewport-area.building-road { cursor: crosshair; }
-  #viewport-area.demolishing { cursor: cell; }
+  #viewport-area.building { cursor: crosshair; }
 
-  #canvas-world {
+  #canvas-main {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
   }
 
-  /* FLOATING HUD CARDS */
-  .hud-card {
+  /* FLOATING PANELS */
+  .hud-panel {
     position: absolute;
-    background: rgba(18, 38, 49, 0.94);
+    background: var(--panel-bg);
     border: 2px solid var(--panel-border);
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.65);
-    backdrop-filter: blur(5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
     z-index: 40;
   }
 
-  /* MINIMAP */
-  #minimap-widget {
+  /* COLONY RADAR */
+  #mini-radar {
     bottom: 16px;
     right: 16px;
-    width: 200px;
-    height: 200px;
+    width: 190px;
+    height: 190px;
     padding: 8px;
     display: flex;
     flex-direction: column;
   }
-
-  .widget-head {
+  .radar-head {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--text-dim);
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
-
-  #canvas-minimap {
+  #canvas-radar {
     flex: 1;
     width: 100%;
     background: #060e12;
-    border: 1px solid var(--panel-shadow);
+    border: 1px solid #000;
     border-radius: 4px;
     cursor: pointer;
   }
 
-  /* ZOOM & HELPER CONTROLS */
-  #quick-controls {
+  /* ZOOM CONTROLS */
+  #quick-zoom {
     bottom: 16px;
     left: 16px;
-    padding: 8px;
+    padding: 6px;
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
-
   .round-btn {
-    width: 36px;
-    height: 36px;
+    width: 36px; height: 36px;
     border-radius: 50%;
-    background: var(--panel-main);
+    background: #254453;
     border: 1px solid var(--panel-border);
     color: #fff;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
-    transition: 0.1s ease;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
   }
+  .round-btn:hover { background: #355e73; border-color: #93c5fd; }
 
-  .round-btn:hover {
-    background: var(--panel-header);
-    border-color: #8ac0db;
-    transform: scale(1.05);
-  }
-
-  /* TILE INSPECTOR CARD */
-  #inspector-card {
+  /* CITIZEN ROSTER POPUP */
+  #roster-card {
     top: 16px;
     left: 16px;
+    max-width: 320px;
     padding: 12px 14px;
-    min-width: 250px;
+    display: none;
     font-size: 12px;
-    line-height: 1.45;
-    pointer-events: none;
   }
-
-  #inspector-card h4 {
-    color: var(--accent-gold);
-    font-size: 14px;
-    margin-bottom: 3px;
+  .roster-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
   }
+  .rabbit-avatar {
+    font-size: 28px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--accent-gold);
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--text-dim); }
+  .stat-row b { color: #fff; }
 
-  .inspector-sub {
-    color: var(--text-dim);
-    font-size: 11px;
-    font-family: monospace;
-    margin-bottom: 4px;
+  /* WORLD MAP MODAL / OVERLAY */
+  #world-overlay-panel {
+    position: absolute;
+    top: 16px;
+    right: 220px;
+    padding: 10px 16px;
+    font-size: 12px;
+    display: none;
   }
 
   /* TOAST NOTIFICATIONS */
@@ -314,553 +273,276 @@
     z-index: 100;
     pointer-events: none;
   }
-
   .toast-item {
     background: rgba(15, 33, 42, 0.96);
     border: 1px solid var(--accent-gold);
-    color: #ffffff;
+    color: #fff;
     padding: 8px 18px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
     box-shadow: 0 4px 16px rgba(0,0,0,0.6);
-    animation: toastPop 3s forwards ease-in-out;
+    animation: toastPop 3.2s forwards ease;
     white-space: nowrap;
   }
-
   @keyframes toastPop {
-    0% { opacity: 0; transform: translateY(-10px); }
+    0% { opacity: 0; transform: translateY(-8px); }
     12% { opacity: 1; transform: translateY(0); }
     85% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 0; transform: translateY(-8px); }
   }
 
-  /* MODALS */
+  /* MODAL WINDOWS */
   .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(6, 14, 18, 0.88);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(6px);
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(5, 12, 16, 0.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; backdrop-filter: blur(6px);
   }
-
   .dialog-box {
-    background: linear-gradient(180deg, #274b5e 0%, #152c38 100%);
+    background: linear-gradient(180deg, #24414f 0%, #15262f 100%);
     border: 2px solid var(--panel-border);
     border-radius: 12px;
-    width: 640px;
-    max-width: 94vw;
-    max-height: 88vh;
-    overflow-y: auto;
-    padding: 24px;
+    width: 680px; max-width: 94vw; max-height: 88vh;
+    overflow-y: auto; padding: 24px;
     box-shadow: 0 16px 40px rgba(0,0,0,0.85);
   }
-
   .dialog-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--accent-gold);
-    margin-bottom: 5px;
-    text-shadow: 1px 1px 2px #000;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .dialog-subtitle {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 18px;
-  }
-
-  .grid-presets {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .preset-tile {
-    background: rgba(12, 24, 32, 0.7);
-    border: 2px solid var(--panel-main);
-    border-radius: 8px;
-    padding: 12px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .preset-tile:hover {
-    border-color: var(--panel-border);
-    background: rgba(36, 70, 87, 0.7);
-    transform: translateY(-2px);
-  }
-
-  .preset-tile.selected {
-    border-color: var(--accent-gold);
-    background: rgba(43, 85, 107, 0.9);
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.45);
-  }
-
-  .p-title { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
-  .p-dim { font-family: monospace; color: var(--accent-gold); font-size: 12px; }
-  .p-desc { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
-
-  #custom-box {
-    background: rgba(8, 18, 24, 0.6);
-    border: 1px solid var(--panel-main);
-    border-radius: 8px;
-    padding: 14px;
-    margin-bottom: 18px;
-    display: none;
-  }
-
-  .slider-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 12px;
-  }
-  .slider-row:last-child { margin-bottom: 0; }
-  .slider-row label { color: var(--text-dim); }
-
-  .slider-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  input[type="range"] {
-    accent-color: var(--accent-gold);
-    cursor: pointer;
-  }
-
-  .slider-val {
-    font-family: monospace;
-    font-size: 12px;
-    min-width: 44px;
-    text-align: right;
-    color: var(--accent-gold);
-  }
-
-  .dialog-foot {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .btn-start {
-    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
-    border: 1px solid #fde68a;
-    color: #0f1c24;
-    font-weight: 800;
-    font-size: 14px;
-    padding: 9px 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    transition: 0.1s ease;
-  }
-  .btn-start:hover {
-    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
-  }
-
-  /* TOWN & ENTITY CARDS */
-  #entity-modal-card {
-    display: none;
-    position: absolute;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(15, 33, 43, 0.96);
-    border: 2px solid var(--accent-gold);
-    border-radius: 10px;
-    padding: 14px 20px;
-    min-width: 330px;
-    z-index: 45;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
-  }
-
-  .entity-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--accent-gold);
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 20px; font-weight: 800; color: var(--accent-gold);
+    display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 6px;
   }
-
-  .entity-row {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-  .entity-row b { color: #fff; }
-
-  .close-x {
-    cursor: pointer;
-    font-size: 18px;
-    color: var(--text-dim);
-  }
+  .close-x { cursor: pointer; font-size: 20px; color: var(--text-dim); }
   .close-x:hover { color: #fff; }
 
-  /* FLEET TABLE & STYLING */
-  .fleet-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 12px 0 16px 0;
-    font-size: 12px;
+  /* CARAVAN DIALOG */
+  .caravan-target-card {
+    background: rgba(9, 19, 25, 0.65);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
   }
-  .fleet-table th {
-    background: rgba(10, 24, 32, 0.8);
-    color: var(--text-dim);
-    text-align: left;
-    padding: 8px 10px;
-    border-bottom: 1px solid var(--panel-border);
-    font-weight: 600;
-  }
-  .fleet-table td {
-    padding: 8px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .fleet-table tr:hover {
-    background: rgba(255,255,255,0.05);
-  }
-  .badge-tag {
-    display: inline-block;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-  }
-  .badge-van { background: #1e3a8a; color: #93c5fd; }
-  .badge-truck { background: #78350f; color: #fde68a; }
-  .badge-train { background: #064e3b; color: #6ee7b7; }
 </style>
 </head>
 <body>
 
-<div id="game-app">
+<div id="app">
   <!-- TOP STATUS BAR -->
   <header id="top-bar">
     <div class="brand">
-      <span>🚂</span>
-      <span>TRANSPORT TYCOON: AUTOMATION</span>
+      <span>🐇</span>
+      <span>BURROW & BLADE</span>
+      <span class="race-tag">Rabbit Colony</span>
     </div>
 
-    <div class="stats-group">
-      <div class="stat-pill">
-        <span class="stat-label">Treasury</span>
-        <span id="txt-money" class="stat-val gold">$50,000</span>
+    <div class="res-rack">
+      <div class="res-pill" title="Carrots (Staple food for rabbits)">
+        <span>🥕</span>
+        <span id="res-carrots" class="res-val carrot">60</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Date</span>
-        <span id="txt-date" class="stat-val">Year 1950, Apr</span>
+      <div class="res-pill" title="Wheat (Harvested from fields)">
+        <span>🌾</span>
+        <span id="res-wheat" class="res-val wheat">30</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Towns</span>
-        <span id="txt-towns" class="stat-val blue">0</span>
+      <div class="res-pill" title="Carrot Bread (High-nutrition baked goods)">
+        <span>🥖</span>
+        <span id="res-bread" class="res-val bread">20</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Industries</span>
-        <span id="txt-industries" class="stat-val gold">0</span>
+      <div class="res-pill" title="Timber (Harvested from forests)">
+        <span>🌲</span>
+        <span id="res-timber" class="res-val wood">80</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Population</span>
-        <span id="txt-pop" class="stat-val">0</span>
+      <div class="res-pill" title="Field Stone (Hewn for sturdy burrows)">
+        <span>🪨</span>
+        <span id="res-stone" class="res-val stone">40</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Routes</span>
-        <span id="txt-routes" class="stat-val blue">0 Active</span>
+      <div class="res-pill" title="Tools (Crafted at the workshop)">
+        <span>🔨</span>
+        <span id="res-tools" class="res-val">15</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Fleet</span>
-        <span id="txt-fleet" class="stat-val purple">0</span>
+      <div class="res-pill" title="Gold Sovereigns (Earned from world caravans)">
+        <span>🪙</span>
+        <span id="res-gold" class="res-val gold">250</span>
       </div>
-      <div class="stat-pill">
-        <span class="stat-label">Net Income</span>
-        <span id="txt-income" class="stat-val">+$0 / mo</span>
+      <div class="res-pill" title="Rabbit Population: Adults + Kits">
+        <span>👥</span>
+        <span id="res-pop" class="res-val">8 (6 Adults, 2 Kits)</span>
+      </div>
+      <div class="res-pill" title="Current Season & Day">
+        <span id="res-season">🌱 Spring, Day 1 (Yr 1)</span>
       </div>
     </div>
 
-    <div class="stats-group">
-      <button class="t-btn" id="btn-fleet" style="background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-color: #93c5fd;">🚛 Fleet</button>
-      <button class="t-btn" id="btn-save-game" title="Quick Save to Browser Storage">💾 Save</button>
-      <button class="t-btn" id="btn-load-game" title="Load Game from Browser Storage">📂 Load</button>
-      <button class="t-btn" id="btn-export-game" title="Export Save File (.json)">⬇️ Export</button>
-      <button class="t-btn" id="btn-import-game" title="Import Save File (.json)">⬆️ Import</button>
-      <button class="t-btn" id="btn-audio-toggle">🔊 Audio: ON</button>
-      <button class="t-btn" id="btn-open-map-dialog" style="background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-color: #6ee7b7;">🗺️ New Map</button>
+    <div class="top-actions">
+      <button class="btn world-btn" id="btn-toggle-view">🗺️ World Map</button>
+      <button class="btn" id="btn-caravan-open">🎒 Trade Caravan</button>
+      <button class="btn" id="btn-colony-roster">📋 Citizens</button>
+      <button class="btn" id="btn-sound">🔊 Sound: ON</button>
     </div>
   </header>
 
   <!-- ACTION TOOLBAR -->
   <nav id="toolbar">
     <div class="tool-cluster">
-      <button class="t-btn active" data-tool="inspect" id="t-inspect" title="Inspect tiles, select objects, pan camera">
-        <span>🔍</span>
-        <span>Inspect & Pan</span>
+      <button class="btn active" data-tool="inspect" title="Inspect citizens, burrows, and flora">🔍 Inspect</button>
+      <button class="btn" data-tool="path" title="Pave cobblestone paths (+40% rabbit speed)">
+        <span>🪨</span><span>Stone Path</span><span class="cost-tag">1 Stone</span>
       </button>
-      <button class="t-btn" data-tool="road" id="t-road" title="Build roads on land ($20) or road bridges over water ($80)">
-        <span>🛣️</span>
-        <span>Lay Street</span>
-        <span class="badge-cost">$20</span>
+      <button class="btn" data-tool="burrow" title="Dig a Cozy Rabbit Burrow (Houses 1 couple + kits)">
+        <span>🏡</span><span>Burrow</span><span class="cost-tag">25 Wood, 10 Stone</span>
       </button>
-      <button class="t-btn" data-tool="rail" id="t-rail" title="Build railroad tracks ($35) or rail trestle bridges over water ($120)">
-        <span>🛤️</span>
-        <span>Lay Rail</span>
-        <span class="badge-cost">$35</span>
+      <button class="btn" data-tool="carrot_patch" title="Till a rich carrot patch for foragers and farmers">
+        <span>🥕</span><span>Carrot Patch</span><span class="cost-tag">5 Wood</span>
       </button>
-      <button class="t-btn" data-tool="station" id="t-station" title="Build a train station near towns or industries ($600)">
-        <span>🚉</span>
-        <span>Station</span>
-        <span class="badge-cost">$600</span>
+      <button class="btn" data-tool="wheat_field" title="Plant wheat fields to mill flour for bakeries">
+        <span>🌾</span><span>Wheat Field</span><span class="cost-tag">8 Wood</span>
       </button>
-      <button class="t-btn" data-tool="industry" id="t-industry" title="Found an industry: Coal Mine, Farm, Sawmill, or Factory ($1,500)">
-        <span>🏭</span>
-        <span>Industry</span>
-        <span class="badge-cost">$1,500</span>
+      <button class="btn" data-tool="bakery" title="Bakery & Windmill (Bakes Carrot Bread)">
+        <span>🥖</span><span>Bakery</span><span class="cost-tag">30 Wood, 20 Stone</span>
       </button>
-      <button class="t-btn" data-tool="town" id="t-town" title="Found a new town with town hall ($2,000)">
-        <span>🏛️</span>
-        <span>Found Town</span>
-        <span class="badge-cost">$2,000</span>
+      <button class="btn" data-tool="woodcutter" title="Woodcutter Lodge (Harvests timber)">
+        <span>🪓</span><span>Woodcutter</span><span class="cost-tag">20 Wood</span>
       </button>
-      <button class="t-btn" data-tool="building" id="t-building" title="Add a residential or commercial building near a town ($150)">
-        <span>🏠</span>
-        <span>Add House</span>
-        <span class="badge-cost">$150</span>
+      <button class="btn" data-tool="stonemason" title="Stonemason Shack (Hews quarry stone)">
+        <span>⛏️</span><span>Masonry</span><span class="cost-tag">20 Wood, 10 Stone</span>
       </button>
-      <button class="t-btn" data-tool="trees" id="t-trees" title="Plant trees ($10)">
-        <span>🌲</span>
-        <span>Plant Trees</span>
-        <span class="badge-cost">$10</span>
+      <button class="btn" data-tool="workshop" title="Tool Workshop (Crafts tools & carts)">
+        <span>🔨</span><span>Workshop</span><span class="cost-tag">35 Wood, 25 Stone</span>
       </button>
-      <button class="t-btn danger" data-tool="demolish" id="t-demolish" title="Bulldoze roads, rails, bridges, trees, and buildings ($15)">
-        <span>🚜</span>
-        <span>Bulldozer</span>
-        <span class="badge-cost">$15</span>
+      <button class="btn" data-tool="hearth" title="Village Hearth & Well (Social gathering place)">
+        <span>🔥</span><span>Hearth</span><span class="cost-tag">15 Stone</span>
       </button>
+      <button class="btn" data-tool="demolish" style="color:#f87171;" title="Dismantle a structure">🚜 Bulldoze</button>
     </div>
 
     <div class="tool-cluster">
-      <button class="t-btn" id="btn-projection-toggle">📐 View: Isometric</button>
-      <button class="t-btn" id="spd-pause">⏸️</button>
-      <button class="t-btn active" id="spd-1x">1x</button>
-      <button class="t-btn" id="spd-2x">2x</button>
-      <button class="t-btn" id="spd-5x">5x</button>
+      <button class="btn" id="spd-pause">⏸️</button>
+      <button class="btn active" id="spd-1x">1x</button>
+      <button class="btn" id="spd-2x">2x</button>
+      <button class="btn" id="spd-5x">5x</button>
     </div>
   </nav>
 
-  <!-- VIEWPORT & MAP CANVAS -->
+  <!-- VIEWPORT AREA -->
   <main id="viewport-area">
-    <canvas id="canvas-world"></canvas>
-
-    <!-- TILE INSPECTOR CARD -->
-    <div id="inspector-card" class="hud-card">
-      <h4 id="tile-name">Meadow</h4>
-      <div id="tile-pos" class="inspector-sub">Grid (0, 0)</div>
-      <div id="tile-desc">Click tiles or drag with tools to build.</div>
-    </div>
-
-    <!-- MINIMAP WIDGET -->
-    <div id="minimap-widget" class="hud-card">
-      <div class="widget-head">
-        <span>World Radar</span>
-        <span id="lbl-radar-dim">40x40</span>
-      </div>
-      <canvas id="canvas-minimap" width="180" height="180"></canvas>
-    </div>
+    <canvas id="canvas-main"></canvas>
 
     <!-- QUICK ZOOM CONTROLS -->
-    <div id="quick-controls" class="hud-card">
-      <button class="round-btn" id="btn-zoom-add" title="Zoom In">+</button>
-      <button class="round-btn" id="btn-zoom-sub" title="Zoom Out">-</button>
-      <button class="round-btn" id="btn-center-capital" title="Center on First Town" style="font-size:14px;">🎯</button>
+    <div id="quick-zoom" class="hud-panel">
+      <button class="round-btn" id="btn-zoom-in" title="Zoom In">+</button>
+      <button class="round-btn" id="btn-zoom-out" title="Zoom Out">-</button>
+      <button class="round-btn" id="btn-center" title="Center on Rabbit Warren">🎯</button>
+    </div>
+
+    <!-- RADAR MINIMAP -->
+    <div id="mini-radar" class="hud-panel">
+      <div class="radar-head">
+        <span id="radar-title">Warren Radar</span>
+        <span id="radar-mode">Settlement</span>
+      </div>
+      <canvas id="canvas-radar" width="170" height="170"></canvas>
+    </div>
+
+    <!-- WORLD OVERLAY HELPER -->
+    <div id="world-overlay-panel" class="hud-panel">
+      <h4 style="color:var(--accent-gold); margin-bottom:4px;">🌍 Kingdom Regional Map</h4>
+      <p style="color:var(--text-dim); font-size:11px;">Click your Warren (green banner) to zoom in. Click other animal towns to trade!</p>
+    </div>
+
+    <!-- CITIZEN INSPECTOR CARD (CULTURES & RIMWORLD STYLE) -->
+    <div id="roster-card" class="hud-panel">
+      <div class="roster-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="rabbit-avatar" id="c-avatar">🐇</div>
+          <div>
+            <h4 id="c-name" style="color:var(--accent-gold); font-size:14px;">Barnaby Long-Ear</h4>
+            <div id="c-profession" style="color:var(--accent-carrot); font-size:11px; font-weight:700;">🥕 Master Carrot Farmer</div>
+          </div>
+        </div>
+        <span class="close-x" id="btn-close-roster">&times;</span>
+      </div>
+      <div class="stat-row">Life Stage: <b id="c-stage">Adult Buck (Age 22)</b></div>
+      <div class="stat-row">Spouse / Partner: <b id="c-spouse">Clover Long-Ear</b></div>
+      <div class="stat-row">Home Burrow: <b id="c-home">Bramble Hollow #1</b></div>
+      <div class="stat-row">Current Activity: <b id="c-task" style="color:#38bdf8;">Tending Carrot Patch</b></div>
+      <div class="stat-row">Carrying: <b id="c-carried">None</b></div>
+      <div class="stat-row">Hunger: <b id="c-hunger" style="color:#4ade80;">Full (92%)</b></div>
+      <div class="stat-row">Happiness: <b id="c-happiness" style="color:#fbbf24;">Content (88%)</b></div>
+      <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px;">
+        <label style="font-size:10px; text-transform:uppercase; color:var(--text-dim); font-weight:700;">Assign Profession:</label>
+        <select id="sel-profession" style="width:100%; margin-top:4px; padding:4px; background:#0e1a20; color:#fff; border:1px solid var(--panel-border); border-radius:4px; font-size:11px;">
+          <option value="farmer">🥕 Carrot Farmer</option>
+          <option value="wheat_farmer">🌾 Wheat Farmer</option>
+          <option value="woodcutter">🪓 Woodcutter</option>
+          <option value="mason">⛏️ Stone Mason</option>
+          <option value="baker">🥖 Baker</option>
+          <option value="artisan">🔨 Craftsman / Smith</option>
+          <option value="unassigned">🌱 Colony Builder / Hauler</option>
+        </select>
+      </div>
     </div>
 
     <!-- TOAST POPUPS -->
     <div id="toast-rack"></div>
-
-    <!-- ENTITY DETAILS CARD (Town / Industry / Station) -->
-    <div id="entity-modal-card">
-      <div class="entity-header">
-        <span id="entity-title">Westbrook</span>
-        <span class="close-x" id="btn-close-entity">&times;</span>
-      </div>
-      <div class="entity-row" id="entity-line-1">Population: <b>420</b></div>
-      <div class="entity-row" id="entity-line-2">Structures: <b>6</b></div>
-      <div class="entity-row" id="entity-line-3">Network Status: <b style="color:#4ade80;">Active Trade Route</b></div>
-      <div class="entity-row" id="entity-tip" style="margin-top:8px; font-style:italic; font-size:11px; color:#cbd5e1;">
-        💡 Tip: Connect streets to other towns to automatically run cargo vans and earn monthly income!
-      </div>
-    </div>
   </main>
 </div>
 
-<!-- FLEET MANAGER MODAL -->
-<div class="modal-overlay" id="modal-fleet" style="display:none;">
-  <div class="dialog-box" style="width:720px;">
-    <div class="dialog-title">
-      <span>🚛 Transport Fleet & Logistics</span>
-      <span class="close-x" id="btn-close-fleet">&times;</span>
-    </div>
-    <p class="dialog-subtitle">Manage operating cargo vans, freight trucks, and express trains running across your transport empire.</p>
-
-    <div style="display:flex; gap:10px; margin-bottom:12px;">
-      <div class="stat-pill" style="flex:1;">
-        <span class="stat-label">Active Vehicles:</span>
-        <span id="flt-total-veh" class="stat-val gold">0</span>
-      </div>
-      <div class="stat-pill" style="flex:1;">
-        <span class="stat-label">Trade & Cargo Routes:</span>
-        <span id="flt-total-routes" class="stat-val blue">0</span>
-      </div>
-      <div class="stat-pill" style="flex:1;">
-        <span class="stat-label">Fleet Lifetime Earnings:</span>
-        <span id="flt-total-earnings" class="stat-val">$0</span>
-      </div>
-    </div>
-
-    <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--panel-border); border-radius:6px; background: rgba(8,18,24,0.6);">
-      <table class="fleet-table">
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Route / Connection</th>
-            <th>Cargo</th>
-            <th>Speed</th>
-            <th>Lifetime Profit</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="fleet-table-body">
-          <tr>
-            <td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No active vehicles. Connect towns or industries with roads/rails to launch vehicles!</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
-      <div style="font-size:12px; color:var(--text-dim);">
-        Trains unlock higher speed, larger cargo batches, and massive revenue bonuses.
-      </div>
-      <div class="dialog-foot">
-        <button class="t-btn" id="btn-fleet-upgrade-all" style="background: linear-gradient(180deg, #10b981 0%, #059669 100%);">⚡ Upgrade All Engines ($500)</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MAP CONFIGURATION MODAL -->
-<div class="modal-overlay" id="modal-map-gen">
+<!-- CARAVAN MODAL -->
+<div class="modal-overlay" id="modal-caravan" style="display:none;">
   <div class="dialog-box">
     <div class="dialog-title">
-      <span>Select Map Size & World</span>
-      <span class="close-x" id="btn-close-map-dialog">&times;</span>
+      <span>🎒 Form Trade Caravan</span>
+      <span class="close-x" id="btn-close-caravan">&times;</span>
     </div>
-    <p class="dialog-subtitle">Choose your simulation territory size or configure custom dimensions.</p>
+    <p style="color:var(--text-dim); font-size:12px; margin-bottom:14px;">
+      Dispatch your brave rabbit traders across the World Map to animal kingdoms to exchange colony goods for gold and exotic treasures.
+    </p>
 
-    <div class="grid-presets">
-      <div class="preset-tile" data-size="tiny">
-        <div class="p-title">Tiny</div>
-        <div class="p-dim">20 x 20</div>
-        <div class="p-desc">Compact island, 2 towns. Rapid testing.</div>
-      </div>
-      <div class="preset-tile selected" data-size="medium">
-        <div class="p-title">Medium</div>
-        <div class="p-dim">40 x 40</div>
-        <div class="p-desc">Standard balanced region, 5-6 towns & industries.</div>
-      </div>
-      <div class="preset-tile" data-size="large">
-        <div class="p-title">Large</div>
-        <div class="p-dim">70 x 70</div>
-        <div class="p-desc">Broad territory with 10-12 towns & supply chains.</div>
-      </div>
-      <div class="preset-tile" data-size="xlarge">
-        <div class="p-title">Extra Large</div>
-        <div class="p-dim">110 x 110</div>
-        <div class="p-desc">Massive empire, 18+ towns, lakes, and industries.</div>
-      </div>
-      <div class="preset-tile" data-size="world">
-        <div class="p-title">World</div>
-        <div class="p-dim">160 x 160</div>
-        <div class="p-desc">Continental scale, 28+ towns & rail corridors.</div>
-      </div>
-      <div class="preset-tile" data-size="custom">
-        <div class="p-title">Custom</div>
-        <div class="p-dim">Adjustable</div>
-        <div class="p-desc">Configure exact width, height & densities.</div>
-      </div>
-    </div>
-
-    <div id="custom-box">
-      <div class="slider-row">
-        <label>Map Width</label>
-        <div class="slider-wrap">
-          <input type="range" id="sl-w" min="16" max="200" value="50" step="2">
-          <span class="slider-val" id="val-sl-w">50</span>
-        </div>
-      </div>
-      <div class="slider-row">
-        <label>Map Height</label>
-        <div class="slider-wrap">
-          <input type="range" id="sl-h" min="16" max="200" value="50" step="2">
-          <span class="slider-val" id="val-sl-h">50</span>
-        </div>
-      </div>
-      <div class="slider-row">
-        <label>Town Count</label>
-        <div class="slider-wrap">
-          <input type="range" id="sl-towns" min="1" max="40" value="6">
-          <span class="slider-val" id="val-sl-towns">6</span>
-        </div>
-      </div>
-      <div class="slider-row">
-        <label>Water Coverage</label>
-        <div class="slider-wrap">
-          <input type="range" id="sl-water" min="0" max="60" value="20" step="5">
-          <span class="slider-val" id="val-sl-water">20%</span>
-        </div>
-      </div>
-      <div class="slider-row">
-        <label>Tree Density</label>
-        <div class="slider-wrap">
-          <input type="range" id="sl-trees" min="0" max="50" value="15" step="5">
-          <span class="slider-val" id="val-sl-trees">15%</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="dialog-foot">
-      <button class="btn-start" id="btn-confirm-gen">Generate Map</button>
+    <div id="caravan-targets-list">
+      <!-- Target Animal Factions -->
     </div>
   </div>
 </div>
 
-<!-- HIDDEN FILE INPUT FOR IMPORT -->
-<input type="file" id="file-import-save" accept=".json" style="display:none;">
+<!-- CITIZENS MATRIX MODAL -->
+<div class="modal-overlay" id="modal-all-citizens" style="display:none;">
+  <div class="dialog-box" style="width:780px;">
+    <div class="dialog-title">
+      <span>👥 Colony Citizens & Family Tree</span>
+      <span class="close-x" id="btn-close-all-citizens">&times;</span>
+    </div>
+    <p style="color:var(--text-dim); font-size:12px; margin-bottom:14px;">
+      In our rabbit civilization, every individual has a home, partner, and profession. Happy couples with fed burrows bear kits to expand the colony.
+    </p>
+
+    <div style="max-height:360px; overflow-y:auto; border:1px solid var(--panel-border); border-radius:6px; background:rgba(6,14,18,0.6);">
+      <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+        <thead>
+          <tr style="background:rgba(20,38,48,0.9); color:var(--text-dim);">
+            <th style="padding:8px 12px;">Rabbit Citizen</th>
+            <th style="padding:8px 12px;">Gender / Age</th>
+            <th style="padding:8px 12px;">Profession</th>
+            <th style="padding:8px 12px;">Burrow Home</th>
+            <th style="padding:8px 12px;">Partner</th>
+            <th style="padding:8px 12px;">Happiness</th>
+          </tr>
+        </thead>
+        <tbody id="all-citizens-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <script>
 /* =========================================================================
-   SIMULATION ENGINE & GAME LOGIC
+   BURROW & BLADE: GAME ENGINE & SIMULATION
    ========================================================================= */
 
 // Audio Synthesizer via Web Audio API
-class GameAudio {
-  constructor() {
-    this.ctx = null;
-    this.enabled = true;
-  }
+class ColonyAudio {
+  constructor() { this.ctx = null; this.enabled = true; }
   ensure() {
     if (!this.ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -871,515 +553,608 @@ class GameAudio {
     if (!this.enabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      const g = this.ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(600, this.ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.05);
+      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.05);
     } catch(e) {}
   }
-  buildRoad() {
+  hop() {
     if (!this.enabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      const g = this.ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(240, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(480, this.ctx.currentTime + 0.07);
-      gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.07);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.07);
+      osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(280, this.ctx.currentTime + 0.06);
+      g.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.06);
     } catch(e) {}
   }
-  buildRail() {
+  build() {
     if (!this.enabled || !this.ctx) return;
     try {
       const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      const g = this.ctx.createGain();
       osc.type = 'square';
-      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(350, this.ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.08);
+      osc.frequency.setValueAtTime(350, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(550, this.ctx.currentTime + 0.08);
+      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      osc.connect(g); g.connect(this.ctx.destination);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.08);
     } catch(e) {}
   }
-  trainWhistle() {
+  birthFanfare() {
     if (!this.enabled || !this.ctx) return;
     try {
-      [440, 554].forEach(f => {
+      [330, 440, 550, 660].forEach((f, i) => {
         const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.35);
-      });
-    } catch(e) {}
-  }
-  cash() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const freqs = [784, 1046];
-      freqs.forEach((f, i) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+        const g = this.ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.06);
-        gain.gain.setValueAtTime(0.08, this.ctx.currentTime + i * 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.06 + 0.15);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(this.ctx.currentTime + i * 0.06);
-        osc.stop(this.ctx.currentTime + i * 0.06 + 0.15);
-      });
-    } catch(e) {}
-  }
-  demolish() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const bufSize = this.ctx.sampleRate * 0.12;
-      const buf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-      const noise = this.ctx.createBufferSource();
-      noise.buffer = buf;
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(360, this.ctx.currentTime);
-      filter.frequency.linearRampToValueAtTime(60, this.ctx.currentTime + 0.12);
-      const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
-      noise.start();
-    } catch(e) {}
-  }
-  fanfare() {
-    if (!this.enabled || !this.ctx) return;
-    try {
-      const freqs = [261.6, 329.6, 392.0, 523.3];
-      freqs.forEach((f, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
-        gain.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.22);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(this.ctx.currentTime + idx * 0.08);
-        osc.stop(this.ctx.currentTime + idx * 0.08 + 0.22);
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime + i * 0.09);
+        g.gain.setValueAtTime(0.06, this.ctx.currentTime + i * 0.09);
+        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.09 + 0.2);
+        osc.connect(g); g.connect(this.ctx.destination);
+        osc.start(this.ctx.currentTime + i * 0.09);
+        osc.stop(this.ctx.currentTime + i * 0.09 + 0.2);
       });
     } catch(e) {}
   }
 }
 
-// Master Game State
+// Master Simulation State
 const GAME = {
-  audio: new GameAudio(),
-  activeTool: 'inspect', // 'inspect'|'road'|'rail'|'station'|'industry'|'town'|'building'|'trees'|'demolish'
-  viewMode: 'iso',       // 'iso' | 'ortho'
-  money: 50000,
-  simSpeed: 1,           // 0=pause, 1=1x, 2=2x, 5=5x
-  date: { year: 1950, month: 4, day: 1 },
-  mapW: 40,
-  mapH: 40,
-  tiles: [],
-  towns: [],
-  industries: [],
-  stations: [],
-  routes: [],
-  vehicles: [],
-  floatingTexts: [],
-  cam: { x: 0, y: 0, zoom: 1.0 },
+  audio: new ColonyAudio(),
+  view: 'settlement', // 'settlement' | 'world'
+  speed: 1,
+  season: 'Spring',
+  day: 1,
+  year: 1,
+  dayTimer: 0,
+  activeTool: 'inspect',
+
+  // Colony Treasury & Stockpile
+  res: {
+    carrots: 60,
+    wheat: 30,
+    bread: 20,
+    timber: 80,
+    stone: 40,
+    tools: 15,
+    gold: 250
+  },
+
+  // Citizen Rabbits
+  rabbits: [],
+  selectedRabbit: null,
+
+  // Settlement Map (32x32 tiles, top-down 2D bird's-eye)
+  settlement: {
+    w: 32,
+    h: 32,
+    tiles: [],
+    buildings: []
+  },
+
+  // World Map (16x16 regional tiles with neighboring animal kingdoms)
+  world: {
+    w: 16,
+    h: 16,
+    tiles: [],
+    playerX: 8,
+    playerY: 8,
+    kingdoms: [],
+    caravans: []
+  },
+
+  cam: {
+    settlement: { x: 0, y: 0, zoom: 1.4 },
+    world: { x: 0, y: 0, zoom: 1.0 }
+  },
+
   mouse: {
     x: 0, y: 0,
     tileX: -1, tileY: -1,
     isDown: false,
     dragStartX: 0, dragStartY: 0,
-    dragStartTileX: -1, dragStartTileY: -1,
     isPanning: false
   },
+
   costs: {
-    road: 20,
-    roadBridge: 80,
-    rail: 35,
-    railBridge: 120,
-    station: 600,
-    industry: 1500,
-    town: 2000,
-    building: 150,
-    trees: 10,
-    demolish: 15
-  },
-  stats: {
-    totalLifetimeRevenue: 0,
-    deliveriesCount: 0
+    path: { stone: 1 },
+    burrow: { timber: 25, stone: 10 },
+    carrot_patch: { timber: 5 },
+    wheat_field: { timber: 8 },
+    bakery: { timber: 30, stone: 20 },
+    woodcutter: { timber: 20 },
+    stonemason: { timber: 20, stone: 10 },
+    workshop: { timber: 35, stone: 25 },
+    hearth: { stone: 15 }
   }
 };
 
-const TOWN_NAMES = [
-  "Westbrook", "Portland", "Slough", "Basingstoke", "Oakridge",
-  "Gabrielton", "Kingsport", "Riverdale", "Highfield", "Pine Bluff",
-  "Amberford", "Fairhaven", "Glenwood", "Newhaven", "Eastwood",
-  "Redmond", "Springfield", "Milford", "Bridgewater", "Stonegate",
-  "Ashford", "Sunnydale", "Foxborough", "Kittery", "Camden"
+const RABBIT_FIRST_NAMES_M = ["Barnaby", "Pippin", "Rowan", "Bramble", "Jasper", "Oliver", "Chester", "Archie", "Felix", "Gideon", "Milo", "Thistle"];
+const RABBIT_FIRST_NAMES_F = ["Clover", "Hazel", "Juniper", "Willow", "Poppy", "Flora", "Daisy", "Blossom", "Meadow", "Fern", "Primrose", "Ivy"];
+const RABBIT_CLAN_NAMES = ["Long-Ear", "Cotton-Tail", "Bramble-Foot", "Moss-Burrow", "Whisker-Puff", "Quick-Hop", "Fern-Digger", "Briar-Patch", "Thistledown"];
+
+const ANIMAL_KINGDOMS = [
+  { name: "Krag-Hollow", race: "Badgers", icon: "🦡", desc: "Master ironminers & blacksmiths in mountain crags.", buys: "Carrot Bread & Food", pays: "Gold & Iron", x: 4, y: 3 },
+  { name: "Otter-Weir", race: "Otters", icon: "🦦", desc: "River fishers and pearl merchants.", buys: "Timber & Tools", pays: "Gold & River Salt", x: 12, y: 5 },
+  { name: "Reynar's Hold", race: "Foxes", icon: "🦊", desc: "Cunning frontier traders & weavers.", buys: "Carrots & Wheat", pays: "Fine Silk & Gold", x: 13, y: 12 },
+  { name: "Quill-Grove", race: "Hedgehogs", icon: "🦔", desc: "Forest herbalists & master woodcarvers.", buys: "Field Stone & Bread", pays: "Medicinal Herbs & Gold", x: 4, y: 13 }
 ];
 
-const INDUSTRY_TYPES = [
-  { type: 'coal', name: 'Coal Mine', icon: '⛏️', produces: 'Coal', consumes: null, color: '#18181b', payout: 240 },
-  { type: 'farm', name: 'Grain & Dairy Farm', icon: '🌾', produces: 'Grain', consumes: null, color: '#eab308', payout: 210 },
-  { type: 'forest', name: 'Forest & Sawmill', icon: '🌲', produces: 'Timber', consumes: null, color: '#854d0e', payout: 220 },
-  { type: 'factory', name: 'Manufacturing Plant', icon: '🏭', produces: 'Goods', consumes: ['Coal', 'Timber'], color: '#ef4444', payout: 350 }
-];
+/* =========================================================================
+   INITIALIZATION & WORLD GENERATION
+   ========================================================================= */
 
-function generateMap(w, h, townCount, waterPct, treePct) {
-  GAME.mapW = w;
-  GAME.mapH = h;
-  GAME.tiles = [];
-  GAME.towns = [];
-  GAME.industries = [];
-  GAME.stations = [];
-  GAME.routes = [];
-  GAME.vehicles = [];
-  GAME.floatingTexts = [];
+function initGame() {
+  initSettlementMap(32, 32);
+  initWorldMap(16, 16);
+  initStarterRabbits();
+  centerSettlementCamera();
+  updateHUD();
+}
 
-  // 1. Initialize Grid
+function initSettlementMap(w, h) {
+  GAME.settlement.w = w;
+  GAME.settlement.h = h;
+  GAME.settlement.tiles = [];
+  GAME.settlement.buildings = [];
+
   for (let y = 0; y < h; y++) {
     const row = [];
     for (let x = 0; x < w; x++) {
-      row.push({
-        type: 'grass',
-        road: 0,        // bitmask: 1=N, 2=E, 4=S, 8=W
-        rail: 0,        // bitmask: 1=N, 2=E, 4=S, 8=W
-        bridge: null,   // null | 'road' | 'rail'
-        building: null,
-        tree: false,
-        elevation: 0
-      });
+      let type = 'grass';
+      // River along one side
+      if (x === 3 || x === 4) type = 'water';
+      // Forest clusters
+      let tree = false;
+      if (type === 'grass' && Math.random() < 0.18 && (x > 8 || y > 8)) tree = true;
+      // Stone boulders
+      let rock = false;
+      if (type === 'grass' && !tree && Math.random() < 0.05) rock = true;
+
+      row.push({ type, tree, rock, path: false, buildingId: null });
     }
-    GAME.tiles.push(row);
+    GAME.settlement.tiles.push(row);
   }
 
-  // 2. Generate Lakes & Water
-  const lakeCount = Math.max(1, Math.round((w * h / 450) * (waterPct / 20)));
-  for (let l = 0; l < lakeCount; l++) {
-    const cx = Math.floor(Math.random() * (w - 10)) + 5;
-    const cy = Math.floor(Math.random() * (h - 10)) + 5;
-    const rad = Math.floor(Math.random() * 4) + 2;
-    for (let dy = -rad; dy <= rad; dy++) {
-      for (let dx = -rad; dx <= rad; dx++) {
-        const tx = cx + dx;
-        const ty = cy + dy;
-        if (tx >= 0 && tx < w && ty >= 0 && ty < h) {
-          if (dx * dx + dy * dy <= rad * rad + (Math.random() * 2 - 1)) {
-            GAME.tiles[ty][tx].type = 'water';
-          }
+  // Clear starter village center
+  const cx = 16, cy = 16;
+  for (let dy = -5; dy <= 5; dy++) {
+    for (let dx = -5; dx <= 5; dx++) {
+      const tile = GAME.settlement.tiles[cy + dy][cx + dx];
+      tile.tree = false;
+      tile.rock = false;
+    }
+  }
+
+  // Place Central Hearth
+  addBuilding('hearth', cx, cy);
+
+  // Place 2 Starter Burrows
+  addBuilding('burrow', cx - 3, cy - 2);
+  addBuilding('burrow', cx + 3, cy - 2);
+
+  // Place Starter Carrot Patch & Woodcutter
+  addBuilding('carrot_patch', cx - 3, cy + 3);
+  addBuilding('woodcutter', cx + 3, cy + 3);
+
+  // Connect with stone pathways
+  for (let x = cx - 4; x <= cx + 4; x++) GAME.settlement.tiles[cy][x].path = true;
+  for (let y = cy - 3; y <= cy + 3; y++) GAME.settlement.tiles[y][cx].path = true;
+}
+
+function initWorldMap(w, h) {
+  GAME.world.w = w;
+  GAME.world.h = h;
+  GAME.world.tiles = [];
+  GAME.world.kingdoms = [...ANIMAL_KINGDOMS];
+  GAME.world.caravans = [];
+
+  for (let y = 0; y < h; y++) {
+    const row = [];
+    for (let x = 0; x < w; x++) {
+      let biome = 'meadow';
+      if (y < 4) biome = 'mountains';
+      else if (x > 11 && y > 8) biome = 'forest';
+      else if (x === 6 || x === 7) biome = 'river';
+      row.push({ biome });
+    }
+    GAME.world.tiles.push(row);
+  }
+}
+
+function initStarterRabbits() {
+  GAME.rabbits = [];
+
+  // Couple 1
+  const b1 = createRabbit("Barnaby", "Long-Ear", "M", 24, "farmer");
+  const d1 = createRabbit("Clover", "Long-Ear", "F", 22, "farmer");
+  b1.spouseId = d1.id;
+  d1.spouseId = b1.id;
+  b1.burrowId = 1;
+  d1.burrowId = 1;
+
+  // Kit for Couple 1
+  const k1 = createRabbit("Pippin", "Long-Ear", "M", 3, "kit");
+  k1.burrowId = 1;
+
+  // Couple 2
+  const b2 = createRabbit("Rowan", "Bramble-Foot", "M", 26, "woodcutter");
+  const d2 = createRabbit("Hazel", "Bramble-Foot", "F", 24, "baker");
+  b2.spouseId = d2.id;
+  d2.spouseId = b2.id;
+  b2.burrowId = 2;
+  d2.burrowId = 2;
+
+  // Kit for Couple 2
+  const k2 = createRabbit("Willow", "Bramble-Foot", "F", 2, "kit");
+  k2.burrowId = 2;
+
+  // 2 young adult helpers
+  const b3 = createRabbit("Jasper", "Cotton-Tail", "M", 19, "mason");
+  const d3 = createRabbit("Juniper", "Cotton-Tail", "F", 18, "unassigned");
+
+  GAME.rabbits.push(b1, d1, k1, b2, d2, k2, b3, d3);
+}
+
+function createRabbit(firstName, clanName, gender, age, profession) {
+  const cx = 16 * 32, cy = 16 * 32;
+  return {
+    id: Math.random().toString(36).substring(2, 9),
+    name: `${firstName} ${clanName}`,
+    firstName,
+    clanName,
+    gender,
+    age, // years
+    lifeStage: age < 5 ? 'kit' : (age > 45 ? 'elder' : 'adult'),
+    spouseId: null,
+    burrowId: null,
+    profession: profession || 'unassigned',
+    workplaceId: null,
+    x: cx + (Math.random() * 80 - 40),
+    y: cy + (Math.random() * 80 - 40),
+    targetX: cx,
+    targetY: cy,
+    vx: 0, vy: 0,
+    speed: 38,
+    state: 'idle',
+    actionTimer: Math.random() * 2,
+    hopPhase: Math.random() * Math.PI,
+    hunger: 80 + Math.random() * 20,
+    happiness: 85 + Math.random() * 15,
+    carried: null, // { type, amount }
+    color: gender === 'M' ? '#d4a373' : '#faedcd'
+  };
+}
+
+function addBuilding(type, tx, ty) {
+  const id = GAME.settlement.buildings.length + 1;
+  const bldg = {
+    id,
+    type,
+    tx, ty,
+    name: getBuildingName(type, id),
+    level: 1,
+    productionTimer: 0
+  };
+  GAME.settlement.buildings.push(bldg);
+
+  // Mark tiles
+  const size = (type === 'hearth' || type === 'bakery' || type === 'burrow') ? 2 : 1;
+  for (let dy = 0; dy < size; dy++) {
+    for (let dx = 0; dx < size; dx++) {
+      if (ty + dy < GAME.settlement.h && tx + dx < GAME.settlement.w) {
+        const t = GAME.settlement.tiles[ty + dy][tx + dx];
+        t.buildingId = id;
+        t.tree = false;
+        t.rock = false;
+      }
+    }
+  }
+  return bldg;
+}
+
+function getBuildingName(type, id) {
+  if (type === 'burrow') return `Rabbit Burrow #${id}`;
+  if (type === 'carrot_patch') return `Carrot Patch #${id}`;
+  if (type === 'wheat_field') return `Wheat Field #${id}`;
+  if (type === 'bakery') return `Colony Windmill & Bakery`;
+  if (type === 'woodcutter') return `Timber Lodge`;
+  if (type === 'stonemason') return `Masonry Shed`;
+  if (type === 'workshop') return `Artisan Workshop`;
+  if (type === 'hearth') return `Village Green & Hearth`;
+  return `Building #${id}`;
+}
+
+/* =========================================================================
+   SIMULATION TICK: CITIZEN AI, REPRODUCTION & WORK (CULTURES ENGINE)
+   ========================================================================= */
+
+function tickSimulation(dt) {
+  if (GAME.speed === 0) return;
+  const spd = GAME.speed;
+
+  // Time & Calendar (Day/Season)
+  GAME.dayTimer += dt * 0.08 * spd;
+  if (GAME.dayTimer >= 1.0) {
+    GAME.dayTimer = 0;
+    GAME.day++;
+    if (GAME.day > 30) {
+      GAME.day = 1;
+      advanceSeason();
+    }
+    dailySimulationTick();
+    updateHUD();
+  }
+
+  // Rabbit AI Behavior
+  GAME.rabbits.forEach(r => tickRabbitAI(r, dt * spd));
+
+  // Building Production Cycles
+  GAME.settlement.buildings.forEach(b => tickBuilding(b, dt * spd));
+
+  // World Map Caravans
+  tickCaravans(dt * spd);
+}
+
+function advanceSeason() {
+  const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
+  let idx = seasons.indexOf(GAME.season);
+  idx = (idx + 1) % 4;
+  GAME.season = seasons[idx];
+  if (GAME.season === 'Spring') GAME.year++;
+
+  // Rabbits age by 1 year in Spring
+  if (GAME.season === 'Spring') {
+    GAME.rabbits.forEach(r => {
+      r.age++;
+      if (r.lifeStage === 'kit' && r.age >= 5) {
+        r.lifeStage = 'adult';
+        r.profession = 'unassigned';
+        showToast(`🎉 ${r.name} came of age and is now an Adult Rabbit! Ready for a profession.`);
+      }
+      if (r.lifeStage === 'adult' && r.age >= 45) {
+        r.lifeStage = 'elder';
+        showToast(`👴 ${r.name} has become a respected Village Elder.`);
+      }
+    });
+  }
+
+  showToast(`📅 Season changed: Welcome to ${GAME.season}, Year ${GAME.year}!`);
+  updateHUD();
+}
+
+function dailySimulationTick() {
+  // 1. Food Consumption
+  GAME.rabbits.forEach(r => {
+    if (GAME.res.bread >= 1) {
+      GAME.res.bread -= 0.5;
+      r.hunger = Math.min(100, r.hunger + 25);
+      r.happiness = Math.min(100, r.happiness + 8);
+    } else if (GAME.res.carrots >= 1) {
+      GAME.res.carrots -= 1;
+      r.hunger = Math.min(100, r.hunger + 15);
+    } else {
+      r.hunger = Math.max(0, r.hunger - 20);
+      r.happiness = Math.max(0, r.happiness - 15);
+    }
+  });
+
+  // 2. Cultures Reproduction Cycle
+  // Married couples in a burrow with good food and happiness bear Kits!
+  const burrows = GAME.settlement.buildings.filter(b => b.type === 'burrow');
+  burrows.forEach(b => {
+    const residents = GAME.rabbits.filter(r => r.burrowId === b.id);
+    const buck = residents.find(r => r.gender === 'M' && r.lifeStage === 'adult');
+    const doe = residents.find(r => r.gender === 'F' && r.lifeStage === 'adult');
+    const kitCount = residents.filter(r => r.lifeStage === 'kit').length;
+
+    if (buck && doe && buck.spouseId === doe.id && kitCount < 2) {
+      if (buck.hunger > 60 && doe.hunger > 60 && buck.happiness > 70 && doe.happiness > 70) {
+        // Chance to have a kit
+        if (Math.random() < 0.28) {
+          const gender = Math.random() > 0.5 ? 'M' : 'F';
+          const namePool = gender === 'M' ? RABBIT_FIRST_NAMES_M : RABBIT_FIRST_NAMES_F;
+          const firstName = namePool[Math.floor(Math.random() * namePool.length)];
+          const kit = createRabbit(firstName, doe.clanName, gender, 0, 'kit');
+          kit.burrowId = b.id;
+          kit.x = b.tx * 32 + 16;
+          kit.y = b.ty * 32 + 16;
+          GAME.rabbits.push(kit);
+
+          GAME.audio.birthFanfare();
+          showToast(`🍼 A healthy new rabbit kit, ${kit.name}, was born in ${b.name}!`);
+          updateHUD();
         }
       }
     }
-  }
+  });
 
-  // 3. Scatter Natural Trees
-  const treeCount = Math.floor(w * h * (treePct / 100));
-  for (let i = 0; i < treeCount; i++) {
-    const tx = Math.floor(Math.random() * w);
-    const ty = Math.floor(Math.random() * h);
-    if (GAME.tiles[ty][tx].type === 'grass') {
-      GAME.tiles[ty][tx].tree = true;
+  // 3. Unmarried Adult Matching (Courting)
+  const singleBucks = GAME.rabbits.filter(r => r.lifeStage === 'adult' && !r.spouseId && r.gender === 'M');
+  const singleDoes = GAME.rabbits.filter(r => r.lifeStage === 'adult' && !r.spouseId && r.gender === 'F');
+  if (singleBucks.length > 0 && singleDoes.length > 0) {
+    const openBurrow = burrows.find(b => GAME.rabbits.filter(r => r.burrowId === b.id).length === 0);
+    if (openBurrow) {
+      const b = singleBucks[0];
+      const d = singleDoes[0];
+      b.spouseId = d.id;
+      d.spouseId = b.id;
+      b.burrowId = openBurrow.id;
+      d.burrowId = openBurrow.id;
+      showToast(`💍 ${b.name} & ${d.name} have married and moved into ${openBurrow.name}!`);
     }
   }
+}
 
-  // 4. Place Initial Towns
-  let placed = 0;
-  let attempts = 0;
-  const namePool = [...TOWN_NAMES].sort(() => Math.random() - 0.5);
+function tickRabbitAI(r, dt) {
+  r.hopPhase += dt * 8;
+  r.actionTimer -= dt;
 
-  while (placed < townCount && attempts < 350) {
-    attempts++;
-    const cx = Math.floor(Math.random() * (w - 10)) + 5;
-    const cy = Math.floor(Math.random() * (h - 10)) + 5;
+  // Movement towards target
+  const dx = r.targetX - r.x;
+  const dy = r.targetY - r.y;
+  const dist = Math.hypot(dx, dy);
 
-    let ok = true;
-    const minD = Math.max(7, Math.min(w, h) / (townCount * 0.5));
-    for (const t of GAME.towns) {
-      if (Math.hypot(t.x - cx, t.y - cy) < minD) { ok = false; break; }
+  if (dist > 6) {
+    // Speed boosted on cobblestone paths
+    const curTx = Math.floor(r.x / 32);
+    const curTy = Math.floor(r.y / 32);
+    const onPath = (curTx >= 0 && curTx < GAME.settlement.w && curTy >= 0 && curTy < GAME.settlement.h && GAME.settlement.tiles[curTy][curTx].path);
+    const spd = r.speed * (onPath ? 1.45 : 1.0);
+
+    r.x += (dx / dist) * spd * dt;
+    r.y += (dy / dist) * spd * dt;
+    r.state = 'walking';
+  } else {
+    // Arrived at destination
+    r.state = 'working';
+    if (r.actionTimer <= 0) {
+      decideNextRabbitTask(r);
     }
-    if (!ok) continue;
+  }
+}
 
-    let waterNear = 0;
-    for (let dy = -2; dy <= 2; dy++) {
-      for (let dx = -2; dx <= 2; dx++) {
-        if (GAME.tiles[cy + dy][cx + dx].type === 'water') waterNear++;
+function decideNextRabbitTask(r) {
+  r.actionTimer = 2.5 + Math.random() * 3.0;
+
+  // 1. Kit Behavior: play, chase butterflies around hearth or meadows
+  if (r.lifeStage === 'kit') {
+    const hearth = GAME.settlement.buildings.find(b => b.type === 'hearth');
+    const hx = hearth ? hearth.tx * 32 + 16 : 16 * 32;
+    const hy = hearth ? hearth.ty * 32 + 16 : 16 * 32;
+    r.targetX = hx + (Math.random() * 120 - 60);
+    r.targetY = hy + (Math.random() * 120 - 60);
+    r.state = 'playing';
+    return;
+  }
+
+  // 2. Profession-Based Workflow
+  if (r.profession === 'farmer') {
+    const patch = GAME.settlement.buildings.find(b => b.type === 'carrot_patch');
+    if (patch) {
+      if (!r.carried) {
+        // Go harvest
+        r.targetX = patch.tx * 32 + 16;
+        r.targetY = patch.ty * 32 + 16;
+        r.carried = { type: 'carrots', amount: 3 };
+      } else {
+        // Return to home or hearth
+        const burrow = GAME.settlement.buildings.find(b => b.id === r.burrowId);
+        r.targetX = burrow ? burrow.tx * 32 + 16 : 16 * 32;
+        r.targetY = burrow ? burrow.ty * 32 + 16 : 16 * 32;
+        GAME.res.carrots += r.carried.amount;
+        r.carried = null;
+        updateHUD();
       }
+      return;
     }
-    if (waterNear > 2) continue;
+  }
 
-    const townName = namePool[placed % namePool.length] || `Settlement ${placed + 1}`;
-    const townId = placed + 1;
-    const town = {
-      id: townId,
-      name: townName,
-      x: cx,
-      y: cy,
-      population: Math.floor(Math.random() * 350) + 250,
-      buildings: 1
-    };
-
-    const center = GAME.tiles[cy][cx];
-    center.type = 'grass';
-    center.tree = false;
-    center.building = { type: 'hall', townId: town.id, name: town.name };
-
-    // Initial cross-streets around town hall
-    const roads = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
-    roads.forEach(([rx, ry]) => {
-      if (rx >= 0 && rx < w && ry >= 0 && ry < h) {
-        const rt = GAME.tiles[ry][rx];
-        rt.type = 'grass';
-        rt.tree = false;
-        rt.road = 15;
+  if (r.profession === 'wheat_farmer') {
+    const field = GAME.settlement.buildings.find(b => b.type === 'wheat_field');
+    if (field) {
+      if (!r.carried) {
+        r.targetX = field.tx * 32 + 16;
+        r.targetY = field.ty * 32 + 16;
+        r.carried = { type: 'wheat', amount: 2 };
+      } else {
+        const bakery = GAME.settlement.buildings.find(b => b.type === 'bakery');
+        r.targetX = bakery ? bakery.tx * 32 + 16 : 16 * 32;
+        r.targetY = bakery ? bakery.ty * 32 + 16 : 16 * 32;
+        GAME.res.wheat += r.carried.amount;
+        r.carried = null;
+        updateHUD();
       }
-    });
+      return;
+    }
+  }
 
-    // 2-3 Starter houses
-    const houses = [[cx - 1, cy - 1], [cx + 1, cy - 1], [cx - 1, cy + 1], [cx + 1, cy + 1]];
-    houses.forEach(([hx, hy]) => {
-      if (Math.random() > 0.3 && hx >= 0 && hx < w && hy >= 0 && hy < h) {
-        const ht = GAME.tiles[hy][hx];
-        ht.type = 'grass';
-        ht.tree = false;
-        ht.building = {
-          type: Math.random() > 0.4 ? 'res1' : 'comm',
-          townId: town.id,
-          name: town.name
-        };
-        town.buildings++;
+  if (r.profession === 'woodcutter') {
+    const lodge = GAME.settlement.buildings.find(b => b.type === 'woodcutter');
+    if (lodge) {
+      r.targetX = lodge.tx * 32 + (Math.random() * 60 - 30);
+      r.targetY = lodge.ty * 32 + (Math.random() * 60 - 30);
+      GAME.res.timber += 2;
+      updateHUD();
+      return;
+    }
+  }
+
+  if (r.profession === 'mason') {
+    const mason = GAME.settlement.buildings.find(b => b.type === 'stonemason');
+    if (mason) {
+      r.targetX = mason.tx * 32 + 16;
+      r.targetY = mason.ty * 32 + 16;
+      GAME.res.stone += 1;
+      updateHUD();
+      return;
+    }
+  }
+
+  if (r.profession === 'baker') {
+    const bakery = GAME.settlement.buildings.find(b => b.type === 'bakery');
+    if (bakery) {
+      r.targetX = bakery.tx * 32 + 16;
+      r.targetY = bakery.ty * 32 + 16;
+      if (GAME.res.wheat >= 2) {
+        GAME.res.wheat -= 2;
+        GAME.res.bread += 2;
+        updateHUD();
       }
-    });
-
-    GAME.towns.push(town);
-    placed++;
-  }
-
-  // 5. Place Procedural Industries (Coal Mine, Farm, Sawmill, Factory)
-  const industryCount = Math.max(2, Math.floor(townCount * 0.85));
-  let indPlaced = 0;
-  let indAttempts = 0;
-
-  while (indPlaced < industryCount && indAttempts < 250) {
-    indAttempts++;
-    const ix = Math.floor(Math.random() * (w - 8)) + 4;
-    const iy = Math.floor(Math.random() * (h - 8)) + 4;
-    const tile = GAME.tiles[iy][ix];
-    if (tile.type === 'water' || tile.building || tile.road || tile.rail) continue;
-
-    // Check distance to towns & other industries
-    let tooClose = false;
-    for (const t of GAME.towns) {
-      if (Math.hypot(t.x - ix, t.y - iy) < 4) { tooClose = true; break; }
-    }
-    for (const ind of GAME.industries) {
-      if (Math.hypot(ind.x - ix, ind.y - iy) < 6) { tooClose = true; break; }
-    }
-    if (tooClose) continue;
-
-    const indDef = INDUSTRY_TYPES[indPlaced % INDUSTRY_TYPES.length];
-    const indObj = {
-      id: indPlaced + 1,
-      name: `${TOWN_NAMES[Math.floor(Math.random() * TOWN_NAMES.length)]} ${indDef.name}`,
-      indType: indDef.type,
-      produces: indDef.produces,
-      consumes: indDef.consumes,
-      payout: indDef.payout,
-      x: ix,
-      y: iy,
-      stockpile: 10
-    };
-
-    tile.type = 'grass';
-    tile.tree = false;
-    tile.building = {
-      type: 'industry',
-      indType: indDef.type,
-      indId: indObj.id,
-      name: indObj.name
-    };
-    GAME.industries.push(indObj);
-    indPlaced++;
-  }
-
-  recalculateAllRoads();
-  recalculateAllRails();
-
-  if (GAME.towns.length > 0) {
-    centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
-  } else {
-    centerCameraOn(Math.floor(w / 2), Math.floor(h / 2));
-  }
-
-  updateHUD();
-  renderMinimap();
-}
-
-/* =========================================================================
-   AUTOTILING & BITMASK NETWORK CALCULATIONS
-   ========================================================================= */
-
-function updateRoadMask(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-  if (!tile.road) return;
-
-  let mask = 0;
-  // Check North (y-1)
-  if (y > 0 && (GAME.tiles[y - 1][x].road || isRoadConnectable(x, y - 1))) mask |= 1;
-  // Check East (x+1)
-  if (x < GAME.mapW - 1 && (GAME.tiles[y][x + 1].road || isRoadConnectable(x + 1, y))) mask |= 2;
-  // Check South (y+1)
-  if (y < GAME.mapH - 1 && (GAME.tiles[y + 1][x].road || isRoadConnectable(x, y + 1))) mask |= 4;
-  // Check West (x-1)
-  if (x > 0 && (GAME.tiles[y][x - 1].road || isRoadConnectable(x - 1, y))) mask |= 8;
-
-  tile.road = mask || 15;
-}
-
-function isRoadConnectable(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return false;
-  const t = GAME.tiles[y][x];
-  if (t.road) return true;
-  if (t.building && (t.building.type === 'hall' || t.building.type === 'industry')) return true;
-  return false;
-}
-
-function updateRailMask(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-  if (!tile.rail) return;
-
-  let mask = 0;
-  if (y > 0 && (GAME.tiles[y - 1][x].rail || isRailConnectable(x, y - 1))) mask |= 1;
-  if (x < GAME.mapW - 1 && (GAME.tiles[y][x + 1].rail || isRailConnectable(x + 1, y))) mask |= 2;
-  if (y < GAME.mapH - 1 && (GAME.tiles[y + 1][x].rail || isRailConnectable(x, y + 1))) mask |= 4;
-  if (x > 0 && (GAME.tiles[y][x - 1].rail || isRailConnectable(x - 1, y))) mask |= 8;
-
-  tile.rail = mask || 15;
-}
-
-function isRailConnectable(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return false;
-  const t = GAME.tiles[y][x];
-  if (t.rail) return true;
-  if (t.building && (t.building.type === 'station' || t.building.type === 'industry')) return true;
-  return false;
-}
-
-function recalculateAllRoads() {
-  for (let y = 0; y < GAME.mapH; y++) {
-    for (let x = 0; x < GAME.mapW; x++) {
-      if (GAME.tiles[y][x].road) updateRoadMask(x, y);
+      return;
     }
   }
+
+  // Default wander / socialize near village hearth
+  const hearth = GAME.settlement.buildings.find(b => b.type === 'hearth');
+  const cx = hearth ? hearth.tx * 32 + 16 : 16 * 32;
+  const cy = hearth ? hearth.ty * 32 + 16 : 16 * 32;
+  r.targetX = cx + (Math.random() * 90 - 45);
+  r.targetY = cy + (Math.random() * 90 - 45);
 }
 
-function recalculateAllRails() {
-  for (let y = 0; y < GAME.mapH; y++) {
-    for (let x = 0; x < GAME.mapW; x++) {
-      if (GAME.tiles[y][x].rail) updateRailMask(x, y);
+function tickBuilding(b, dt) {
+  b.productionTimer += dt;
+  if (b.type === 'carrot_patch' && b.productionTimer > 12) {
+    b.productionTimer = 0;
+    GAME.res.carrots += 1;
+    updateHUD();
+  }
+}
+
+function tickCaravans(dt) {
+  for (let i = GAME.world.caravans.length - 1; i >= 0; i--) {
+    const c = GAME.world.caravans[i];
+    c.progress += dt * 0.12;
+    if (c.progress >= 1.0) {
+      // Arrived at foreign animal kingdom!
+      GAME.res.gold += c.goldReward;
+      showToast(`🪙 Caravan returned from ${c.target.name}! Earned +$${c.goldReward} Gold.`);
+      GAME.world.caravans.splice(i, 1);
+      updateHUD();
     }
-  }
-}
-
-function updateRoadNeighbors(x, y) {
-  updateRoadMask(x, y);
-  if (y > 0) updateRoadMask(x, y - 1);
-  if (x < GAME.mapW - 1) updateRoadMask(x + 1, y);
-  if (y < GAME.mapH - 1) updateRoadMask(x, y + 1);
-  if (x > 0) updateRoadMask(x - 1, y);
-}
-
-function updateRailNeighbors(x, y) {
-  updateRailMask(x, y);
-  if (y > 0) updateRailMask(x, y - 1);
-  if (x < GAME.mapW - 1) updateRailMask(x + 1, y);
-  if (y < GAME.mapH - 1) updateRailMask(x, y + 1);
-  if (x > 0) updateRailMask(x - 1, y);
-}
-
-/* =========================================================================
-   PROJECTIONS & COORDINATE CONVERSION
-   ========================================================================= */
-
-const TILE_W = 64;
-const TILE_H = 32;
-
-function tileToScreen(tx, ty) {
-  if (GAME.viewMode === 'iso') {
-    const sx = (tx - ty) * (TILE_W / 2) * GAME.cam.zoom + GAME.cam.x;
-    const sy = (tx + ty) * (TILE_H / 2) * GAME.cam.zoom + GAME.cam.y;
-    return { x: sx, y: sy };
-  } else {
-    const size = 48 * GAME.cam.zoom;
-    return { x: tx * size + GAME.cam.x, y: ty * size + GAME.cam.y };
-  }
-}
-
-function screenToTile(sx, sy) {
-  if (GAME.viewMode === 'iso') {
-    const adjX = (sx - GAME.cam.x) / GAME.cam.zoom;
-    const adjY = (sy - GAME.cam.y) / GAME.cam.zoom;
-    const tx = Math.floor((adjX / (TILE_W / 2) + adjY / (TILE_H / 2)) / 2);
-    const ty = Math.floor((adjY / (TILE_H / 2) - adjX / (TILE_W / 2)) / 2);
-    return { x: tx, y: ty };
-  } else {
-    const size = 48 * GAME.cam.zoom;
-    return {
-      x: Math.floor((sx - GAME.cam.x) / size),
-      y: Math.floor((sy - GAME.cam.y) / size)
-    };
-  }
-}
-
-function centerCameraOn(tx, ty) {
-  const canvas = document.getElementById('canvas-world');
-  if (GAME.viewMode === 'iso') {
-    const wx = (tx - ty) * (TILE_W / 2) * GAME.cam.zoom;
-    const wy = (tx + ty) * (TILE_H / 2) * GAME.cam.zoom;
-    GAME.cam.x = canvas.width / 2 - wx;
-    GAME.cam.y = canvas.height / 2 - wy;
-  } else {
-    const size = 48 * GAME.cam.zoom;
-    GAME.cam.x = canvas.width / 2 - (tx + 0.5) * size;
-    GAME.cam.y = canvas.height / 2 - (ty + 0.5) * size;
   }
 }
 
 /* =========================================================================
-   CANVAS RENDERING ENGINE
+   CANVAS RENDERING: 2D TOP-DOWN (SETTLEMENT & WORLD VIEWS)
    ========================================================================= */
 
-const canvas = document.getElementById('canvas-world');
+const canvas = document.getElementById('canvas-main');
 const ctx = canvas.getContext('2d');
-const minimapCanvas = document.getElementById('canvas-minimap');
-const minimapCtx = minimapCanvas.getContext('2d');
+const radarCanvas = document.getElementById('canvas-radar');
+const radarCtx = radarCanvas.getContext('2d');
 
 function fitCanvas() {
   const vp = document.getElementById('viewport-area');
@@ -1395,1487 +1170,401 @@ function gameLoop(now) {
 
   tickSimulation(dt);
 
-  ctx.fillStyle = '#0a161c';
+  ctx.fillStyle = '#091318';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  renderWorld(now);
-  renderVehicles(now);
-  renderFloatingTexts(dt);
-  renderHighlights();
+  if (GAME.view === 'settlement') {
+    renderSettlementView();
+    renderRabbits();
+  } else {
+    renderWorldView();
+  }
 
+  renderMinimap();
   requestAnimationFrame(gameLoop);
 }
 
-function renderWorld(now) {
-  const zoom = GAME.cam.zoom;
-  const isIso = GAME.viewMode === 'iso';
-  const tw = TILE_W * zoom;
-  const th = TILE_H * zoom;
-  const orthoSize = 48 * zoom;
+// 1. Settlement 2D Top-Down View
+function renderSettlementView() {
+  const cam = GAME.cam.settlement;
+  const tileSize = 32 * cam.zoom;
 
-  for (let y = 0; y < GAME.mapH; y++) {
-    for (let x = 0; x < GAME.mapW; x++) {
-      const tile = GAME.tiles[y][x];
-      const pos = tileToScreen(x, y);
+  const startX = Math.max(0, Math.floor(-cam.x / tileSize));
+  const endX = Math.min(GAME.settlement.w, Math.ceil((canvas.width - cam.x) / tileSize));
+  const startY = Math.max(0, Math.floor(-cam.y / tileSize));
+  const endY = Math.min(GAME.settlement.h, Math.ceil((canvas.height - cam.y) / tileSize));
 
-      // Frustum culling
-      if (isIso) {
-        if (pos.x < -tw || pos.x > canvas.width + tw || pos.y < -th * 2 || pos.y > canvas.height + th * 2) continue;
-        drawTileIso(ctx, x, y, tile, pos.x, pos.y, tw, th, now);
+  // Render ground tiles
+  for (let y = startY; y < endY; y++) {
+    for (let x = startX; x < endX; x++) {
+      const tile = GAME.settlement.tiles[y][x];
+      const px = x * tileSize + cam.x;
+      const py = y * tileSize + cam.y;
+
+      if (tile.type === 'water') {
+        ctx.fillStyle = '#0284c7';
       } else {
-        if (pos.x < -orthoSize || pos.x > canvas.width || pos.y < -orthoSize || pos.y > canvas.height) continue;
-        drawTileOrtho(ctx, x, y, tile, pos.x, pos.y, orthoSize);
+        ctx.fillStyle = (x + y) % 2 === 0 ? '#3f782f' : '#396d29';
+      }
+      ctx.fillRect(px, py, Math.ceil(tileSize), Math.ceil(tileSize));
+
+      // Cobblestone path
+      if (tile.path) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(px + tileSize * 0.15, py + tileSize * 0.15, tileSize * 0.7, tileSize * 0.7);
+        ctx.strokeStyle = '#64748b';
+        ctx.strokeRect(px + tileSize * 0.15, py + tileSize * 0.15, tileSize * 0.7, tileSize * 0.7);
+      }
+
+      // Natural Trees
+      if (tile.tree) {
+        drawTree2D(px + tileSize / 2, py + tileSize / 2, tileSize * 0.42);
+      }
+
+      // Natural Stone Boulders
+      if (tile.rock) {
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath();
+        ctx.ellipse(px + tileSize * 0.5, py + tileSize * 0.5, tileSize * 0.28, tileSize * 0.22, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#334155';
+        ctx.stroke();
       }
     }
   }
+
+  // Render Buildings
+  GAME.settlement.buildings.forEach(b => {
+    drawBuilding2D(b, cam.x, cam.y, tileSize);
+  });
 }
 
-function drawTileIso(ctx, x, y, tile, px, py, tw, th, now) {
-  // Diamond tile base
+function drawTree2D(cx, cy, r) {
+  ctx.fillStyle = '#166534';
   ctx.beginPath();
-  ctx.moveTo(px, py);
-  ctx.lineTo(px + tw / 2, py + th / 2);
-  ctx.lineTo(px, py + th);
-  ctx.lineTo(px - tw / 2, py + th / 2);
-  ctx.closePath();
-
-  if (tile.type === 'water') {
-    const wave = Math.sin((x * 0.8 + y * 0.6) + now * 0.003) * 5;
-    ctx.fillStyle = `hsl(202, 80%, ${32 + wave * 0.5}%)`;
-    ctx.fill();
-    ctx.strokeStyle = '#1e5a7d';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Subtle water shimmer lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(px - tw * 0.15, py + th * 0.45);
-    ctx.lineTo(px + tw * 0.15, py + th * 0.55);
-    ctx.stroke();
-  } else {
-    ctx.fillStyle = (x + y) % 2 === 0 ? '#499336' : '#41862f';
-    ctx.fill();
-    ctx.strokeStyle = '#387328';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
-
-  // Draw Bridges / Roads / Rails
-  const isBridge = tile.type === 'water' && (tile.road || tile.rail);
-
-  if (tile.road) {
-    drawRoadIso(ctx, px, py, tw, th, tile.road, isBridge);
-  }
-
-  if (tile.rail) {
-    drawRailIso(ctx, px, py, tw, th, tile.rail, isBridge);
-  }
-
-  if (tile.tree && !tile.road && !tile.rail && !tile.building) {
-    drawTreeIso(ctx, px, py, tw, th, x, y);
-  }
-
-  if (tile.building) {
-    drawBuildingIso(ctx, px, py, tw, th, tile.building);
-  }
-}
-
-/* =========================================================================
-   FIXED ISOMETRIC ROAD RENDERING: CONNECTS DIRECTLY TO DIAMOND EDGES
-   ========================================================================= */
-
-function drawRoadIso(ctx, px, py, tw, th, mask, isBridge) {
-  const cx = px;
-  const cy = py + th / 2;
-  const rw = 0.28; // Road half-width factor
-
-  // Center junction polygon vertices
-  const cJ_N = { x: cx + rw * tw * 0.5, y: cy - rw * th * 0.5 };
-  const cJ_E = { x: cx + rw * tw * 0.5, y: cy + rw * th * 0.5 };
-  const cJ_S = { x: cx - rw * tw * 0.5, y: cy + rw * th * 0.5 };
-  const cJ_W = { x: cx - rw * tw * 0.5, y: cy - rw * th * 0.5 };
-
-  // Bridge Support Piers (when spanning water)
-  if (isBridge) {
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(cx - tw * 0.22, cy + th * 0.15, tw * 0.08, th * 0.5);
-    ctx.fillRect(cx + tw * 0.14, cy + th * 0.15, tw * 0.08, th * 0.5);
-
-    // Bridge shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + th * 0.35, tw * 0.35, th * 0.2, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Draw asphalt road surface
-  ctx.fillStyle = isBridge ? '#4b5563' : '#374151';
-  ctx.strokeStyle = '#1f2937';
-  ctx.lineWidth = Math.max(1, tw * 0.015);
-
-  // Fill center junction
-  ctx.beginPath();
-  ctx.moveTo(cJ_N.x, cJ_N.y);
-  ctx.lineTo(cJ_E.x, cJ_E.y);
-  ctx.lineTo(cJ_S.x, cJ_S.y);
-  ctx.lineTo(cJ_W.x, cJ_W.y);
-  ctx.closePath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.fill();
-
-  // North Arm (dy = -1: towards screen +tw/4, -th/4)
-  if (mask & 1) {
-    const eL = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
-    const eR = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath();
-    ctx.moveTo(cJ_W.x, cJ_W.y);
-    ctx.lineTo(eL.x, eL.y);
-    ctx.lineTo(eR.x, eR.y);
-    ctx.lineTo(cJ_E.x, cJ_E.y);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  // South Arm (dy = +1: towards screen -tw/4, +th/4)
-  if (mask & 4) {
-    const eL = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
-    const eR = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath();
-    ctx.moveTo(cJ_W.x, cJ_W.y);
-    ctx.lineTo(eL.x, eL.y);
-    ctx.lineTo(eR.x, eR.y);
-    ctx.lineTo(cJ_E.x, cJ_E.y);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  // East Arm (dx = +1: towards screen +tw/4, +th/4)
-  if (mask & 2) {
-    const eT = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
-    const eB = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath();
-    ctx.moveTo(cJ_N.x, cJ_N.y);
-    ctx.lineTo(eT.x, eT.y);
-    ctx.lineTo(eB.x, eB.y);
-    ctx.lineTo(cJ_S.x, cJ_S.y);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  // West Arm (dx = -1: towards screen -tw/4, -th/4)
-  if (mask & 8) {
-    const eT = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
-    const eB = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath();
-    ctx.moveTo(cJ_N.x, cJ_N.y);
-    ctx.lineTo(eT.x, eT.y);
-    ctx.lineTo(eB.x, eB.y);
-    ctx.lineTo(cJ_S.x, cJ_S.y);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  // Curbed side borders
-  ctx.strokeStyle = '#1e293b';
-  ctx.lineWidth = Math.max(1, tw * 0.018);
+  ctx.fillStyle = '#22c55e';
   ctx.beginPath();
-  if (mask & 1) {
-    ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(cx + tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 - rw * th * 0.5);
-    ctx.moveTo(cJ_E.x, cJ_E.y); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5);
-  }
-  if (mask & 4) {
-    ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(cx - tw * 0.25 - rw * tw * 0.5, cy + th * 0.25 - rw * th * 0.5);
-    ctx.moveTo(cJ_E.x, cJ_E.y); ctx.lineTo(cx - tw * 0.25 + rw * tw * 0.5, cy + th * 0.25 + rw * th * 0.5);
-  }
-  if (mask & 2) {
-    ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy + th * 0.25 - rw * th * 0.5);
-    ctx.moveTo(cJ_S.x, cJ_S.y); ctx.lineTo(cx + tw * 0.25 - rw * tw * 0.5, cy + th * 0.25 + rw * th * 0.5);
-  }
-  if (mask & 8) {
-    ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(cx - tw * 0.25 + rw * tw * 0.5, cy - th * 0.25 - rw * th * 0.5);
-    ctx.moveTo(cJ_S.x, cJ_S.y); ctx.lineTo(cx - tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5);
-  }
-  ctx.stroke();
-
-  // Bridge railings
-  if (isBridge) {
-    ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = Math.max(1.5, tw * 0.024);
-    ctx.beginPath();
-    if ((mask & 5) === 5) {
-      ctx.moveTo(cJ_W.x, cJ_W.y - 2); ctx.lineTo(cx + tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 - rw * th * 0.5 - 2);
-      ctx.moveTo(cJ_E.x, cJ_E.y - 2); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5 - 2);
-    } else {
-      ctx.moveTo(cJ_N.x, cJ_N.y - 2); ctx.lineTo(cx + tw * 0.25 + rw * tw * 0.5, cy + th * 0.25 - rw * th * 0.5 - 2);
-      ctx.moveTo(cJ_S.x, cJ_S.y - 2); ctx.lineTo(cx - tw * 0.25 - rw * tw * 0.5, cy - th * 0.25 + rw * th * 0.5 - 2);
-    }
-    ctx.stroke();
-  }
-
-  // Yellow dashed centerline connecting cleanly across edge midpoints
-  ctx.strokeStyle = '#facc15';
-  ctx.lineWidth = Math.max(1, tw * 0.022);
-  ctx.setLineDash([3 * GAME.cam.zoom, 3 * GAME.cam.zoom]);
-  ctx.beginPath();
-  if (mask & 1) { ctx.moveTo(cx, cy); ctx.lineTo(cx + tw * 0.25, cy - th * 0.25); }
-  if (mask & 4) { ctx.moveTo(cx, cy); ctx.lineTo(cx - tw * 0.25, cy + th * 0.25); }
-  if (mask & 2) { ctx.moveTo(cx, cy); ctx.lineTo(cx + tw * 0.25, cy + th * 0.25); }
-  if (mask & 8) { ctx.moveTo(cx, cy); ctx.lineTo(cx - tw * 0.25, cy - th * 0.25); }
-  ctx.stroke();
-  ctx.setLineDash([]);
-}
-
-/* =========================================================================
-   RAILROAD TRACK RENDERING IN ISOMETRIC VIEW
-   ========================================================================= */
-
-function drawRailIso(ctx, px, py, tw, th, mask, isBridge) {
-  const cx = px;
-  const cy = py + th / 2;
-  const rw = 0.20; // Rail ballast half-width
-
-  // Bridge piers for rail trestle
-  if (isBridge) {
-    ctx.fillStyle = '#78350f';
-    ctx.fillRect(cx - tw * 0.2, cy + th * 0.15, tw * 0.06, th * 0.5);
-    ctx.fillRect(cx + tw * 0.14, cy + th * 0.15, tw * 0.06, th * 0.5);
-    // Cross brace
-    ctx.strokeStyle = '#92400e';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - tw * 0.2, cy + th * 0.2);
-    ctx.lineTo(cx + tw * 0.2, cy + th * 0.5);
-    ctx.moveTo(cx + tw * 0.2, cy + th * 0.2);
-    ctx.lineTo(cx - tw * 0.2, cy + th * 0.5);
-    ctx.stroke();
-  }
-
-  // Ballast Gravel Base (Dark charcoal)
-  ctx.fillStyle = '#3f3f46';
-  ctx.beginPath();
-  const cJ_N = { x: cx + rw * tw * 0.5, y: cy - rw * th * 0.5 };
-  const cJ_E = { x: cx + rw * tw * 0.5, y: cy + rw * th * 0.5 };
-  const cJ_S = { x: cx - rw * tw * 0.5, y: cy + rw * th * 0.5 };
-  const cJ_W = { x: cx - rw * tw * 0.5, y: cy - rw * th * 0.5 };
-
-  ctx.moveTo(cJ_N.x, cJ_N.y);
-  ctx.lineTo(cJ_E.x, cJ_E.y);
-  ctx.lineTo(cJ_S.x, cJ_S.y);
-  ctx.lineTo(cJ_W.x, cJ_W.y);
-  ctx.closePath();
+  ctx.arc(cx - r * 0.2, cy - r * 0.2, r * 0.55, 0, Math.PI * 2);
   ctx.fill();
-
-  if (mask & 1) {
-    const eL = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
-    const eR = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath(); ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(eL.x, eL.y); ctx.lineTo(eR.x, eR.y); ctx.lineTo(cJ_E.x, cJ_E.y); ctx.fill();
-  }
-  if (mask & 4) {
-    const eL = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
-    const eR = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath(); ctx.moveTo(cJ_W.x, cJ_W.y); ctx.lineTo(eL.x, eL.y); ctx.lineTo(eR.x, eR.y); ctx.lineTo(cJ_E.x, cJ_E.y); ctx.fill();
-  }
-  if (mask & 2) {
-    const eT = { x: cx + tw * 0.25 + rw * tw * 0.5, y: cy + th * 0.25 - rw * th * 0.5 };
-    const eB = { x: cx + tw * 0.25 - rw * tw * 0.5, y: cy + th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath(); ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(eT.x, eT.y); ctx.lineTo(eB.x, eB.y); ctx.lineTo(cJ_S.x, cJ_S.y); ctx.fill();
-  }
-  if (mask & 8) {
-    const eT = { x: cx - tw * 0.25 + rw * tw * 0.5, y: cy - th * 0.25 - rw * th * 0.5 };
-    const eB = { x: cx - tw * 0.25 - rw * tw * 0.5, y: cy - th * 0.25 + rw * th * 0.5 };
-    ctx.beginPath(); ctx.moveTo(cJ_N.x, cJ_N.y); ctx.lineTo(eT.x, eT.y); ctx.lineTo(eB.x, eB.y); ctx.lineTo(cJ_S.x, cJ_S.y); ctx.fill();
-  }
-
-  // Wooden Railroad Ties / Sleepers
-  ctx.strokeStyle = '#5c2d16';
-  ctx.lineWidth = Math.max(1.5, tw * 0.035);
-  ctx.beginPath();
-  const tieW = rw * 0.9;
-  const drawSleeper = (sx, sy, isDiag1) => {
-    if (isDiag1) {
-      ctx.moveTo(sx - tieW * tw * 0.5, sy - tieW * th * 0.5);
-      ctx.lineTo(sx + tieW * tw * 0.5, sy + tieW * th * 0.5);
-    } else {
-      ctx.moveTo(sx + tieW * tw * 0.5, sy - tieW * th * 0.5);
-      ctx.lineTo(sx - tieW * tw * 0.5, sy + tieW * th * 0.5);
-    }
-  };
-
-  // Center tie
-  drawSleeper(cx, cy, (mask & 5) !== 0);
-
-  // Arm ties
-  if (mask & 1) {
-    drawSleeper(cx + tw * 0.125, cy - th * 0.125, true);
-    drawSleeper(cx + tw * 0.22, cy - th * 0.22, true);
-  }
-  if (mask & 4) {
-    drawSleeper(cx - tw * 0.125, cy + th * 0.125, true);
-    drawSleeper(cx - tw * 0.22, cy + th * 0.22, true);
-  }
-  if (mask & 2) {
-    drawSleeper(cx + tw * 0.125, cy + th * 0.125, false);
-    drawSleeper(cx + tw * 0.22, cy + th * 0.22, false);
-  }
-  if (mask & 8) {
-    drawSleeper(cx - tw * 0.125, cy - th * 0.125, false);
-    drawSleeper(cx - tw * 0.22, cy - th * 0.22, false);
-  }
-  ctx.stroke();
-
-  // Dual Parallel Steel Rails (Shiny silver with dark shadow)
-  const railDist = rw * 0.45;
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = Math.max(1, tw * 0.022);
-
-  ctx.beginPath();
-  // North Rails
-  if (mask & 1) {
-    // Rail 1
-    ctx.moveTo(cx - railDist * tw * 0.5, cy - railDist * th * 0.5);
-    ctx.lineTo(cx + tw * 0.25 - railDist * tw * 0.5, cy - th * 0.25 - railDist * th * 0.5);
-    // Rail 2
-    ctx.moveTo(cx + railDist * tw * 0.5, cy + railDist * th * 0.5);
-    ctx.lineTo(cx + tw * 0.25 + railDist * tw * 0.5, cy - th * 0.25 + railDist * th * 0.5);
-  }
-  // South Rails
-  if (mask & 4) {
-    ctx.moveTo(cx - railDist * tw * 0.5, cy - railDist * th * 0.5);
-    ctx.lineTo(cx - tw * 0.25 - railDist * tw * 0.5, cy + th * 0.25 - railDist * th * 0.5);
-    ctx.moveTo(cx + railDist * tw * 0.5, cy + railDist * th * 0.5);
-    ctx.lineTo(cx - tw * 0.25 + railDist * tw * 0.5, cy + th * 0.25 + railDist * th * 0.5);
-  }
-  // East Rails
-  if (mask & 2) {
-    ctx.moveTo(cx + railDist * tw * 0.5, cy - railDist * th * 0.5);
-    ctx.lineTo(cx + tw * 0.25 + railDist * tw * 0.5, cy + th * 0.25 - railDist * th * 0.5);
-    ctx.moveTo(cx - railDist * tw * 0.5, cy + railDist * th * 0.5);
-    ctx.lineTo(cx + tw * 0.25 - railDist * tw * 0.5, cy + th * 0.25 + railDist * th * 0.5);
-  }
-  // West Rails
-  if (mask & 8) {
-    ctx.moveTo(cx + railDist * tw * 0.5, cy - railDist * th * 0.5);
-    ctx.lineTo(cx - tw * 0.25 + railDist * tw * 0.5, cy - th * 0.25 - railDist * th * 0.5);
-    ctx.moveTo(cx - railDist * tw * 0.5, cy + railDist * th * 0.5);
-    ctx.lineTo(cx - tw * 0.25 - railDist * tw * 0.5, cy - th * 0.25 + railDist * th * 0.5);
-  }
-  ctx.stroke();
 }
 
-function drawTreeIso(ctx, px, py, tw, th, x, y) {
-  const cx = px;
-  const cy = py + th * 0.55;
-  const h = th * 1.35;
-  const w = tw * 0.35;
+function drawBuilding2D(b, camX, camY, tileSize) {
+  const px = b.tx * tileSize + camX;
+  const py = b.ty * tileSize + camY;
 
-  ctx.fillStyle = '#653a1a';
-  ctx.fillRect(cx - 2, cy - h * 0.2, 4, h * 0.25);
-
-  ctx.fillStyle = (x + y) % 3 === 0 ? '#1b5e20' : '#2e7d32';
-  for (let i = 0; i < 3; i++) {
-    const layerY = cy - h * (0.2 + i * 0.28);
-    const layerW = w * (1 - i * 0.22);
+  if (b.type === 'burrow') {
+    // Rabbit Mound Burrow with Round Door & Chimney
+    const w = tileSize * 2;
+    const h = tileSize * 2;
+    ctx.fillStyle = '#5c4033'; // Earth mound
     ctx.beginPath();
-    ctx.moveTo(cx, layerY - h * 0.35);
-    ctx.lineTo(cx + layerW / 2, layerY);
-    ctx.lineTo(cx - layerW / 2, layerY);
-    ctx.closePath();
+    ctx.arc(px + w / 2, py + h / 2, w * 0.44, 0, Math.PI * 2);
     ctx.fill();
-  }
-}
-
-function drawBuildingIso(ctx, px, py, tw, th, bldg) {
-  const cx = px;
-  const cy = py + th / 2;
-
-  if (bldg.type === 'station') {
-    // Train Station Platform & Canopy
-    const sH = th * 1.3;
-    const sW = tw * 0.44;
-
-    // Platform Base
-    ctx.fillStyle = '#64748b';
-    ctx.beginPath();
-    ctx.moveTo(cx - sW, cy);
-    ctx.lineTo(cx, cy + th * 0.25);
-    ctx.lineTo(cx + sW, cy);
-    ctx.lineTo(cx, cy - th * 0.25);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = '#3e2723';
+    ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Station House
+    // Grass turf roof
+    ctx.fillStyle = '#4d7c0f';
+    ctx.beginPath();
+    ctx.arc(px + w / 2, py + h / 2, w * 0.34, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Round wooden door
     ctx.fillStyle = '#b45309';
-    ctx.fillRect(cx - sW * 0.4, cy - sH * 0.8, sW * 0.8, sH * 0.6);
+    ctx.beginPath();
+    ctx.arc(px + w / 2, py + h * 0.72, w * 0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.stroke();
 
-    // Gabled Roof
+    // Burrow Sign
+    drawBadge2D(px + w / 2, py - 6, `🏡 ${b.name}`);
+  } else if (b.type === 'carrot_patch') {
+    const s = tileSize;
+    ctx.fillStyle = '#78350f'; // tilled soil
+    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
+    // Green carrot tops & orange tips
+    ctx.fillStyle = '#f97316';
+    ctx.fillRect(px + s * 0.35, py + s * 0.4, s * 0.3, s * 0.3);
+    ctx.fillStyle = '#22c55e';
+    ctx.fillRect(px + s * 0.35, py + s * 0.15, s * 0.3, s * 0.25);
+  } else if (b.type === 'wheat_field') {
+    const s = tileSize;
+    ctx.fillStyle = '#ca8a04';
+    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
+    ctx.fillStyle = '#fef08a';
+    for (let k = 0; k < 3; k++) ctx.fillRect(px + s * 0.2 + k * 8, py + s * 0.2, 4, s * 0.6);
+  } else if (b.type === 'bakery') {
+    const w = tileSize * 2;
+    const h = tileSize * 2;
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(px + 4, py + 4, w - 8, h - 8);
+    // Red gabled roof
+    ctx.fillStyle = '#dc2626';
+    ctx.fillRect(px + 4, py + 4, w - 8, h * 0.35);
+    drawBadge2D(px + w / 2, py - 6, `🥖 Bakery`);
+  } else if (b.type === 'woodcutter') {
+    const s = tileSize;
+    ctx.fillStyle = '#92400e';
+    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
+    ctx.fillStyle = '#15803d';
+    ctx.fillRect(px + 4, py + 4, s - 8, s * 0.4);
+    drawBadge2D(px + s / 2, py - 6, `🪓 Timber`);
+  } else if (b.type === 'stonemason') {
+    const s = tileSize;
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(px + 2, py + 2, s - 4, s - 4);
+    drawBadge2D(px + s / 2, py - 6, `⛏️ Masonry`);
+  } else if (b.type === 'workshop') {
+    const w = tileSize * 2;
+    const h = tileSize * 2;
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(px + 4, py + 4, w - 8, h - 8);
+    drawBadge2D(px + w / 2, py - 6, `🔨 Workshop`);
+  } else if (b.type === 'hearth') {
+    const w = tileSize * 2;
+    const h = tileSize * 2;
+    // Cobblestone plaza
+    ctx.fillStyle = '#94a3b8';
+    ctx.beginPath();
+    ctx.arc(px + w / 2, py + h / 2, w * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    // Firepit
     ctx.fillStyle = '#dc2626';
     ctx.beginPath();
-    ctx.moveTo(cx - sW * 0.5, cy - sH * 0.8);
-    ctx.lineTo(cx, cy - sH * 1.15);
-    ctx.lineTo(cx + sW * 0.5, cy - sH * 0.8);
-    ctx.closePath();
+    ctx.arc(px + w / 2, py + h / 2, w * 0.18, 0, Math.PI * 2);
     ctx.fill();
-
-    // Clock
-    ctx.fillStyle = '#fef08a';
+    ctx.fillStyle = '#facc15';
     ctx.beginPath();
-    ctx.arc(cx, cy - sH * 0.92, 4, 0, Math.PI * 2);
+    ctx.arc(px + w / 2, py + h / 2, w * 0.1, 0, Math.PI * 2);
     ctx.fill();
-
-    // Signboard
-    drawFloatingBadge(ctx, cx, cy - sH * 1.25, `🚉 ${bldg.name || 'Station'}`);
-    return;
-  }
-
-  if (bldg.type === 'industry') {
-    // Distinctive Industry Buildings
-    const indType = bldg.indType || 'factory';
-    const bH = th * 1.6;
-    const bW = tw * 0.45;
-
-    if (indType === 'coal') {
-      // Coal Mine: Headframe A-frame tower with pulley wheel & black coal pile
-      ctx.strokeStyle = '#27272a';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(cx - bW * 0.5, cy);
-      ctx.lineTo(cx, cy - bH * 1.2);
-      ctx.lineTo(cx + bW * 0.5, cy);
-      ctx.stroke();
-
-      // Pulley wheel
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.arc(cx, cy - bH * 1.2, 5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Coal ore pile
-      ctx.fillStyle = '#18181b';
-      ctx.beginPath();
-      ctx.ellipse(cx + bW * 0.3, cy + th * 0.1, tw * 0.18, th * 0.15, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      drawFloatingBadge(ctx, cx, cy - bH * 1.35, `⛏️ ${bldg.name}`);
-    } else if (indType === 'farm') {
-      // Farm: Red Barn & Silver Grain Silo
-      // Silo
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(cx - bW * 0.6, cy - bH * 0.9, bW * 0.3, bH * 0.7);
-      ctx.beginPath();
-      ctx.arc(cx - bW * 0.45, cy - bH * 0.9, bW * 0.15, Math.PI, 0);
-      ctx.fill();
-
-      // Big Red Barn
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(cx - bW * 0.2, cy - bH * 0.7, bW * 0.7, bH * 0.6);
-      // Barn roof
-      ctx.fillStyle = '#f87171';
-      ctx.beginPath();
-      ctx.moveTo(cx - bW * 0.25, cy - bH * 0.7);
-      ctx.lineTo(cx + bW * 0.15, cy - bH * 1.05);
-      ctx.lineTo(cx + bW * 0.55, cy - bH * 0.7);
-      ctx.closePath();
-      ctx.fill();
-
-      drawFloatingBadge(ctx, cx, cy - bH * 1.25, `🌾 ${bldg.name}`);
-    } else if (indType === 'forest') {
-      // Sawmill: Timber cabin & stack of logs
-      ctx.fillStyle = '#78350f';
-      ctx.fillRect(cx - bW * 0.5, cy - bH * 0.65, bW * 0.6, bH * 0.5);
-      // Green roof
-      ctx.fillStyle = '#15803d';
-      ctx.beginPath();
-      ctx.moveTo(cx - bW * 0.55, cy - bH * 0.65);
-      ctx.lineTo(cx - bW * 0.2, cy - bH * 0.95);
-      ctx.lineTo(cx + bW * 0.15, cy - bH * 0.65);
-      ctx.closePath();
-      ctx.fill();
-
-      // Logs pile
-      ctx.fillStyle = '#b45309';
-      for (let k = 0; k < 3; k++) {
-        ctx.fillRect(cx + bW * 0.2, cy - k * 5, bW * 0.4, 4);
-      }
-
-      drawFloatingBadge(ctx, cx, cy - bH * 1.15, `🌲 ${bldg.name}`);
-    } else {
-      // Manufacturing Factory: Brick building with two tall smoking chimneys
-      ctx.fillStyle = '#991b1b';
-      ctx.fillRect(cx - bW * 0.6, cy - bH * 0.7, bW * 1.2, bH * 0.6);
-
-      // Chimneys
-      ctx.fillStyle = '#7f1d1d';
-      ctx.fillRect(cx - bW * 0.3, cy - bH * 1.2, 5, bH * 0.6);
-      ctx.fillRect(cx + bW * 0.1, cy - bH * 1.35, 6, bH * 0.75);
-
-      // Smoke particles
-      ctx.fillStyle = 'rgba(203, 213, 225, 0.4)';
-      ctx.beginPath();
-      ctx.arc(cx - bW * 0.25, cy - bH * 1.3, 4, 0, Math.PI * 2);
-      ctx.arc(cx + bW * 0.15, cy - bH * 1.45, 6, 0, Math.PI * 2);
-      ctx.fill();
-
-      drawFloatingBadge(ctx, cx, cy - bH * 1.55, `🏭 ${bldg.name}`);
-    }
-    return;
-  }
-
-  // Standard Town Buildings & Town Hall
-  const isHall = bldg.type === 'hall';
-  const bH = isHall ? th * 1.8 : th * 1.25;
-  const bW = tw * 0.42;
-
-  // Left wall
-  ctx.fillStyle = isHall ? '#b45309' : '#cbd5e1';
-  ctx.beginPath();
-  ctx.moveTo(cx - bW, cy);
-  ctx.lineTo(cx, cy + th * 0.25);
-  ctx.lineTo(cx, cy + th * 0.25 - bH);
-  ctx.lineTo(cx - bW, cy - bH);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = '#475569';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // Right wall
-  ctx.fillStyle = isHall ? '#92400e' : '#94a3b8';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy + th * 0.25);
-  ctx.lineTo(cx + bW, cy);
-  ctx.lineTo(cx + bW, cy - bH);
-  ctx.lineTo(cx, cy + th * 0.25 - bH);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  // Roof
-  ctx.fillStyle = isHall ? '#dc2626' : (bldg.type === 'comm' ? '#2563eb' : '#be123c');
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - bH - th * 0.4);
-  ctx.lineTo(cx + bW, cy - bH);
-  ctx.lineTo(cx, cy + th * 0.25 - bH);
-  ctx.lineTo(cx - bW, cy - bH);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  // Town Hall Banner
-  if (isHall) {
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(cx - 3, cy - bH - th * 0.75, 6, th * 0.4);
-
-    // Flag
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.moveTo(cx + 3, cy - bH - th * 0.75);
-    ctx.lineTo(cx + 15, cy - bH - th * 0.65);
-    ctx.lineTo(cx + 3, cy - bH - th * 0.55);
-    ctx.closePath();
-    ctx.fill();
-
-    drawFloatingBadge(ctx, cx, cy - bH - th * 1.0, `🏛️ ${bldg.name}`);
+    drawBadge2D(px + w / 2, py - 6, `🔥 Village Hearth`);
   }
 }
 
-function drawFloatingBadge(ctx, bx, by, text) {
+function drawBadge2D(bx, by, text) {
   ctx.font = 'bold 11px sans-serif';
   const m = ctx.measureText(text);
-  const badgeW = m.width + 12;
-  const badgeH = 18;
-
-  ctx.fillStyle = 'rgba(12, 28, 38, 0.88)';
+  const bw = m.width + 10;
+  const bh = 18;
+  ctx.fillStyle = 'rgba(15, 28, 35, 0.9)';
   ctx.strokeStyle = '#facc15';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.roundRect(bx - badgeW / 2, by - badgeH / 2, badgeW, badgeH, 4);
+  ctx.roundRect(bx - bw / 2, by - bh / 2, bw, bh, 3);
   ctx.fill();
   ctx.stroke();
-
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(text, bx, by);
 }
 
-function drawTileOrtho(ctx, x, y, tile, px, py, size) {
-  if (tile.type === 'water') {
-    ctx.fillStyle = '#0284c7';
-  } else {
-    ctx.fillStyle = (x + y) % 2 === 0 ? '#499336' : '#41862f';
-  }
-  ctx.fillRect(px, py, size, size);
-  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-  ctx.strokeRect(px, py, size, size);
+// 2. Rabbit Pawns Rendering (Top-Down with Ears and Animation)
+function renderRabbits() {
+  const cam = GAME.cam.settlement;
+  const z = cam.zoom;
 
-  if (tile.road) {
-    ctx.fillStyle = tile.type === 'water' ? '#64748b' : '#475569';
-    const rw = size * 0.35;
-    const mid = size * 0.5;
-    ctx.fillRect(px + mid - rw/2, py + mid - rw/2, rw, rw);
-    if (tile.road & 1) ctx.fillRect(px + mid - rw/2, py, rw, mid);
-    if (tile.road & 4) ctx.fillRect(px + mid - rw/2, py + mid, rw, mid);
-    if (tile.road & 8) ctx.fillRect(px, py + mid - rw/2, mid, rw);
-    if (tile.road & 2) ctx.fillRect(px + mid, py + mid - rw/2, mid, rw);
-  }
+  GAME.rabbits.forEach(r => {
+    const sx = r.x * z + cam.x;
+    const sy = r.y * z + cam.y;
+    const isKit = r.lifeStage === 'kit';
+    const bodyR = (isKit ? 6 : 9) * z;
+    const hopOffset = Math.abs(Math.sin(r.hopPhase)) * (isKit ? 5 : 3) * z;
 
-  if (tile.rail) {
-    ctx.fillStyle = '#27272a';
-    const rw = size * 0.26;
-    const mid = size * 0.5;
-    ctx.fillRect(px + mid - rw/2, py + mid - rw/2, rw, rw);
-    if (tile.rail & 1) ctx.fillRect(px + mid - rw/2, py, rw, mid);
-    if (tile.rail & 4) ctx.fillRect(px + mid - rw/2, py + mid, rw, mid);
-    if (tile.rail & 8) ctx.fillRect(px, py + mid - rw/2, mid, rw);
-    if (tile.rail & 2) ctx.fillRect(px + mid, py + mid - rw/2, mid, rw);
-  }
-
-  if (tile.tree && !tile.road && !tile.rail && !tile.building) {
-    ctx.fillStyle = '#15803d';
-    ctx.beginPath();
-    ctx.arc(px + size * 0.5, py + size * 0.5, size * 0.3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  if (tile.building) {
-    if (bldgColor(tile.building)) {
-      ctx.fillStyle = bldgColor(tile.building);
-      ctx.fillRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
-      ctx.strokeStyle = '#000';
-      ctx.strokeRect(px + size * 0.15, py + size * 0.15, size * 0.7, size * 0.7);
-    }
-  }
-}
-
-function bldgColor(bldg) {
-  if (bldg.type === 'hall') return '#dc2626';
-  if (bldg.type === 'station') return '#2563eb';
-  if (bldg.type === 'industry') {
-    if (bldg.indType === 'coal') return '#18181b';
-    if (bldg.indType === 'farm') return '#eab308';
-    if (bldg.indType === 'forest') return '#854d0e';
-    return '#ef4444';
-  }
-  return bldg.type === 'comm' ? '#38bdf8' : '#fbbf24';
-}
-
-function renderHighlights() {
-  const { tileX, tileY } = GAME.mouse;
-  const isIso = GAME.viewMode === 'iso';
-  const tw = TILE_W * GAME.cam.zoom;
-  const th = TILE_H * GAME.cam.zoom;
-  const size = 48 * GAME.cam.zoom;
-
-  // Road or Rail Drag Line Preview
-  if (GAME.mouse.isDown && (GAME.activeTool === 'road' || GAME.activeTool === 'rail') && GAME.mouse.dragStartTileX !== -1) {
-    const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, tileX, tileY);
-    line.forEach(({ x, y }) => {
-      if (x >= 0 && x < GAME.mapW && y >= 0 && y < GAME.mapH) {
-        const p = tileToScreen(x, y);
-        ctx.fillStyle = GAME.activeTool === 'road' ? 'rgba(250, 204, 21, 0.45)' : 'rgba(168, 85, 247, 0.45)';
-        ctx.strokeStyle = GAME.activeTool === 'road' ? '#facc15' : '#c084fc';
-        ctx.lineWidth = 2;
-        if (isIso) {
-          drawIsoDiamond(ctx, p.x, p.y, tw, th, true);
-        } else {
-          ctx.fillRect(p.x, p.y, size, size);
-          ctx.strokeRect(p.x, p.y, size, size);
-        }
-      }
-    });
-    return;
-  }
-
-  // Single tile hover cursor
-  if (tileX >= 0 && tileX < GAME.mapW && tileY >= 0 && tileY < GAME.mapH) {
-    const p = tileToScreen(tileX, tileY);
-    if (GAME.activeTool === 'demolish') {
-      ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
-      ctx.strokeStyle = '#ef4444';
-    } else {
-      ctx.fillStyle = 'rgba(34, 197, 94, 0.35)';
-      ctx.strokeStyle = '#22c55e';
-    }
-    ctx.lineWidth = 2;
-
-    if (isIso) {
-      drawIsoDiamond(ctx, p.x, p.y, tw, th, true);
-    } else {
-      ctx.fillRect(p.x, p.y, size, size);
-      ctx.strokeRect(p.x, p.y, size, size);
-    }
-  }
-}
-
-function drawIsoDiamond(ctx, px, py, tw, th, stroke = false) {
-  ctx.beginPath();
-  ctx.moveTo(px, py);
-  ctx.lineTo(px + tw / 2, py + th / 2);
-  ctx.lineTo(px, py + th);
-  ctx.lineTo(px - tw / 2, py + th / 2);
-  ctx.closePath();
-  ctx.fill();
-  if (stroke) ctx.stroke();
-}
-
-function getLine(x0, y0, x1, y1) {
-  const points = [];
-  const dx = Math.abs(x1 - x0);
-  const dy = Math.abs(y1 - y0);
-  let curX = x0, curY = y0;
-
-  if (dx >= dy) {
-    const stepX = x1 >= x0 ? 1 : -1;
-    const stepY = y1 >= y0 ? 1 : -1;
-    while (curX !== x1) { points.push({ x: curX, y: curY }); curX += stepX; }
-    while (curY !== y1) { points.push({ x: curX, y: curY }); curY += stepY; }
-    points.push({ x: curX, y: curY });
-  } else {
-    const stepX = x1 >= x0 ? 1 : -1;
-    const stepY = y1 >= y0 ? 1 : -1;
-    while (curY !== y1) { points.push({ x: curX, y: curY }); curY += stepY; }
-    while (curX !== x1) { points.push({ x: curX, y: curY }); curX += stepX; }
-    points.push({ x: curX, y: curY });
-  }
-  return points;
-}
-
-/* =========================================================================
-   AUTOMATION: VEHICLE MOVEMENT, ROUTES & SUPPLY CHAIN SIMULATION
-   ========================================================================= */
-
-function tickSimulation(dt) {
-  if (GAME.simSpeed === 0) return;
-  const spd = GAME.simSpeed;
-
-  GAME.date.day += dt * 4 * spd;
-  if (GAME.date.day >= 30) {
-    GAME.date.day = 1;
-    GAME.date.month++;
-    monthTick();
-    if (GAME.date.month > 12) {
-      GAME.date.month = 1;
-      GAME.date.year++;
-    }
-    updateHUD();
-  }
-
-  // Vehicles movement along road & rail networks
-  for (let i = 0; i < GAME.vehicles.length; i++) {
-    const v = GAME.vehicles[i];
-    const speedMult = (v.speed || 1.0) * (v.mode === 'train' ? 2.2 : 1.5);
-    v.progress += dt * speedMult * spd;
-
-    if (v.progress >= 1.0) {
-      v.progress = 0;
-      v.pathIdx++;
-      if (v.pathIdx >= v.path.length - 1) {
-        // Arrived at destination!
-        handleVehicleDelivery(v);
-      }
-    }
-  }
-}
-
-function handleVehicleDelivery(v) {
-  const dest = v.t2;
-  let revenue = Math.round(v.path.length * (v.mode === 'train' ? 32 : 18));
-  if (v.cargo && v.cargo.payout) revenue += v.cargo.payout;
-
-  GAME.money += revenue;
-  GAME.stats.totalLifetimeRevenue += revenue;
-  GAME.stats.deliveriesCount++;
-  v.lifetimeEarnings = (v.lifetimeEarnings || 0) + revenue;
-
-  // Floating text on screen
-  const screenPos = tileToScreen(v.path[v.path.length - 1].x, v.path[v.path.length - 1].y);
-  spawnFloatingText(screenPos.x, screenPos.y, `+$${revenue}`, '#22c55e');
-
-  if (v.mode === 'train') {
-    GAME.audio.trainWhistle();
-    showToast(`🚂 Express Train delivered ${v.cargo.name} to ${dest.name}! +$${revenue}`);
-  } else {
-    GAME.audio.cash();
-    showToast(`🚚 ${v.cargo.name} delivered to ${dest.name}! +$${revenue}`);
-  }
-
-  // Reverse route for return journey
-  const tmp = v.t1;
-  v.t1 = v.t2;
-  v.t2 = tmp;
-  v.path.reverse();
-  v.pathIdx = 0;
-  updateHUD();
-}
-
-function monthTick() {
-  let routeIncome = 0;
-  GAME.routes.forEach(r => routeIncome += r.path.length * 12);
-  GAME.money += routeIncome;
-
-  // Connected towns grow in population
-  GAME.towns.forEach(t => {
-    const isConn = GAME.routes.some(r => (r.t1 && r.t1.id === t.id) || (r.t2 && r.t2.id === t.id));
-    if (isConn) {
-      t.population += Math.floor(Math.random() * 12) + 6;
-    }
-  });
-
-  // Industries generate local stockpiles
-  GAME.industries.forEach(ind => {
-    ind.stockpile = Math.min(100, (ind.stockpile || 0) + 5);
-  });
-
-  updateHUD();
-}
-
-function spawnFloatingText(x, y, text, color = '#22c55e') {
-  GAME.floatingTexts.push({
-    x: x,
-    y: y,
-    text: text,
-    color: color,
-    life: 1.5,
-    maxLife: 1.5
-  });
-}
-
-function renderFloatingTexts(dt) {
-  for (let i = GAME.floatingTexts.length - 1; i >= 0; i--) {
-    const ft = GAME.floatingTexts[i];
-    ft.life -= dt;
-    ft.y -= dt * 28;
-    if (ft.life <= 0) {
-      GAME.floatingTexts.splice(i, 1);
-      continue;
-    }
-    const alpha = Math.min(1.0, ft.life / ft.maxLife);
     ctx.save();
-    ctx.font = 'bold 13px monospace';
-    ctx.fillStyle = ft.color;
-    ctx.globalAlpha = alpha;
-    ctx.fillText(ft.text, ft.x - 14, ft.y);
-    ctx.restore();
-  }
-}
+    ctx.translate(sx, sy - hopOffset);
 
-/* =========================================================================
-   PATHFINDING (BFS FOR ROADS AND RAILS)
-   ========================================================================= */
+    // Rabbit Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(0, hopOffset + 4 * z, bodyR, bodyR * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-function findPath(p1, p2, networkType = 'road') {
-  const q = [{ x: p1.x, y: p1.y, path: [{ x: p1.x, y: p1.y }] }];
-  const visited = new Set();
-  visited.add(`${p1.x},${p1.y}`);
+    // Rabbit Body
+    ctx.fillStyle = r.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, bodyR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#78350f';
+    ctx.lineWidth = 1;
+    ctx.stroke();
 
-  while (q.length > 0) {
-    const cur = q.shift();
-    if (Math.abs(cur.x - p2.x) + Math.abs(cur.y - p2.y) <= 1) {
-      cur.path.push({ x: p2.x, y: p2.y });
-      return cur.path;
+    // Long Rabbit Ears!
+    ctx.fillStyle = '#faedcd';
+    ctx.strokeStyle = '#d4a373';
+    // Left ear
+    ctx.beginPath();
+    ctx.ellipse(-bodyR * 0.45, -bodyR * 0.9, bodyR * 0.28, bodyR * 0.75, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    // Right ear
+    ctx.beginPath();
+    ctx.ellipse(bodyR * 0.45, -bodyR * 0.9, bodyR * 0.28, bodyR * 0.75, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Whiskers & Pink nose
+    ctx.fillStyle = '#f43f5e';
+    ctx.beginPath();
+    ctx.arc(0, 1 * z, 1.8 * z, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Carried Item Icon
+    if (r.carried) {
+      ctx.font = `${Math.floor(10 * z)}px sans-serif`;
+      ctx.fillText(r.carried.type === 'carrots' ? '🥕' : '🌾', bodyR * 0.8, -bodyR * 0.5);
     }
 
-    const dirs = [
-      { x: cur.x, y: cur.y - 1 },
-      { x: cur.x + 1, y: cur.y },
-      { x: cur.x, y: cur.y + 1 },
-      { x: cur.x - 1, y: cur.y }
-    ];
+    // Name label
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText(r.firstName, 0, bodyR + 10 * z);
 
-    for (const d of dirs) {
-      if (d.x >= 0 && d.x < GAME.mapW && d.y >= 0 && d.y < GAME.mapH) {
-        const key = `${d.x},${d.y}`;
-        if (!visited.has(key)) {
-          const tile = GAME.tiles[d.y][d.x];
-          const hasTrack = networkType === 'road' ? (tile.road > 0) : (tile.rail > 0);
-          const isDest = (d.x === p2.x && d.y === p2.y);
+    ctx.restore();
+  });
+}
 
-          if (hasTrack || isDest) {
-            visited.add(key);
-            q.push({ x: d.x, y: d.y, path: [...cur.path, { x: d.x, y: d.y }] });
-          }
+// 3. World Regional Map Rendering
+function renderWorldView() {
+  const cam = GAME.cam.world;
+  const tileSize = 44 * cam.zoom;
+
+  // Background grid
+  for (let y = 0; y < GAME.world.h; y++) {
+    for (let x = 0; x < GAME.world.w; x++) {
+      const tile = GAME.world.tiles[y][x];
+      const px = x * tileSize + cam.x;
+      const py = y * tileSize + cam.y;
+
+      if (tile.biome === 'mountains') ctx.fillStyle = '#64748b';
+      else if (tile.biome === 'forest') ctx.fillStyle = '#1e3a2b';
+      else if (tile.biome === 'river') ctx.fillStyle = '#0284c7';
+      else ctx.fillStyle = '#365e3b';
+
+      ctx.fillRect(px, py, tileSize, tileSize);
+      ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+      ctx.strokeRect(px, py, tileSize, tileSize);
+    }
+  }
+
+  // Player Colony Square (Warren Brambleton)
+  const px = GAME.world.playerX * tileSize + cam.x;
+  const py = GAME.world.playerY * tileSize + cam.y;
+  ctx.fillStyle = 'rgba(34, 197, 94, 0.4)';
+  ctx.fillRect(px, py, tileSize, tileSize);
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(px, py, tileSize, tileSize);
+  drawBadge2D(px + tileSize / 2, py + tileSize / 2, `🐇 Brambleton (Your Warren)`);
+
+  // Foreign Animal Kingdoms
+  GAME.world.kingdoms.forEach(k => {
+    const kx = k.x * tileSize + cam.x;
+    const ky = k.y * tileSize + cam.y;
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(kx + 4, ky + 4, tileSize - 8, tileSize - 8);
+    ctx.strokeStyle = '#fbbf24';
+    ctx.strokeRect(kx + 4, ky + 4, tileSize - 8, tileSize - 8);
+    drawBadge2D(kx + tileSize / 2, ky + tileSize / 2, `${k.icon} ${k.name} (${k.race})`);
+  });
+
+  // Active Caravans on World Map
+  GAME.world.caravans.forEach(c => {
+    const startX = GAME.world.playerX * tileSize + cam.x + tileSize / 2;
+    const startY = GAME.world.playerY * tileSize + cam.y + tileSize / 2;
+    const targetX = c.target.x * tileSize + cam.x + tileSize / 2;
+    const targetY = c.target.y * tileSize + cam.y + tileSize / 2;
+
+    const curX = startX + (targetX - startX) * c.progress;
+    const curY = startY + (targetY - startY) * c.progress;
+
+    // Draw route dashed line
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(targetX, targetY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Caravan icon
+    ctx.font = '18px sans-serif';
+    ctx.fillText('🎒🐇', curX - 10, curY);
+  });
+}
+
+// 4. Minimap Radar
+function renderMinimap() {
+  radarCtx.fillStyle = '#060e12';
+  radarCtx.fillRect(0, 0, radarCanvas.width, radarCanvas.height);
+
+  if (GAME.view === 'settlement') {
+    const sx = radarCanvas.width / GAME.settlement.w;
+    const sy = radarCanvas.height / GAME.settlement.h;
+
+    for (let y = 0; y < GAME.settlement.h; y++) {
+      for (let x = 0; x < GAME.settlement.w; x++) {
+        const t = GAME.settlement.tiles[y][x];
+        radarCtx.fillStyle = t.type === 'water' ? '#0284c7' : (t.tree ? '#14532d' : '#3f782f');
+        radarCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
+        if (t.path) {
+          radarCtx.fillStyle = '#cbd5e1';
+          radarCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
         }
       }
     }
-  }
-  return null;
-}
 
-function checkRoutes() {
-  const newRoutes = [];
+    GAME.settlement.buildings.forEach(b => {
+      radarCtx.fillStyle = b.type === 'burrow' ? '#f59e0b' : '#38bdf8';
+      radarCtx.fillRect(b.tx * sx - 1, b.ty * sy - 1, sx * 2, sy * 2);
+    });
 
-  // 1. Town-to-Town Road Routes
-  for (let i = 0; i < GAME.towns.length; i++) {
-    for (let j = i + 1; j < GAME.towns.length; j++) {
-      const t1 = GAME.towns[i];
-      const t2 = GAME.towns[j];
-      const path = findPath(t1, t2, 'road');
-      if (path && path.length > 2) {
-        newRoutes.push({
-          id: `road_${t1.id}_${t2.id}`,
-          mode: 'road',
-          t1, t2,
-          cargo: { name: 'Passengers & Mail', type: 'passengers', payout: 60 },
-          path: [...path]
-        });
+    GAME.rabbits.forEach(r => {
+      const rx = (r.x / 32) * sx;
+      const ry = (r.y / 32) * sy;
+      radarCtx.fillStyle = '#ffffff';
+      radarCtx.fillRect(rx - 1, ry - 1, 3, 3);
+    });
+  } else {
+    // World radar
+    const sx = radarCanvas.width / GAME.world.w;
+    const sy = radarCanvas.height / GAME.world.h;
+    for (let y = 0; y < GAME.world.h; y++) {
+      for (let x = 0; x < GAME.world.w; x++) {
+        const t = GAME.world.tiles[y][x];
+        radarCtx.fillStyle = t.biome === 'mountains' ? '#64748b' : (t.biome === 'forest' ? '#14532d' : '#365e3b');
+        radarCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
       }
     }
+    // Player Warren
+    radarCtx.fillStyle = '#22c55e';
+    radarCtx.fillRect(GAME.world.playerX * sx - 2, GAME.world.playerY * sy - 2, sx + 4, sy + 4);
   }
-
-  // 2. Industry Supply Chain Routes (Road & Rail)
-  for (const ind of GAME.industries) {
-    // Check connections to towns
-    for (const town of GAME.towns) {
-      // Road route
-      const roadPath = findPath(ind, town, 'road');
-      if (roadPath && roadPath.length > 2) {
-        newRoutes.push({
-          id: `ind_road_${ind.id}_${town.id}`,
-          mode: 'road',
-          t1: ind, t2: town,
-          cargo: { name: ind.produces, type: ind.indType, payout: ind.payout },
-          path: [...roadPath]
-        });
-      }
-      // Rail route (if both have nearby station or tracks)
-      const railPath = findPath(ind, town, 'rail');
-      if (railPath && railPath.length > 2) {
-        newRoutes.push({
-          id: `ind_rail_${ind.id}_${town.id}`,
-          mode: 'train',
-          t1: ind, t2: town,
-          cargo: { name: `Freight: ${ind.produces}`, type: ind.indType, payout: ind.payout * 1.6 },
-          path: [...railPath]
-        });
-      }
-    }
-  }
-
-  // 3. Station-to-Station Passenger / Express Rail Routes
-  for (let i = 0; i < GAME.stations.length; i++) {
-    for (let j = i + 1; j < GAME.stations.length; j++) {
-      const s1 = GAME.stations[i];
-      const s2 = GAME.stations[j];
-      const path = findPath(s1, s2, 'rail');
-      if (path && path.length > 2) {
-        newRoutes.push({
-          id: `train_${s1.id}_${s2.id}`,
-          mode: 'train',
-          t1: s1, t2: s2,
-          cargo: { name: 'Express Passengers', type: 'express', payout: 180 },
-          path: [...path]
-        });
-      }
-    }
-  }
-
-  if (newRoutes.length > GAME.routes.length) {
-    GAME.audio.fanfare();
-    showToast(`🎉 New Trade & Cargo Route Established! Monthly subsidies active.`);
-  }
-
-  GAME.routes = newRoutes;
-
-  // Keep existing vehicles or spawn new ones for routes without vehicles
-  const updatedVehicles = [];
-  GAME.routes.forEach(r => {
-    const existing = GAME.vehicles.find(v => v.routeId === r.id);
-    if (existing) {
-      existing.path = [...r.path];
-      updatedVehicles.push(existing);
-    } else {
-      updatedVehicles.push({
-        id: Math.random().toString(36).substring(2, 8),
-        routeId: r.id,
-        mode: r.mode,
-        t1: r.t1,
-        t2: r.t2,
-        cargo: r.cargo,
-        path: [...r.path],
-        pathIdx: 0,
-        progress: 0,
-        speed: 1.0,
-        lifetimeEarnings: 0
-      });
-    }
-  });
-  GAME.vehicles = updatedVehicles;
-
-  updateHUD();
-  updateFleetModal();
 }
 
 /* =========================================================================
-   VEHICLE SPRITE RENDERING (VANS, CARGO TRUCKS & TRAINS)
-   ========================================================================= */
-
-function renderVehicles(now) {
-  const isIso = GAME.viewMode === 'iso';
-  const th = TILE_H * GAME.cam.zoom;
-  const size = 48 * GAME.cam.zoom;
-
-  GAME.vehicles.forEach(v => {
-    if (!v.path || v.pathIdx >= v.path.length - 1) return;
-    const p1 = v.path[v.pathIdx];
-    const p2 = v.path[v.pathIdx + 1];
-
-    const ix = p1.x + (p2.x - p1.x) * v.progress;
-    const iy = p1.y + (p2.y - p1.y) * v.progress;
-
-    if (isIso) {
-      const pos = tileToScreen(ix, iy);
-      const sx = pos.x;
-      const sy = pos.y + th * 0.5;
-
-      if (v.mode === 'train') {
-        // Multi-Car Locomotive & Freight Train
-        drawTrainSpriteIso(ctx, sx, sy, p1, p2, v);
-      } else {
-        // Delivery Van or Cargo Truck
-        drawTruckSpriteIso(ctx, sx, sy, p1, p2, v);
-      }
-    } else {
-      // Orthographic 2D top-down vehicle
-      const pos = tileToScreen(ix, iy);
-      ctx.fillStyle = v.mode === 'train' ? '#10b981' : '#f59e0b';
-      ctx.beginPath();
-      ctx.arc(pos.x + size * 0.5, pos.y + size * 0.5, v.mode === 'train' ? 8 * GAME.cam.zoom : 6 * GAME.cam.zoom, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#000';
-      ctx.stroke();
-    }
-  });
-}
-
-function drawTruckSpriteIso(ctx, sx, sy, p1, p2, v) {
-  const z = GAME.cam.zoom;
-  const isCargo = v.cargo && v.cargo.type !== 'passengers';
-
-  ctx.save();
-  ctx.translate(sx, sy);
-
-  // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.beginPath();
-  ctx.ellipse(0, 3 * z, 10 * z, 5 * z, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Truck Body
-  ctx.fillStyle = isCargo ? '#d97706' : '#f59e0b';
-  ctx.strokeStyle = '#1e293b';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.roundRect(-8 * z, -8 * z, 16 * z, 11 * z, 2 * z);
-  ctx.fill();
-  ctx.stroke();
-
-  // Windshield & Cargo cab
-  ctx.fillStyle = '#38bdf8';
-  ctx.fillRect(-5 * z, -7 * z, 10 * z, 3 * z);
-
-  // Cargo crate / load
-  if (isCargo) {
-    ctx.fillStyle = v.cargo.type === 'coal' ? '#18181b' : (v.cargo.type === 'forest' ? '#78350f' : '#22c55e');
-    ctx.fillRect(-6 * z, -3 * z, 12 * z, 5 * z);
-  }
-
-  ctx.restore();
-}
-
-function drawTrainSpriteIso(ctx, sx, sy, p1, p2, v) {
-  const z = GAME.cam.zoom;
-  ctx.save();
-  ctx.translate(sx, sy);
-
-  // Train Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.beginPath();
-  ctx.ellipse(0, 4 * z, 18 * z, 6 * z, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Locomotive Engine (Black / Forest Green)
-  ctx.fillStyle = '#0f172a';
-  ctx.strokeStyle = '#f59e0b';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.roundRect(-14 * z, -9 * z, 16 * z, 11 * z, 3 * z);
-  ctx.fill();
-  ctx.stroke();
-
-  // Red Cowcatcher grill
-  ctx.fillStyle = '#ef4444';
-  ctx.fillRect(2 * z, -7 * z, 4 * z, 8 * z);
-
-  // Golden Smokestack
-  ctx.fillStyle = '#fbbf24';
-  ctx.fillRect(-2 * z, -13 * z, 3 * z, 5 * z);
-
-  // Animated Steam Puffs
-  ctx.fillStyle = 'rgba(241, 245, 249, 0.7)';
-  const puff = Math.sin(performance.now() * 0.01) * 2;
-  ctx.beginPath();
-  ctx.arc(-5 * z + puff, -16 * z, 3.5 * z, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Tender / Passenger Car behind locomotive
-  ctx.fillStyle = '#1e3a8a';
-  ctx.beginPath();
-  ctx.roundRect(-26 * z, -8 * z, 10 * z, 9 * z, 2 * z);
-  ctx.fill();
-  ctx.strokeStyle = '#93c5fd';
-  ctx.stroke();
-
-  ctx.restore();
-}
-
-/* =========================================================================
-   BUILD & DEMOLISH ACTIONS
-   ========================================================================= */
-
-function buildRoad(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-
-  // Water Tile -> Road Bridge
-  if (tile.type === 'water') {
-    if (tile.road) return;
-    if (tile.building) {
-      showToast("Tile is occupied!");
-      return;
-    }
-    if (GAME.money < GAME.costs.roadBridge) {
-      showToast("Building a road bridge requires $80!");
-      return;
-    }
-    GAME.money -= GAME.costs.roadBridge;
-    tile.road = 15;
-    tile.bridge = 'road';
-    updateRoadNeighbors(x, y);
-    GAME.audio.buildRoad();
-    showToast("🌉 Road Bridge constructed across water!");
-    checkRoutes();
-    updateHUD();
-    renderMinimap();
-    return;
-  }
-
-  if (tile.building) {
-    showToast("Tile is occupied by a building!");
-    return;
-  }
-  if (tile.road) return;
-  const isCrossing = tile.rail > 0;
-
-  if (GAME.money < GAME.costs.road) {
-    showToast("Insufficient treasury funds!");
-    return;
-  }
-
-  GAME.money -= GAME.costs.road;
-  tile.road = 15;
-  tile.tree = false;
-  updateRoadNeighbors(x, y);
-  GAME.audio.buildRoad();
-  if (isCrossing) showToast("🚦 Railroad level crossing created!");
-  checkRoutes();
-  updateHUD();
-  renderMinimap();
-}
-
-function buildRail(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-
-  // Water Tile -> Rail Trestle Bridge
-  if (tile.type === 'water') {
-    if (tile.rail) return;
-    if (tile.building) {
-      showToast("Tile is occupied!");
-      return;
-    }
-    if (GAME.money < GAME.costs.railBridge) {
-      showToast("Building a railway trestle bridge requires $120!");
-      return;
-    }
-    GAME.money -= GAME.costs.railBridge;
-    tile.rail = 15;
-    tile.bridge = 'rail';
-    updateRailNeighbors(x, y);
-    GAME.audio.buildRail();
-    showToast("🌉 Railway Trestle Bridge constructed!");
-    checkRoutes();
-    updateHUD();
-    renderMinimap();
-    return;
-  }
-
-  if (tile.building) {
-    showToast("Tile is occupied by a building!");
-    return;
-  }
-  if (tile.rail) return;
-  const isCrossing = tile.road > 0;
-
-  if (GAME.money < GAME.costs.rail) {
-    showToast("Insufficient treasury funds for railroad tracks ($35)!");
-    return;
-  }
-
-  GAME.money -= GAME.costs.rail;
-  tile.rail = 15;
-  tile.tree = false;
-  updateRailNeighbors(x, y);
-  GAME.audio.buildRail();
-  if (isCrossing) showToast("🚦 Railroad level crossing created!");
-  checkRoutes();
-  updateHUD();
-  renderMinimap();
-}
-
-function buildStation(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-
-  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
-    showToast("Station requires clear, open ground!");
-    return;
-  }
-
-  if (GAME.money < GAME.costs.station) {
-    showToast("Constructing a Train Station requires $600!");
-    return;
-  }
-
-  // Find nearest town
-  let nearestTown = null;
-  let minD = Infinity;
-  GAME.towns.forEach(t => {
-    const d = Math.hypot(t.x - x, t.y - y);
-    if (d < minD) { minD = d; nearestTown = t; }
-  });
-
-  const stationId = GAME.stations.length + 1;
-  const stationName = nearestTown ? `${nearestTown.name} Central Station` : `Station ${stationId}`;
-
-  GAME.money -= GAME.costs.station;
-  tile.tree = false;
-  tile.building = {
-    type: 'station',
-    stationId: stationId,
-    name: stationName
-  };
-
-  const stationObj = {
-    id: stationId,
-    name: stationName,
-    x: x,
-    y: y
-  };
-  GAME.stations.push(stationObj);
-
-  GAME.audio.trainWhistle();
-  showToast(`🚉 ${stationName} opened! Lay rails to link stations.`);
-  updateRailNeighbors(x, y);
-  checkRoutes();
-  updateHUD();
-  renderMinimap();
-}
-
-function buildIndustry(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-
-  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
-    showToast("Industry requires clear ground!");
-    return;
-  }
-
-  if (GAME.money < GAME.costs.industry) {
-    showToast("Founding an Industrial Center costs $1,500!");
-    return;
-  }
-
-  const indDef = INDUSTRY_TYPES[GAME.industries.length % INDUSTRY_TYPES.length];
-  const indId = GAME.industries.length + 1;
-  const indName = `${TOWN_NAMES[indId % TOWN_NAMES.length]} ${indDef.name}`;
-
-  GAME.money -= GAME.costs.industry;
-  tile.tree = false;
-  tile.building = {
-    type: 'industry',
-    indType: indDef.type,
-    indId: indId,
-    name: indName
-  };
-
-  const indObj = {
-    id: indId,
-    name: indName,
-    indType: indDef.type,
-    produces: indDef.produces,
-    consumes: indDef.consumes,
-    payout: indDef.payout,
-    x: x,
-    y: y,
-    stockpile: 15
-  };
-  GAME.industries.push(indObj);
-
-  GAME.audio.fanfare();
-  showToast(`🏭 ${indName} established! Connect to towns or factories for profit.`);
-  updateRoadNeighbors(x, y);
-  updateRailNeighbors(x, y);
-  checkRoutes();
-  updateHUD();
-  renderMinimap();
-}
-
-function demolish(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-  let touched = false;
-
-  if (tile.building) {
-    if (tile.building.type === 'hall') {
-      showToast("Cannot demolish a Town Hall!");
-      return;
-    }
-    if (tile.building.type === 'station') {
-      GAME.stations = GAME.stations.filter(s => s.x !== x || s.y !== y);
-    }
-    if (tile.building.type === 'industry') {
-      GAME.industries = GAME.industries.filter(ind => ind.x !== x || ind.y !== y);
-    }
-    tile.building = null;
-    touched = true;
-  }
-
-  if (tile.road) {
-    tile.road = 0;
-    tile.bridge = null;
-    updateRoadNeighbors(x, y);
-    touched = true;
-  }
-
-  if (tile.rail) {
-    tile.rail = 0;
-    tile.bridge = null;
-    updateRailNeighbors(x, y);
-    touched = true;
-  }
-
-  if (tile.tree) {
-    tile.tree = false;
-    touched = true;
-  }
-
-  if (touched) {
-    GAME.money -= GAME.costs.demolish;
-    GAME.audio.demolish();
-    checkRoutes();
-    updateHUD();
-    renderMinimap();
-  }
-}
-
-function buildTown(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-
-  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
-    showToast("Town center requires clear land!");
-    return;
-  }
-
-  if (GAME.money < GAME.costs.town) {
-    showToast("Founding a town costs $2,000!");
-    return;
-  }
-
-  GAME.money -= GAME.costs.town;
-  const townId = GAME.towns.length + 1;
-  const town = {
-    id: townId,
-    name: TOWN_NAMES[townId % TOWN_NAMES.length] || `New Town ${townId}`,
-    x: x,
-    y: y,
-    population: 300,
-    buildings: 1
-  };
-
-  tile.tree = false;
-  tile.building = { type: 'hall', townId: town.id, name: town.name };
-  GAME.towns.push(town);
-
-  GAME.audio.fanfare();
-  showToast(`🏛️ New Town Founded: ${town.name}!`);
-  checkRoutes();
-  updateHUD();
-  renderMinimap();
-}
-
-function buildHouse(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-
-  if (tile.type === 'water' || tile.building || tile.road || tile.rail) {
-    showToast("Select open meadow near a road!");
-    return;
-  }
-
-  if (GAME.money < GAME.costs.building) {
-    showToast("Building a house costs $150!");
-    return;
-  }
-
-  let nearest = null;
-  let minD = Infinity;
-  GAME.towns.forEach(t => {
-    const d = Math.hypot(t.x - x, t.y - y);
-    if (d < minD) { minD = d; nearest = t; }
-  });
-
-  if (!nearest || minD > 14) {
-    showToast("Must be within 14 tiles of a town!");
-    return;
-  }
-
-  GAME.money -= GAME.costs.building;
-  tile.tree = false;
-  tile.building = {
-    type: Math.random() > 0.4 ? 'res1' : 'comm',
-    townId: nearest.id,
-    name: nearest.name
-  };
-  nearest.population += Math.floor(Math.random() * 30) + 15;
-  nearest.buildings++;
-
-  GAME.audio.click();
-  updateHUD();
-  renderMinimap();
-}
-
-function plantTrees(x, y) {
-  if (x < 0 || x >= GAME.mapW || y < 0 || y >= GAME.mapH) return;
-  const tile = GAME.tiles[y][x];
-  if (tile.type !== 'grass' || tile.road || tile.rail || tile.building || tile.tree) return;
-
-  if (GAME.money < GAME.costs.trees) return;
-  GAME.money -= GAME.costs.trees;
-  tile.tree = true;
-  GAME.audio.click();
-  updateHUD();
-  renderMinimap();
-}
-
-/* =========================================================================
-   USER INPUT CONTROLS & EVENT LISTENERS
+   USER CONTROLS & CAMERA
    ========================================================================= */
 
 const vp = document.getElementById('viewport-area');
+
+function centerSettlementCamera() {
+  const tileSize = 32 * GAME.cam.settlement.zoom;
+  GAME.cam.settlement.x = canvas.width / 2 - 16 * tileSize;
+  GAME.cam.settlement.y = canvas.height / 2 - 16 * tileSize;
+}
+
+function centerWorldCamera() {
+  const tileSize = 44 * GAME.cam.world.zoom;
+  GAME.cam.world.x = canvas.width / 2 - GAME.world.playerX * tileSize;
+  GAME.cam.world.y = canvas.height / 2 - GAME.world.playerY * tileSize;
+}
 
 vp.addEventListener('mousedown', (e) => {
   GAME.audio.ensure();
@@ -2887,28 +1576,19 @@ vp.addEventListener('mousedown', (e) => {
   GAME.mouse.dragStartX = mx;
   GAME.mouse.dragStartY = my;
 
-  const t = screenToTile(mx, my);
-  GAME.mouse.tileX = t.x;
-  GAME.mouse.tileY = t.y;
-  GAME.mouse.dragStartTileX = t.x;
-  GAME.mouse.dragStartTileY = t.y;
-
-  if (e.button === 2 || e.button === 1 || GAME.activeTool === 'inspect') {
+  if (e.button === 1 || e.button === 2 || GAME.activeTool === 'inspect') {
     GAME.mouse.isPanning = true;
     vp.classList.add('panning');
-    if (e.button === 0 && GAME.activeTool === 'inspect') {
-      inspectTileObject(t.x, t.y);
-    }
+    if (e.button === 0) handleInspectClick(mx, my);
     return;
   }
 
-  if (e.button === 0) {
-    if (GAME.activeTool === 'town') buildTown(t.x, t.y);
-    else if (GAME.activeTool === 'station') buildStation(t.x, t.y);
-    else if (GAME.activeTool === 'industry') buildIndustry(t.x, t.y);
-    else if (GAME.activeTool === 'building') buildHouse(t.x, t.y);
-    else if (GAME.activeTool === 'trees') plantTrees(t.x, t.y);
-    else if (GAME.activeTool === 'demolish') demolish(t.x, t.y);
+  if (e.button === 0 && GAME.view === 'settlement') {
+    const cam = GAME.cam.settlement;
+    const tileSize = 32 * cam.zoom;
+    const tx = Math.floor((mx - cam.x) / tileSize);
+    const ty = Math.floor((my - cam.y) / tileSize);
+    handleSettlementBuild(tx, ty);
   }
 });
 
@@ -2916,106 +1596,376 @@ vp.addEventListener('mousemove', (e) => {
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
-  GAME.mouse.x = mx;
-  GAME.mouse.y = my;
 
   if (GAME.mouse.isDown && GAME.mouse.isPanning) {
-    GAME.cam.x += mx - GAME.mouse.dragStartX;
-    GAME.cam.y += my - GAME.mouse.dragStartY;
+    const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
+    cam.x += mx - GAME.mouse.dragStartX;
+    cam.y += my - GAME.mouse.dragStartY;
     GAME.mouse.dragStartX = mx;
     GAME.mouse.dragStartY = my;
-    renderMinimap();
-    return;
   }
-
-  const t = screenToTile(mx, my);
-  GAME.mouse.tileX = t.x;
-  GAME.mouse.tileY = t.y;
-
-  if (GAME.mouse.isDown && GAME.activeTool === 'demolish' && e.buttons === 1) {
-    demolish(t.x, t.y);
-  }
-
-  updateInspector(t.x, t.y);
 });
 
-vp.addEventListener('mouseup', (e) => {
-  if (GAME.mouse.isDown && e.button === 0) {
-    if (GAME.activeTool === 'road' && GAME.mouse.dragStartTileX !== -1) {
-      const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, GAME.mouse.tileX, GAME.mouse.tileY);
-      line.forEach(({ x, y }) => buildRoad(x, y));
-    } else if (GAME.activeTool === 'rail' && GAME.mouse.dragStartTileX !== -1) {
-      const line = getLine(GAME.mouse.dragStartTileX, GAME.mouse.dragStartTileY, GAME.mouse.tileX, GAME.mouse.tileY);
-      line.forEach(({ x, y }) => buildRail(x, y));
-    }
-  }
-
+vp.addEventListener('mouseup', () => {
   GAME.mouse.isDown = false;
   GAME.mouse.isPanning = false;
-  GAME.mouse.dragStartTileX = -1;
-  GAME.mouse.dragStartTileY = -1;
   vp.classList.remove('panning');
 });
-
-vp.addEventListener('contextmenu', (e) => e.preventDefault());
 
 vp.addEventListener('wheel', (e) => {
   e.preventDefault();
   const factor = e.deltaY < 0 ? 1.15 : 0.85;
-  const newZoom = Math.min(2.5, Math.max(0.35, GAME.cam.zoom * factor));
-
-  const mx = GAME.mouse.x;
-  const my = GAME.mouse.y;
-  GAME.cam.x = mx - (mx - GAME.cam.x) * (newZoom / GAME.cam.zoom);
-  GAME.cam.y = my - (my - GAME.cam.y) * (newZoom / GAME.cam.zoom);
-  GAME.cam.zoom = newZoom;
-
-  renderMinimap();
+  const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
+  const minZ = GAME.view === 'settlement' ? 0.6 : 0.5;
+  const maxZ = GAME.view === 'settlement' ? 2.5 : 2.0;
+  cam.zoom = Math.min(maxZ, Math.max(minZ, cam.zoom * factor));
 }, { passive: false });
 
-window.addEventListener('keydown', (e) => {
-  const speed = 35;
-  if (e.key === 'w' || e.key === 'ArrowUp') GAME.cam.y += speed;
-  if (e.key === 's' || e.key === 'ArrowDown') GAME.cam.y -= speed;
-  if (e.key === 'a' || e.key === 'ArrowLeft') GAME.cam.x += speed;
-  if (e.key === 'd' || e.key === 'ArrowRight') GAME.cam.x -= speed;
-  if (e.key === '1') selectTool('inspect');
-  if (e.key === '2') selectTool('road');
-  if (e.key === '3') selectTool('rail');
-  if (e.key === '4') selectTool('station');
-  if (e.key === '5') selectTool('town');
-  renderMinimap();
+function handleInspectClick(mx, my) {
+  if (GAME.view === 'settlement') {
+    const cam = GAME.cam.settlement;
+    const z = cam.zoom;
+
+    // Check if clicked on a rabbit
+    let foundRabbit = null;
+    for (const r of GAME.rabbits) {
+      const rx = r.x * z + cam.x;
+      const ry = r.y * z + cam.y;
+      if (Math.hypot(rx - mx, ry - my) < 18 * z) {
+        foundRabbit = r;
+        break;
+      }
+    }
+
+    if (foundRabbit) {
+      openRabbitInspector(foundRabbit);
+      return;
+    }
+
+    // Check if clicked on a building
+    const tileSize = 32 * z;
+    const tx = Math.floor((mx - cam.x) / tileSize);
+    const ty = Math.floor((my - cam.y) / tileSize);
+    if (tx >= 0 && tx < GAME.settlement.w && ty >= 0 && ty < GAME.settlement.h) {
+      const bldgId = GAME.settlement.tiles[ty][tx].buildingId;
+      if (bldgId) {
+        const b = GAME.settlement.buildings.find(item => item.id === bldgId);
+        if (b) showToast(`🏛️ Selected ${b.name}`);
+      }
+    }
+  } else {
+    // World view click: check if clicked player Warren or kingdom
+    const cam = GAME.cam.world;
+    const tileSize = 44 * cam.zoom;
+    const tx = Math.floor((mx - cam.x) / tileSize);
+    const ty = Math.floor((my - cam.y) / tileSize);
+
+    if (tx === GAME.world.playerX && ty === GAME.world.playerY) {
+      // Zoom into settlement!
+      switchToView('settlement');
+      showToast("🏡 Zooming into Brambleton Settlement!");
+      return;
+    }
+
+    const kingdom = GAME.world.kingdoms.find(k => k.x === tx && k.y === ty);
+    if (kingdom) {
+      openCaravanModal(kingdom);
+    }
+  }
+}
+
+function handleSettlementBuild(tx, ty) {
+  if (tx < 0 || tx >= GAME.settlement.w || ty < 0 || ty >= GAME.settlement.h) return;
+  const tool = GAME.activeTool;
+  const tile = GAME.settlement.tiles[ty][tx];
+
+  if (tool === 'path') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.stone < 1) { showToast("Requires 1 Stone!"); return; }
+    GAME.res.stone -= 1;
+    tile.path = true;
+    GAME.audio.build();
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'burrow') {
+    if (tile.type === 'water' || tile.buildingId) { showToast("Select open ground!"); return; }
+    if (GAME.res.timber < 25 || GAME.res.stone < 10) { showToast("Requires 25 Timber & 10 Stone!"); return; }
+    GAME.res.timber -= 25; GAME.res.stone -= 10;
+    addBuilding('burrow', tx, ty);
+    GAME.audio.build();
+    showToast("🏡 Cozy Rabbit Burrow constructed!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'carrot_patch') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.timber < 5) { showToast("Requires 5 Timber!"); return; }
+    GAME.res.timber -= 5;
+    addBuilding('carrot_patch', tx, ty);
+    GAME.audio.build();
+    showToast("🥕 Tilled Carrot Patch!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'wheat_field') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.timber < 8) { showToast("Requires 8 Timber!"); return; }
+    GAME.res.timber -= 8;
+    addBuilding('wheat_field', tx, ty);
+    GAME.audio.build();
+    showToast("🌾 Planted Wheat Field!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'bakery') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.timber < 30 || GAME.res.stone < 20) { showToast("Requires 30 Timber & 20 Stone!"); return; }
+    GAME.res.timber -= 30; GAME.res.stone -= 20;
+    addBuilding('bakery', tx, ty);
+    GAME.audio.build();
+    showToast("🥖 Colony Windmill & Bakery opened!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'woodcutter') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.timber < 20) { showToast("Requires 20 Timber!"); return; }
+    GAME.res.timber -= 20;
+    addBuilding('woodcutter', tx, ty);
+    GAME.audio.build();
+    showToast("🪓 Woodcutter Lodge ready!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'stonemason') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.timber < 20 || GAME.res.stone < 10) { showToast("Requires 20 Timber & 10 Stone!"); return; }
+    GAME.res.timber -= 20; GAME.res.stone -= 10;
+    addBuilding('stonemason', tx, ty);
+    GAME.audio.build();
+    showToast("⛏️ Masonry Shed constructed!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'workshop') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.timber < 35 || GAME.res.stone < 25) { showToast("Requires 35 Timber & 25 Stone!"); return; }
+    GAME.res.timber -= 35; GAME.res.stone -= 25;
+    addBuilding('workshop', tx, ty);
+    GAME.audio.build();
+    showToast("🔨 Artisan Workshop built!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'hearth') {
+    if (tile.type === 'water' || tile.buildingId) return;
+    if (GAME.res.stone < 15) { showToast("Requires 15 Stone!"); return; }
+    GAME.res.stone -= 15;
+    addBuilding('hearth', tx, ty);
+    GAME.audio.build();
+    showToast("🔥 Village Green Hearth built!");
+    updateHUD();
+    return;
+  }
+
+  if (tool === 'demolish') {
+    if (tile.buildingId) {
+      const bid = tile.buildingId;
+      GAME.settlement.buildings = GAME.settlement.buildings.filter(b => b.id !== bid);
+      for (let r = 0; r < GAME.settlement.h; r++) {
+        for (let c = 0; c < GAME.settlement.w; c++) {
+          if (GAME.settlement.tiles[r][c].buildingId === bid) GAME.settlement.tiles[r][c].buildingId = null;
+        }
+      }
+      showToast("Demolished building!");
+    }
+    if (tile.path) tile.path = false;
+    if (tile.tree) tile.tree = false;
+    if (tile.rock) tile.rock = false;
+  }
+}
+
+/* =========================================================================
+   HUD & UI MODALS
+   ========================================================================= */
+
+function updateHUD() {
+  document.getElementById('res-carrots').textContent = Math.floor(GAME.res.carrots);
+  document.getElementById('res-wheat').textContent = Math.floor(GAME.res.wheat);
+  document.getElementById('res-bread').textContent = Math.floor(GAME.res.bread);
+  document.getElementById('res-timber').textContent = Math.floor(GAME.res.timber);
+  document.getElementById('res-stone').textContent = Math.floor(GAME.res.stone);
+  document.getElementById('res-tools').textContent = Math.floor(GAME.res.tools);
+  document.getElementById('res-gold').textContent = Math.floor(GAME.res.gold);
+
+  const adults = GAME.rabbits.filter(r => r.lifeStage !== 'kit').length;
+  const kits = GAME.rabbits.filter(r => r.lifeStage === 'kit').length;
+  document.getElementById('res-pop').textContent = `${GAME.rabbits.length} (${adults} Adults, ${kits} Kits)`;
+  document.getElementById('res-season').textContent = `🌱 ${GAME.season}, Day ${GAME.day} (Yr ${GAME.year})`;
+}
+
+// View switcher
+const btnToggleView = document.getElementById('btn-toggle-view');
+const worldPanel = document.getElementById('world-overlay-panel');
+
+btnToggleView.addEventListener('click', () => {
+  switchToView(GAME.view === 'settlement' ? 'world' : 'settlement');
 });
 
-// Toolbar tool selection
-document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(btn => {
-  btn.addEventListener('click', () => {
+function switchToView(newView) {
+  GAME.view = newView;
+  btnToggleView.textContent = newView === 'settlement' ? '🗺️ World Map' : '🏡 Settlement';
+  worldPanel.style.display = newView === 'world' ? 'block' : 'none';
+  document.getElementById('radar-mode').textContent = newView === 'settlement' ? 'Settlement' : 'World Map';
+  if (newView === 'world') centerWorldCamera();
+  else centerSettlementCamera();
+  showToast(newView === 'settlement' ? 'Entered Local Warren View' : 'Entered Kingdom World Map');
+}
+
+// Toolbar clicks
+document.querySelectorAll('#toolbar .btn[data-tool]').forEach(b => {
+  b.addEventListener('click', () => {
     GAME.audio.ensure();
     GAME.audio.click();
-    selectTool(btn.getAttribute('data-tool'));
+    document.querySelectorAll('#toolbar .btn[data-tool]').forEach(btn => btn.classList.remove('active'));
+    b.classList.add('active');
+    GAME.activeTool = b.getAttribute('data-tool');
+    vp.classList.remove('building');
+    if (GAME.activeTool !== 'inspect') vp.classList.add('building');
   });
 });
 
-function selectTool(tool) {
-  GAME.activeTool = tool;
-  document.querySelectorAll('#toolbar .t-btn[data-tool]').forEach(b => b.classList.remove('active'));
-  const target = document.querySelector(`#toolbar .t-btn[data-tool="${tool}"]`);
-  if (target) target.classList.add('active');
+// Citizen Inspector
+function openRabbitInspector(r) {
+  GAME.selectedRabbit = r;
+  const card = document.getElementById('roster-card');
+  document.getElementById('c-name').textContent = r.name;
+  document.getElementById('c-profession').textContent = `Profession: ${r.profession.toUpperCase()}`;
+  document.getElementById('c-stage').textContent = `${r.gender === 'M' ? 'Buck' : 'Doe'} (${r.lifeStage}, age ${r.age})`;
 
-  vp.classList.remove('building-road', 'demolishing');
-  if (tool === 'road' || tool === 'rail') vp.classList.add('building-road');
-  if (tool === 'demolish') vp.classList.add('demolishing');
+  const spouse = GAME.rabbits.find(s => s.id === r.spouseId);
+  document.getElementById('c-spouse').textContent = spouse ? spouse.name : 'Unmarried';
+
+  const burrow = GAME.settlement.buildings.find(b => b.id === r.burrowId);
+  document.getElementById('c-home').textContent = burrow ? burrow.name : 'Homeless (Needs Burrow)';
+
+  document.getElementById('c-task').textContent = r.state.toUpperCase();
+  document.getElementById('c-carried').textContent = r.carried ? `${r.carried.amount} ${r.carried.type}` : 'None';
+  document.getElementById('c-hunger').textContent = `${Math.floor(r.hunger)}%`;
+  document.getElementById('c-happiness').textContent = `${Math.floor(r.happiness)}%`;
+
+  const sel = document.getElementById('sel-profession');
+  sel.value = r.profession;
+  card.style.display = 'block';
 }
 
-// Projection toggle
-document.getElementById('btn-projection-toggle').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.click();
-  GAME.viewMode = GAME.viewMode === 'iso' ? 'ortho' : 'iso';
-  document.getElementById('btn-projection-toggle').textContent = GAME.viewMode === 'iso' ? '📐 View: Isometric' : '📐 View: Top-Down (2D)';
-  if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
-  renderMinimap();
+document.getElementById('sel-profession').addEventListener('change', (e) => {
+  if (GAME.selectedRabbit && GAME.selectedRabbit.lifeStage !== 'kit') {
+    GAME.selectedRabbit.profession = e.target.value;
+    showToast(`Assigned ${GAME.selectedRabbit.name} to ${e.target.value}!`);
+    openRabbitInspector(GAME.selectedRabbit);
+  }
 });
+
+document.getElementById('btn-close-roster').addEventListener('click', () => {
+  document.getElementById('roster-card').style.display = 'none';
+});
+
+// Citizens Matrix Modal
+document.getElementById('btn-colony-roster').addEventListener('click', () => {
+  const tbody = document.getElementById('all-citizens-tbody');
+  tbody.innerHTML = '';
+  GAME.rabbits.forEach(r => {
+    const spouse = GAME.rabbits.find(s => s.id === r.spouseId);
+    const burrow = GAME.settlement.buildings.find(b => b.id === r.burrowId);
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+    tr.innerHTML = `
+      <td style="padding:8px 12px;"><b>${r.name}</b></td>
+      <td style="padding:8px 12px;">${r.gender === 'M' ? 'Buck' : 'Doe'}, age ${r.age} (${r.lifeStage})</td>
+      <td style="padding:8px 12px; color:var(--accent-carrot); font-weight:600;">${r.profession}</td>
+      <td style="padding:8px 12px;">${burrow ? burrow.name : 'Homeless'}</td>
+      <td style="padding:8px 12px;">${spouse ? spouse.name : 'None'}</td>
+      <td style="padding:8px 12px; color:#4ade80;">${Math.floor(r.happiness)}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('modal-all-citizens').style.display = 'flex';
+});
+
+document.getElementById('btn-close-all-citizens').addEventListener('click', () => {
+  document.getElementById('modal-all-citizens').style.display = 'none';
+});
+
+// Caravan Trade Modal
+document.getElementById('btn-caravan-open').addEventListener('click', () => {
+  openCaravanModal(null);
+});
+
+function openCaravanModal(preselectedKingdom) {
+  const list = document.getElementById('caravan-targets-list');
+  list.innerHTML = '';
+  GAME.world.kingdoms.forEach(k => {
+    const div = document.createElement('div');
+    div.className = 'caravan-target-card';
+    div.innerHTML = `
+      <div>
+        <h4 style="color:var(--accent-gold);">${k.icon} ${k.name} (${k.race})</h4>
+        <p style="color:var(--text-dim); font-size:11px;">${k.desc}</p>
+        <p style="font-size:11px; margin-top:4px;">Demands: <b style="color:#fdba74;">${k.buys}</b> | Pays: <b style="color:#facc15;">${k.pays}</b></p>
+      </div>
+      <button class="btn" onclick="window.dispatchCaravanTo('${k.name}')" style="font-weight:700;">🎒 Dispatch Caravan (Costs 15 Bread, 10 Carrots)</button>
+    `;
+    list.appendChild(div);
+  });
+  document.getElementById('modal-caravan').style.display = 'flex';
+}
+
+document.getElementById('btn-close-caravan').addEventListener('click', () => {
+  document.getElementById('modal-caravan').style.display = 'none';
+});
+
+window.dispatchCaravanTo = function(kName) {
+  const k = GAME.world.kingdoms.find(item => item.name === kName);
+  if (!k) return;
+
+  if (GAME.res.bread < 15 || GAME.res.carrots < 10) {
+    showToast("Not enough supplies! Caravan requires 15 Bread and 10 Carrots.");
+    return;
+  }
+
+  GAME.res.bread -= 15;
+  GAME.res.carrots -= 10;
+  GAME.world.caravans.push({
+    target: k,
+    progress: 0,
+    goldReward: Math.floor(Math.random() * 120) + 180
+  });
+
+  document.getElementById('modal-caravan').style.display = 'none';
+  GAME.audio.birthFanfare();
+  showToast(`🎒 Dispatched trade caravan to ${k.name}!`);
+  updateHUD();
+};
+
+// Toast notification
+function showToast(msg) {
+  const rack = document.getElementById('toast-rack');
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.textContent = msg;
+  rack.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 3200);
+}
 
 // Speed buttons
 const spdButtons = [
@@ -3028,515 +1978,46 @@ spdButtons.forEach(({ id, spd }) => {
   document.getElementById(id).addEventListener('click', () => {
     GAME.audio.ensure();
     GAME.audio.click();
-    GAME.simSpeed = spd;
+    GAME.speed = spd;
     spdButtons.forEach(b => document.getElementById(b.id).classList.remove('active'));
     document.getElementById(id).classList.add('active');
   });
 });
 
-// Zoom and center buttons
-document.getElementById('btn-zoom-add').addEventListener('click', () => {
-  GAME.cam.zoom = Math.min(2.5, GAME.cam.zoom * 1.25);
-  renderMinimap();
+// Zoom & Center
+document.getElementById('btn-zoom-in').addEventListener('click', () => {
+  const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
+  cam.zoom = Math.min(2.5, cam.zoom * 1.25);
 });
-document.getElementById('btn-zoom-sub').addEventListener('click', () => {
-  GAME.cam.zoom = Math.max(0.35, GAME.cam.zoom * 0.8);
-  renderMinimap();
+document.getElementById('btn-zoom-out').addEventListener('click', () => {
+  const cam = GAME.view === 'settlement' ? GAME.cam.settlement : GAME.cam.world;
+  cam.zoom = Math.max(0.5, cam.zoom * 0.8);
 });
-document.getElementById('btn-center-capital').addEventListener('click', () => {
-  if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
-  renderMinimap();
+document.getElementById('btn-center').addEventListener('click', () => {
+  if (GAME.view === 'settlement') centerSettlementCamera();
+  else centerWorldCamera();
 });
 
-// Audio toggle
-document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+// Sound Toggle
+document.getElementById('btn-sound').addEventListener('click', () => {
   GAME.audio.ensure();
   GAME.audio.enabled = !GAME.audio.enabled;
-  document.getElementById('btn-audio-toggle').textContent = GAME.audio.enabled ? '🔊 Audio: ON' : '🔇 Audio: OFF';
+  document.getElementById('btn-sound').textContent = GAME.audio.enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
 });
 
-/* =========================================================================
-   UI HELPERS, HUD & ENTITY INSPECTION
-   ========================================================================= */
-
-function updateHUD() {
-  document.getElementById('txt-money').textContent = `$${GAME.money.toLocaleString()}`;
-  document.getElementById('txt-date').textContent = `Year ${GAME.date.year}, ${getMonth(GAME.date.month)}`;
-  document.getElementById('txt-towns').textContent = GAME.towns.length;
-  document.getElementById('txt-industries').textContent = GAME.industries.length;
-
-  let totalPop = 0;
-  GAME.towns.forEach(t => totalPop += t.population);
-  document.getElementById('txt-pop').textContent = totalPop.toLocaleString();
-
-  document.getElementById('txt-routes').textContent = `${GAME.routes.length} Active`;
-  document.getElementById('txt-fleet').textContent = GAME.vehicles.length;
-
-  let netEst = 0;
-  GAME.routes.forEach(r => netEst += r.path.length * (r.mode === 'train' ? 18 : 10));
-  document.getElementById('txt-income').textContent = `+$${netEst.toLocaleString()} / mo`;
-}
-
-function getMonth(m) {
-  const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return names[m - 1] || 'Jan';
-}
-
-function updateInspector(tx, ty) {
-  const card = document.getElementById('inspector-card');
-  const tName = document.getElementById('tile-name');
-  const tPos = document.getElementById('tile-pos');
-  const tDesc = document.getElementById('tile-desc');
-
-  if (tx < 0 || tx >= GAME.mapW || ty < 0 || ty >= GAME.mapH) {
-    tName.textContent = "Outside Frontier";
-    tPos.textContent = "Uncharted";
-    tDesc.textContent = "Scroll or pan back onto the map grid.";
-    return;
-  }
-
-  const tile = GAME.tiles[ty][tx];
-  tPos.textContent = `Grid (${tx}, ${ty})`;
-
-  if (tile.building) {
-    if (tile.building.type === 'hall') {
-      tName.textContent = `🏛️ ${tile.building.name} (Town Hall)`;
-      tDesc.textContent = "Center of municipal commerce and growth.";
-    } else if (tile.building.type === 'station') {
-      tName.textContent = `🚉 ${tile.building.name}`;
-      tDesc.textContent = "Train station platform connecting passenger and freight rail.";
-    } else if (tile.building.type === 'industry') {
-      tName.textContent = `🏭 ${tile.building.name}`;
-      const ind = GAME.industries.find(i => i.id === tile.building.indId);
-      tDesc.textContent = ind ? `Produces ${ind.produces}. Stockpile: ${ind.stockpile || 0} crates.` : "Industrial production facility.";
-    } else {
-      tName.textContent = `🏠 Residential Structure`;
-      tDesc.textContent = `Attached to the municipality of ${tile.building.name}.`;
-    }
-  } else if (tile.road && tile.rail) {
-    tName.textContent = "🚦 Railroad Level Crossing";
-    tDesc.textContent = "Allows both road vehicles and trains to cross safely.";
-  } else if (tile.road) {
-    tName.textContent = tile.bridge === 'road' ? "🌉 Road Bridge" : "🛣️ Paved Street";
-    tDesc.textContent = "Allows automated delivery vans and cargo trucks to travel.";
-  } else if (tile.rail) {
-    tName.textContent = tile.bridge === 'rail' ? "🌉 Railway Trestle Bridge" : "🛤️ Railroad Track";
-    tDesc.textContent = "Heavy steel railway supporting high-speed express trains.";
-  } else if (tile.tree) {
-    tName.textContent = "🌲 Natural Forest";
-    tDesc.textContent = "Dense pine canopy. Clear with bulldozer to build.";
-  } else if (tile.type === 'water') {
-    tName.textContent = "🌊 Deep Water Lake";
-    tDesc.textContent = "Lay streets or rails across water to automatically construct bridges!";
-  } else {
-    tName.textContent = "🌱 Open Meadow";
-    tDesc.textContent = "Clear land ready for streets, rails, or town expansion.";
-  }
-}
-
-function inspectTileObject(tx, ty) {
-  if (tx < 0 || tx >= GAME.mapW || ty < 0 || ty >= GAME.mapH) return;
-  const tile = GAME.tiles[ty][tx];
-  if (!tile.building) return;
-
-  const card = document.getElementById('entity-modal-card');
-  const title = document.getElementById('entity-title');
-  const line1 = document.getElementById('entity-line-1');
-  const line2 = document.getElementById('entity-line-2');
-  const line3 = document.getElementById('entity-line-3');
-  const tip = document.getElementById('entity-tip');
-
-  if (tile.building.type === 'hall') {
-    const town = GAME.towns.find(t => t.id === tile.building.townId);
-    if (!town) return;
-    title.textContent = `🏛️ ${town.name}`;
-    line1.innerHTML = `Population: <b>${town.population.toLocaleString()}</b>`;
-    line2.innerHTML = `Municipal Structures: <b>${town.buildings}</b>`;
-    const isConn = GAME.routes.some(r => (r.t1 && r.t1.id === town.id) || (r.t2 && r.t2.id === town.id));
-    line3.innerHTML = `Network Status: <b style="color:${isConn ? '#4ade80' : '#f87171'};">${isConn ? 'Connected to Trade Network' : 'Isolated - Lay Roads or Rails'}</b>`;
-    tip.textContent = "💡 Connected towns grow faster and generate continuous monthly subsidies.";
-    card.style.display = 'block';
-  } else if (tile.building.type === 'industry') {
-    const ind = GAME.industries.find(i => i.id === tile.building.indId);
-    if (!ind) return;
-    title.textContent = `${tile.building.name}`;
-    line1.innerHTML = `Produces: <b>${ind.produces}</b> (Payout: <b>+$${ind.payout}</b>/delivery)`;
-    line2.innerHTML = `Warehouse Stockpile: <b>${ind.stockpile || 0} crates</b>`;
-    const isConn = GAME.routes.some(r => r.t1 && r.t1.id === ind.id);
-    line3.innerHTML = `Logistics Status: <b style="color:${isConn ? '#4ade80' : '#f87171'};">${isConn ? 'Active Freight Line' : 'Unconnected - Build Road or Rail to Towns/Factories'}</b>`;
-    tip.textContent = "💡 Run transport lines from primary producers (Mines, Farms, Forests) to Factories and Towns for top profits!";
-    card.style.display = 'block';
-  } else if (tile.building.type === 'station') {
-    const st = GAME.stations.find(s => s.id === tile.building.stationId);
-    if (!st) return;
-    title.textContent = `🚉 ${st.name}`;
-    line1.innerHTML = `Platform Type: <b>Dual-Track Passenger & Freight Station</b>`;
-    line2.innerHTML = `Coordinates: <b>(${st.x}, ${st.y})</b>`;
-    const isConn = GAME.routes.some(r => (r.t1 && r.t1.id === st.id) || (r.t2 && r.t2.id === st.id));
-    line3.innerHTML = `Rail Line: <b style="color:${isConn ? '#4ade80' : '#f87171'};">${isConn ? 'Active Express Train Service' : 'Waiting for track connection to another station'}</b>`;
-    tip.textContent = "💡 Trains carry heavier cargo at twice the speed of road vans!";
-    card.style.display = 'block';
-  }
-}
-
-document.getElementById('btn-close-entity').addEventListener('click', () => {
-  document.getElementById('entity-modal-card').style.display = 'none';
-});
-
-function showToast(msg) {
-  const rack = document.getElementById('toast-rack');
-  const el = document.createElement('div');
-  el.className = 'toast-item';
-  el.textContent = msg;
-  rack.appendChild(el);
-  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 3000);
-}
-
-/* =========================================================================
-   FLEET & LOGISTICS MANAGER MODAL
-   ========================================================================= */
-
-const fleetModal = document.getElementById('modal-fleet');
-document.getElementById('btn-fleet').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.click();
-  updateFleetModal();
-  fleetModal.style.display = 'flex';
-});
-
-document.getElementById('btn-close-fleet').addEventListener('click', () => {
-  fleetModal.style.display = 'none';
-});
-
-function updateFleetModal() {
-  document.getElementById('flt-total-veh').textContent = GAME.vehicles.length;
-  document.getElementById('flt-total-routes').textContent = GAME.routes.length;
-  document.getElementById('flt-total-earnings').textContent = `$${(GAME.stats.totalLifetimeRevenue || 0).toLocaleString()}`;
-
-  const tbody = document.getElementById('fleet-table-body');
-  if (GAME.vehicles.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No active vehicles. Connect towns or industries with roads or rails to launch vehicles!</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = '';
-  GAME.vehicles.forEach(v => {
-    const tr = document.createElement('tr');
-    const badgeClass = v.mode === 'train' ? 'badge-train' : (v.cargo.type === 'passengers' ? 'badge-van' : 'badge-truck');
-    const typeLabel = v.mode === 'train' ? 'Express Train' : (v.cargo.type === 'passengers' ? 'Delivery Van' : 'Cargo Truck');
-
-    tr.innerHTML = `
-      <td><span class="badge-tag ${badgeClass}">${typeLabel}</span></td>
-      <td><b>${v.t1.name}</b> ↔ <b>${v.t2.name}</b></td>
-      <td>${v.cargo.name}</td>
-      <td>${Math.round(v.speed * 100)}%</td>
-      <td style="color:#22c55e; font-family:monospace; font-weight:700;">+$${(v.lifetimeEarnings || 0).toLocaleString()}</td>
-      <td><button class="t-btn" onclick="locateVehicle('${v.id}')" style="padding:3px 8px; font-size:11px;">🎯 Locate</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-window.locateVehicle = function(vehId) {
-  const v = GAME.vehicles.find(item => item.id === vehId);
-  if (!v || !v.path || v.path.length === 0) return;
-  const curPos = v.path[v.pathIdx] || v.path[0];
-  centerCameraOn(curPos.x, curPos.y);
-  fleetModal.style.display = 'none';
-  showToast(`Locating ${v.mode === 'train' ? 'Train' : 'Vehicle'} on route to ${v.t2.name}...`);
-  renderMinimap();
-};
-
-document.getElementById('btn-fleet-upgrade-all').addEventListener('click', () => {
-  if (GAME.money < 500) {
-    showToast("Fleet-wide engine upgrades cost $500!");
-    return;
-  }
-  GAME.money -= 500;
-  GAME.vehicles.forEach(v => v.speed = (v.speed || 1.0) * 1.25);
-  GAME.audio.fanfare();
-  showToast("⚡ All vehicle engines upgraded (+25% speed)!");
-  updateHUD();
-  updateFleetModal();
-});
-
-/* =========================================================================
-   PERSISTENCE: SAVE / LOAD / EXPORT / IMPORT
-   ========================================================================= */
-
-document.getElementById('btn-save-game').addEventListener('click', () => {
-  saveGame();
-});
-
-document.getElementById('btn-load-game').addEventListener('click', () => {
-  loadGame();
-});
-
-document.getElementById('btn-export-game').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.click();
-  const saveData = {
-    version: 2,
-    date: GAME.date,
-    money: GAME.money,
-    mapW: GAME.mapW,
-    mapH: GAME.mapH,
-    tiles: GAME.tiles,
-    towns: GAME.towns,
-    industries: GAME.industries,
-    stations: GAME.stations,
-    costs: GAME.costs,
-    stats: GAME.stats
-  };
-  const blob = new Blob([JSON.stringify(saveData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `transport_tycoon_${GAME.date.year}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast("⬇️ Game save exported to JSON file!");
-});
-
-const fileImport = document.getElementById('file-import-save');
-document.getElementById('btn-import-game').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.click();
-  fileImport.click();
-});
-
-fileImport.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (evt) => {
-    try {
-      const data = JSON.parse(evt.target.result);
-      GAME.date = data.date;
-      GAME.money = data.money;
-      GAME.mapW = data.mapW;
-      GAME.mapH = data.mapH;
-      GAME.tiles = data.tiles;
-      GAME.towns = data.towns || [];
-      GAME.industries = data.industries || [];
-      GAME.stations = data.stations || [];
-      GAME.stats = data.stats || { totalLifetimeRevenue: 0, deliveriesCount: 0 };
-      recalculateAllRoads();
-      recalculateAllRails();
-      checkRoutes();
-      if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
-      updateHUD();
-      renderMinimap();
-      GAME.audio.fanfare();
-      showToast("⬆️ Save file imported and loaded successfully!");
-    } catch (err) {
-      showToast("Failed to parse imported JSON file.");
-    }
-  };
-  reader.readAsText(file);
-});
-
-function saveGame(isSilent = false) {
-  try {
-    const saveData = {
-      version: 2,
-      date: GAME.date,
-      money: GAME.money,
-      mapW: GAME.mapW,
-      mapH: GAME.mapH,
-      tiles: GAME.tiles,
-      towns: GAME.towns,
-      industries: GAME.industries,
-      stations: GAME.stations,
-      costs: GAME.costs,
-      stats: GAME.stats
-    };
-    localStorage.setItem('tt_automation_save', JSON.stringify(saveData));
-    if (!isSilent) {
-      GAME.audio.click();
-      showToast("💾 Game saved successfully to browser storage!");
-    }
-  } catch (e) {
-    console.error("Save error:", e);
-    if (!isSilent) showToast("Save failed: storage quota exceeded or unavailable.");
-  }
-}
-
-function loadGame() {
-  try {
-    const raw = localStorage.getItem('tt_automation_save');
-    if (!raw) {
-      showToast("No saved game found in browser storage!");
-      return;
-    }
-    const data = JSON.parse(raw);
-    GAME.date = data.date;
-    GAME.money = data.money;
-    GAME.mapW = data.mapW;
-    GAME.mapH = data.mapH;
-    GAME.tiles = data.tiles;
-    GAME.towns = data.towns || [];
-    GAME.industries = data.industries || [];
-    GAME.stations = data.stations || [];
-    GAME.stats = data.stats || { totalLifetimeRevenue: 0, deliveriesCount: 0 };
-
-    recalculateAllRoads();
-    recalculateAllRails();
-    checkRoutes();
-
-    if (GAME.towns.length > 0) centerCameraOn(GAME.towns[0].x, GAME.towns[0].y);
-    updateHUD();
-    renderMinimap();
-
-    GAME.audio.fanfare();
-    showToast("📂 Saved game loaded successfully!");
-  } catch (e) {
-    console.error("Load error:", e);
-    showToast("Failed to load saved game file.");
-  }
-}
-
-// Periodic auto-save every 45 seconds
-setInterval(() => {
-  if (GAME.tiles.length > 0) saveGame(true);
-}, 45000);
-
-/* =========================================================================
-   MINIMAP RADAR
-   ========================================================================= */
-
-function renderMinimap() {
-  minimapCtx.fillStyle = '#060e12';
-  minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
-
-  const mw = minimapCanvas.width;
-  const mh = minimapCanvas.height;
-  const sx = mw / GAME.mapW;
-  const sy = mh / GAME.mapH;
-
-  for (let y = 0; y < GAME.mapH; y++) {
-    for (let x = 0; x < GAME.mapW; x++) {
-      const tile = GAME.tiles[y][x];
-      if (tile.type === 'water') minimapCtx.fillStyle = '#0284c7';
-      else if (tile.tree) minimapCtx.fillStyle = '#166534';
-      else minimapCtx.fillStyle = '#3f6212';
-      minimapCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
-
-      if (tile.road) {
-        minimapCtx.fillStyle = '#eab308';
-        minimapCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
-      }
-      if (tile.rail) {
-        minimapCtx.fillStyle = '#a855f7';
-        minimapCtx.fillRect(x * sx, y * sy, Math.ceil(sx), Math.ceil(sy));
-      }
-      if (tile.building) {
-        minimapCtx.fillStyle = tile.building.type === 'hall' ? '#ef4444' : (tile.building.type === 'station' ? '#38bdf8' : '#f97316');
-        minimapCtx.fillRect(x * sx - 1, y * sy - 1, Math.ceil(sx) + 2, Math.ceil(sy) + 2);
-      }
-    }
-  }
-
-  // Camera viewport box on radar
-  const isIso = GAME.viewMode === 'iso';
-  const centerTile = screenToTile(canvas.width / 2, canvas.height / 2);
-  const viewSpan = Math.max(4, Math.floor(18 / GAME.cam.zoom));
-  minimapCtx.strokeStyle = '#ffffff';
-  minimapCtx.lineWidth = 1.5;
-  minimapCtx.strokeRect(
-    (centerTile.x - viewSpan / 2) * sx,
-    (centerTile.y - viewSpan / 2) * sy,
-    viewSpan * sx,
-    viewSpan * sy
-  );
-}
-
-minimapCanvas.addEventListener('click', (e) => {
-  const rect = minimapCanvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const targetX = Math.floor((mx / minimapCanvas.width) * GAME.mapW);
-  const targetY = Math.floor((my / minimapCanvas.height) * GAME.mapH);
-  centerCameraOn(targetX, targetY);
-  renderMinimap();
-});
-
-/* =========================================================================
-   STARTUP & MAP GENERATOR PRESET DIALOG
-   ========================================================================= */
-
-const mapModal = document.getElementById('modal-map-gen');
-const customBox = document.getElementById('custom-box');
-let selectedPreset = 'medium';
-
-document.getElementById('btn-open-map-dialog').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.click();
-  mapModal.style.display = 'flex';
-});
-
-document.getElementById('btn-close-map-dialog').addEventListener('click', () => {
-  if (GAME.tiles.length > 0) mapModal.style.display = 'none';
-});
-
-document.querySelectorAll('.preset-tile').forEach(tile => {
-  tile.addEventListener('click', () => {
-    GAME.audio.ensure();
-    GAME.audio.click();
-    document.querySelectorAll('.preset-tile').forEach(t => t.classList.remove('selected'));
-    tile.classList.add('selected');
-    selectedPreset = tile.getAttribute('data-size');
-    customBox.style.display = selectedPreset === 'custom' ? 'block' : 'none';
-  });
-});
-
-['sl-w', 'sl-h', 'sl-towns', 'sl-water', 'sl-trees'].forEach(id => {
-  const el = document.getElementById(id);
-  const valEl = document.getElementById(`val-${id}`);
-  el.addEventListener('input', () => {
-    valEl.textContent = id === 'sl-water' || id === 'sl-trees' ? `${el.value}%` : el.value;
-  });
-});
-
-document.getElementById('btn-confirm-gen').addEventListener('click', () => {
-  GAME.audio.ensure();
-  GAME.audio.click();
-  let w = 40, h = 40, towns = 5, water = 20, trees = 15;
-
-  if (selectedPreset === 'tiny') { w = 20; h = 20; towns = 2; water = 15; trees = 10; }
-  else if (selectedPreset === 'medium') { w = 40; h = 40; towns = 5; water = 20; trees = 15; }
-  else if (selectedPreset === 'large') { w = 70; h = 70; towns = 10; water = 25; trees = 18; }
-  else if (selectedPreset === 'xlarge') { w = 110; h = 110; towns = 18; water = 28; trees = 20; }
-  else if (selectedPreset === 'world') { w = 160; h = 160; towns = 28; water = 30; trees = 22; }
-  else if (selectedPreset === 'custom') {
-    w = parseInt(document.getElementById('sl-w').value);
-    h = parseInt(document.getElementById('sl-h').value);
-    towns = parseInt(document.getElementById('sl-towns').value);
-    water = parseInt(document.getElementById('sl-water').value);
-    trees = parseInt(document.getElementById('sl-trees').value);
-  }
-
-  document.getElementById('lbl-radar-dim').textContent = `${w}x${h}`;
-  mapModal.style.display = 'none';
-
-  generateMap(w, h, towns, water, trees);
-  showToast(`🗺️ New ${w}x${h} territory generated! Build roads, rails, and supply chains.`);
-});
-
-// Initial boot
-window.addEventListener('DOMContentLoaded', () => {
+// Boot Game
+function bootGame() {
   fitCanvas();
-  // Auto-check for existing save game
-  if (localStorage.getItem('tt_automation_save')) {
-    loadGame();
-    mapModal.style.display = 'none';
-  } else {
-    // Generate default medium map
-    generateMap(40, 40, 5, 20, 15);
-    mapModal.style.display = 'none';
-  }
+  initGame();
   requestAnimationFrame(gameLoop);
-});
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', bootGame);
+} else {
+  bootGame();
+}
+
 </script>
 </body>
 </html>
